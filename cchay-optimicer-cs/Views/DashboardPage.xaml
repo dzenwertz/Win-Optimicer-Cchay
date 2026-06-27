@@ -1,0 +1,147 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.DashboardPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Dashboard" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+                <TextBlock x:Name="TxtWelcome" Text="Cargando información del sistema..." FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Quick Optimize Card -->
+            <ui:Card Padding="16" BorderBrush="{DynamicResource AccentBorderThemeBrush}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="Optimización en Un Clic" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Libera memoria RAM inactiva y limpia archivos temporales de disco de forma segura." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <ui:Button x:Name="BtnOptimize" Grid.Column="1" 
+                               Appearance="Primary" 
+                               Padding="24,12,24,12" 
+                               VerticalAlignment="Center"
+                               Click="BtnOptimize_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Flash24" Margin="0,0,8,0" />
+                            <TextBlock x:Name="TxtOptimizeBtn" Text="Optimizar Ahora" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </ui:Button>
+                </Grid>
+            </ui:Card>
+
+            <TextBlock x:Name="TxtResult" Visibility="Collapsed" Text="" Padding="12" FontSize="13" FontWeight="Medium" Background="#1A107C41" Foreground="#40C057" Margin="0,0,0,20" HorizontalAlignment="Stretch" TextAlignment="Center" />
+
+            <!-- Stats Grid -->
+            <UniformGrid Columns="2" Rows="2" Margin="0,0,0,20">
+                <!-- CPU Card -->
+                <ui:Card Margin="0,0,8,8" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Engine24" FontSize="32" Foreground="{DynamicResource AccentTextWritableBrush}" Margin="0,0,16,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Procesador" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Medium" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtCpuModel" Text="CPU" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtCpuCores" Text="Cores / Threads" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+
+                <!-- RAM Card -->
+                <ui:Card Margin="8,0,0,8" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="32" Foreground="#40C057" Margin="0,0,16,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Memoria RAM" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Medium" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtRamValue" Text="0 GB / 0 GB" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <ProgressBar x:Name="ProgRam" Minimum="0" Maximum="100" Value="0" Height="4" Foreground="#40C057" Background="{DynamicResource ControlFillColorDefaultBrush}" Margin="0,0,0,6" />
+                            <TextBlock x:Name="TxtRamPercent" Text="0% usado — 0 GB libres" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+
+                <!-- Disk Card -->
+                <ui:Card Margin="0,8,8,0" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="HardDrive24" FontSize="32" Foreground="#1098AD" Margin="0,0,16,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Disco Local (C:)" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Medium" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtDiskValue" Text="0 GB / 0 GB" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <ProgressBar x:Name="ProgDisk" Minimum="0" Maximum="100" Value="0" Height="4" Foreground="#1098AD" Background="{DynamicResource ControlFillColorDefaultBrush}" Margin="0,0,0,6" />
+                            <TextBlock x:Name="TxtDiskPercent" Text="0% usado — 0 GB libres" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+
+                <!-- GPU & OS Card -->
+                <ui:Card Margin="8,8,0,0" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Glance24" FontSize="32" Foreground="#FD7E14" Margin="0,0,16,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Gráficos &amp; Sistema" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Medium" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtGpuModel" Text="GPU" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock x:Name="TxtOsVersion" Text="Windows Build" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+            </UniformGrid>
+
+            <!-- Quick Actions -->
+            <StackPanel>
+                <TextBlock Text="Acciones Rápidas" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,10,0,10" />
+                <UniformGrid Columns="3" Rows="1">
+                    <ui:Card Margin="0,0,8,0" Padding="12" MouseLeftButtonDown="NavigateCard_Click" Tag="ram" Cursor="Hand">
+                        <StackPanel>
+                            <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="20" Foreground="#40C057" HorizontalAlignment="Left" Margin="0,0,0,6" />
+                            <TextBlock Text="Optimizar RAM" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Libera memoria RAM de procesos inactivos." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Margin="4,0,4,0" Padding="12" MouseLeftButtonDown="NavigateCard_Click" Tag="disk" Cursor="Hand">
+                        <StackPanel>
+                            <ui:SymbolIcon Symbol="HardDrive24" FontSize="20" Foreground="#1098AD" HorizontalAlignment="Left" Margin="0,0,0,6" />
+                            <TextBlock Text="Limpiar Disco" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Elimina archivos temporales y caché." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card Margin="8,0,0,0" Padding="12" MouseLeftButtonDown="NavigateCard_Click" Tag="tweaks" Cursor="Hand">
+                        <StackPanel>
+                            <ui:SymbolIcon Symbol="Wrench24" FontSize="20" Foreground="{DynamicResource AccentTextWritableBrush}" HorizontalAlignment="Left" Margin="0,0,0,6" />
+                            <TextBlock Text="Ajustes de Sistema" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Aplica tweaks de rendimiento y privacidad." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:Card>
+                </UniformGrid>
+            </StackPanel>
+
+            <!-- Creator Info -->
+            <TextBlock Text="Desarrollado por dzenwertz | Cchay Optimicer © 2026" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,30,0,10" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

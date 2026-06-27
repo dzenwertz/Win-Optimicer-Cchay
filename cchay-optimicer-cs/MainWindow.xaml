@@ -1,0 +1,52 @@
+<Window x:Class="cchay_optimicer_cs.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:cchay_optimicer_cs"
+        xmlns:views="clr-namespace:cchay_optimicer_cs.Views"
+        mc:Ignorable="d"
+        Title="Cchay Optimicer" Height="750" Width="1100"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Admin Mode Warning Bar -->
+        <Border x:Name="AdminWarningBar" Grid.Row="0" Background="#7F1D1D" BorderThickness="0,0,0,1" BorderBrush="#F87171" Padding="14,10,14,10" Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ui:SymbolIcon Symbol="Warning24" Foreground="#F87171" Margin="0,0,8,0" />
+                <TextBlock Text="Modo limitado: Cchay Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main Workspace -->
+        <Grid Grid.Row="1">
+            <!-- Navigation Sidebar and Content -->
+            <ui:NavigationView x:Name="RootNavigation"
+                                PaneDisplayMode="Left"
+                                IsBackButtonVisible="Collapsed"
+                                IsPaneToggleVisible="True">
+                <ui:NavigationView.MenuItems>
+                    <ui:NavigationViewItem Content="Dashboard" Tag="dashboard" TargetPageType="{x:Type views:DashboardPage}" Icon="{ui:SymbolIcon Symbol=Home24}" />
+                    <ui:NavigationViewItemSeparator />
+                    <ui:NavigationViewItem Content="Optimizar RAM" Tag="ram" TargetPageType="{x:Type views:RamPage}" Icon="{ui:SymbolIcon Symbol=DeveloperBoard24}" />
+                    <ui:NavigationViewItem Content="Limpiar Disco" Tag="disk" TargetPageType="{x:Type views:DiskPage}" Icon="{ui:SymbolIcon Symbol=HardDrive24}" />
+                    <ui:NavigationViewItem Content="Ajustes de Sistema" Tag="tweaks" TargetPageType="{x:Type views:TweaksPage}" Icon="{ui:SymbolIcon Symbol=Wrench24}" />
+                    <ui:NavigationViewItem Content="Eliminar Bloatware" Tag="bloatware" TargetPageType="{x:Type views:BloatwarePage}" Icon="{ui:SymbolIcon Symbol=Delete24}" />
+                    <ui:NavigationViewItem Content="Optimizador de Red" Tag="network" TargetPageType="{x:Type views:NetworkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
+                    <ui:NavigationViewItem Content="Programas de Inicio" Tag="startup" TargetPageType="{x:Type views:StartupPage}" Icon="{ui:SymbolIcon Symbol=Desktop24}" />
+                    <ui:NavigationViewItem Content="Instalador de Apps" Tag="software" TargetPageType="{x:Type views:SoftwarePage}" Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
+                    <ui:NavigationViewItemSeparator />
+                    <ui:NavigationViewItem Content="Backup y Restaurar" Tag="backup" TargetPageType="{x:Type views:BackupPage}" Icon="{ui:SymbolIcon Symbol=ShieldCheckmark24}" />
+                </ui:NavigationView.MenuItems>
+            </ui:NavigationView>
+        </Grid>
+    </Grid>
+</Window>

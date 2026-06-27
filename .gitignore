@@ -1,0 +1,15 @@
+# Carpetas de compilacion de .NET / VS
+bin/
+obj/
+
+# Archivos de configuracion de Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos temporales generados por la aplicacion
+navigation_log.txt
+crash.txt
+tweakStates.json
