@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:cchay_optimicer_cs"
         xmlns:views="clr-namespace:cchay_optimicer_cs.Views"
         mc:Ignorable="d"
-        Title="Cchay Optimicer" Height="750" Width="1100"
+        Title="Cchay Optimicer" Height="750" Width="1100" Icon="Assets/cchay_logo.png"
         Background="{DynamicResource ApplicationBackgroundBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         WindowStartupLocation="CenterScreen">
@@ -43,9 +43,13 @@
                     <ui:NavigationViewItem Content="Optimizador de Red" Tag="network" TargetPageType="{x:Type views:NetworkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
                     <ui:NavigationViewItem Content="Programas de Inicio" Tag="startup" TargetPageType="{x:Type views:StartupPage}" Icon="{ui:SymbolIcon Symbol=Desktop24}" />
                     <ui:NavigationViewItem Content="Instalador de Apps" Tag="software" TargetPageType="{x:Type views:SoftwarePage}" Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
+                    <ui:NavigationViewItem Content="Escáner de Virus" Tag="scanner" TargetPageType="{x:Type views:ScannerPage}" Icon="{ui:SymbolIcon Symbol=Shield24}" />
                     <ui:NavigationViewItemSeparator />
                     <ui:NavigationViewItem Content="Backup y Restaurar" Tag="backup" TargetPageType="{x:Type views:BackupPage}" Icon="{ui:SymbolIcon Symbol=ShieldCheckmark24}" />
                 </ui:NavigationView.MenuItems>
+                <ui:NavigationView.FooterMenuItems>
+                    <ui:NavigationViewItem Content="Desarrollado por Joseph ICV , dzenwertz" Icon="{ui:SymbolIcon Symbol=Heart24}" Click="FooterAttribution_Click" />
+                </ui:NavigationView.FooterMenuItems>
             </ui:NavigationView>
         </Grid>
     </Grid>

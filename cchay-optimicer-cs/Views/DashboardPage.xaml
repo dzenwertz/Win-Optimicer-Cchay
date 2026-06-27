@@ -141,7 +141,7 @@
             </StackPanel>
 
             <!-- Creator Info -->
-            <TextBlock Text="Desarrollado por dzenwertz | Cchay Optimicer © 2026" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,30,0,10" />
+            <TextBlock Text="Desarrollado por Joseph ICV, dzenwertz | Cchay Optimicer © 2026" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,30,0,10" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

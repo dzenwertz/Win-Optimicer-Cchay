@@ -191,6 +191,7 @@ namespace cchay_optimicer_cs.Views
                         "startup" => typeof(StartupPage),
                         "backup" => typeof(BackupPage),
                         "software" => typeof(SoftwarePage),
+                        "scanner" => typeof(ScannerPage),
                         _ => null
                     };
 

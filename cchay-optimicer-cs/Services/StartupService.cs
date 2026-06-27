@@ -18,33 +18,146 @@ namespace cchay_optimicer_cs.Services
             "startupState.json"
         );
 
-        private static List<StartupItem> LoadDisabledItems()
+        private static bool GetIsItemEnabled(string location, string name)
         {
             try
             {
-                if (File.Exists(StateFilePath))
-                {
-                    string json = File.ReadAllText(StateFilePath);
-                    return JsonSerializer.Deserialize<List<StartupItem>>(json) ?? new List<StartupItem>();
-                }
-            }
-            catch { /* ignore */ }
-            return new List<StartupItem>();
-        }
+                RegistryKey? rootKey = null;
+                string approvalSubKey = "";
 
-        private static void SaveDisabledItems(List<StartupItem> items)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(StateFilePath)!;
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                string json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(StateFilePath, json);
+                if (location == "HKCU Run")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
+                }
+                else if (location == "HKCU Run (Wow6432Node)")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32";
+                }
+                else if (location == "HKLM Run")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
+                }
+                else if (location == "HKLM Run (Wow6432Node)")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32";
+                }
+                else if (location == "User Startup Folder")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+                }
+                else if (location == "Common Startup Folder")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+                }
+
+                if (rootKey != null && !string.IsNullOrEmpty(approvalSubKey))
+                {
+                    using (var key = rootKey.OpenSubKey(approvalSubKey))
+                    {
+                        if (key != null)
+                        {
+                            var val = key.GetValue(name) as byte[];
+                            if (val != null && val.Length > 0)
+                            {
+                                // Even first byte (like 02) = enabled, odd first byte (like 03) = disabled
+                                return (val[0] & 1) == 0;
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to save disabled items: {ex.Message}");
+                Debug.WriteLine($"Error reading StartupApproved for {name}: {ex.Message}");
             }
+
+            // Default to true if not found in StartupApproved
+            return true;
+        }
+
+        private static bool SetItemEnabledState(string location, string name, bool enabled)
+        {
+            try
+            {
+                RegistryKey? rootKey = null;
+                string approvalSubKey = "";
+
+                if (location == "HKCU Run")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
+                }
+                else if (location == "HKCU Run (Wow6432Node)")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32";
+                }
+                else if (location == "HKLM Run")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
+                }
+                else if (location == "HKLM Run (Wow6432Node)")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32";
+                }
+                else if (location == "User Startup Folder")
+                {
+                    rootKey = Registry.CurrentUser;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+                }
+                else if (location == "Common Startup Folder")
+                {
+                    rootKey = Registry.LocalMachine;
+                    approvalSubKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+                }
+
+                if (rootKey != null && !string.IsNullOrEmpty(approvalSubKey))
+                {
+                    using (var key = rootKey.OpenSubKey(approvalSubKey, writable: true))
+                    {
+                        if (key != null)
+                        {
+                            byte[] binaryVal;
+                            var existing = key.GetValue(name) as byte[];
+                            if (existing != null && existing.Length >= 12)
+                            {
+                                binaryVal = (byte[])existing.Clone();
+                            }
+                            else
+                            {
+                                binaryVal = new byte[12];
+                            }
+
+                            // 02 = enabled, 03 = disabled
+                            binaryVal[0] = enabled ? (byte)0x02 : (byte)0x03;
+
+                            if (!enabled && existing == null)
+                            {
+                                // Write FILETIME timestamp when disabling (bytes 4-11)
+                                long fileTime = DateTime.UtcNow.ToFileTime();
+                                byte[] ftBytes = BitConverter.GetBytes(fileTime);
+                                Array.Copy(ftBytes, 0, binaryVal, 4, Math.Min(ftBytes.Length, 8));
+                            }
+
+                            key.SetValue(name, binaryVal, RegistryValueKind.Binary);
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error writing StartupApproved for {name}: {ex.Message}");
+            }
+            return false;
         }
 
         public static Task<List<StartupItem>> GetStartupItemsAsync()
@@ -68,7 +181,7 @@ namespace cchay_optimicer_cs.Services
                                     Name = name,
                                     Path = val,
                                     Location = "HKCU Run",
-                                    Enabled = true
+                                    Enabled = GetIsItemEnabled("HKCU Run", name)
                                 });
                             }
                         }
@@ -91,7 +204,7 @@ namespace cchay_optimicer_cs.Services
                                     Name = name,
                                     Path = val,
                                     Location = "HKCU Run (Wow6432Node)",
-                                    Enabled = true
+                                    Enabled = GetIsItemEnabled("HKCU Run (Wow6432Node)", name)
                                 });
                             }
                         }
@@ -114,7 +227,7 @@ namespace cchay_optimicer_cs.Services
                                     Name = name,
                                     Path = val,
                                     Location = "HKLM Run",
-                                    Enabled = true
+                                    Enabled = GetIsItemEnabled("HKLM Run", name)
                                 });
                             }
                         }
@@ -137,7 +250,7 @@ namespace cchay_optimicer_cs.Services
                                     Name = name,
                                     Path = val,
                                     Location = "HKLM Run (Wow6432Node)",
-                                    Enabled = true
+                                    Enabled = GetIsItemEnabled("HKLM Run (Wow6432Node)", name)
                                 });
                             }
                         }
@@ -151,14 +264,27 @@ namespace cchay_optimicer_cs.Services
                     var userDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\Windows\Start Menu\Programs\Startup");
                     if (Directory.Exists(userDir))
                     {
+                        // Migration: rename any .lnk.disabled back to .lnk
+                        foreach (var file in Directory.GetFiles(userDir, "*.disabled"))
+                        {
+                            try
+                            {
+                                string newPath = file.Substring(0, file.Length - ".disabled".Length);
+                                File.Move(file, newPath, overwrite: true);
+                                SetItemEnabledState("User Startup Folder", Path.GetFileName(newPath), false);
+                            }
+                            catch { }
+                        }
+
                         foreach (var file in Directory.GetFiles(userDir, "*.lnk"))
                         {
+                            string name = Path.GetFileName(file);
                             activeItems.Add(new StartupItem
                             {
-                                Name = Path.GetFileName(file),
+                                Name = name,
                                 Path = file,
                                 Location = "User Startup Folder",
-                                Enabled = true
+                                Enabled = GetIsItemEnabled("User Startup Folder", name)
                             });
                         }
                     }
@@ -171,43 +297,71 @@ namespace cchay_optimicer_cs.Services
                     var commonDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Microsoft\Windows\Start Menu\Programs\Startup");
                     if (Directory.Exists(commonDir))
                     {
+                        // Migration: rename any .lnk.disabled back to .lnk
+                        foreach (var file in Directory.GetFiles(commonDir, "*.disabled"))
+                        {
+                            try
+                            {
+                                string newPath = file.Substring(0, file.Length - ".disabled".Length);
+                                File.Move(file, newPath, overwrite: true);
+                                SetItemEnabledState("Common Startup Folder", Path.GetFileName(newPath), false);
+                            }
+                            catch { }
+                        }
+
                         foreach (var file in Directory.GetFiles(commonDir, "*.lnk"))
                         {
+                            string name = Path.GetFileName(file);
                             activeItems.Add(new StartupItem
                             {
-                                Name = Path.GetFileName(file),
+                                Name = name,
                                 Path = file,
                                 Location = "Common Startup Folder",
-                                Enabled = true
+                                Enabled = GetIsItemEnabled("Common Startup Folder", name)
                             });
                         }
                     }
                 }
                 catch (Exception ex) { Debug.WriteLine($"Error reading Common Startup folder: {ex.Message}"); }
 
-                var disabled = LoadDisabledItems();
-
-                // Merge and return: only add disabled items that are not currently active
-                var result = new List<StartupItem>();
-                result.AddRange(activeItems);
-
-                var cleanedDisabled = new List<StartupItem>();
-                foreach (var d in disabled)
+                // Migration: restore legacy registry disabled items
+                try
                 {
-                    if (!activeItems.Any(a => a.Name.Equals(d.Name, StringComparison.OrdinalIgnoreCase) && a.Location == d.Location))
+                    if (File.Exists(StateFilePath))
                     {
-                        result.Add(d);
-                        cleanedDisabled.Add(d);
+                        string json = File.ReadAllText(StateFilePath);
+                        var disabledItems = JsonSerializer.Deserialize<List<StartupItem>>(json);
+                        if (disabledItems != null)
+                        {
+                            foreach (var item in disabledItems)
+                            {
+                                SetItemEnabledState(item.Location, item.Name, false);
+                                if (item.Location.Contains("Run"))
+                                {
+                                    try
+                                    {
+                                        var root = item.Location.StartsWith("HKCU") ? Registry.CurrentUser : Registry.LocalMachine;
+                                        string subkeyPath = item.Location.Contains("Wow6432Node")
+                                            ? @"Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run"
+                                            : @"Software\Microsoft\Windows\CurrentVersion\Run";
+                                        using (var key = root.OpenSubKey(subkeyPath, writable: true))
+                                        {
+                                            if (key != null && key.GetValue(item.Name) == null)
+                                            {
+                                                key.SetValue(item.Name, item.Path);
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }
+                        File.Delete(StateFilePath);
                     }
                 }
+                catch { }
 
-                // If some disabled items are active now (enabled externally), update state file
-                if (cleanedDisabled.Count != disabled.Count)
-                {
-                    SaveDisabledItems(cleanedDisabled);
-                }
-
-                return result;
+                return activeItems;
             });
         }
 
@@ -215,143 +369,8 @@ namespace cchay_optimicer_cs.Services
         {
             return Task.Run(() =>
             {
-                if (enable)
-                {
-                    return EnableStartupItem(item);
-                }
-                else
-                {
-                    return DisableStartupItem(item);
-                }
+                return SetItemEnabledState(item.Location, item.Name, enable);
             });
-        }
-
-        private static bool DisableStartupItem(StartupItem item)
-        {
-            var disabled = LoadDisabledItems();
-
-            // Prevent duplicate records
-            if (disabled.Any(d => d.Name.Equals(item.Name, StringComparison.OrdinalIgnoreCase) && d.Location == item.Location))
-            {
-                return true;
-            }
-
-            bool success = false;
-            if (item.Location.Contains("Run"))
-            {
-                try
-                {
-                    var root = item.Location.StartsWith("HKCU") ? Registry.CurrentUser : Registry.LocalMachine;
-                    string subkeyPath = item.Location.Contains("Wow6432Node") 
-                        ? @"Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run"
-                        : @"Software\Microsoft\Windows\CurrentVersion\Run";
-                    using (var key = root.OpenSubKey(subkeyPath, writable: true))
-                    {
-                        if (key != null)
-                        {
-                            key.DeleteValue(item.Name, throwOnMissingValue: false);
-                            success = true;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to disable registry startup item: {ex.Message}");
-                }
-            }
-            else
-            {
-                // File-based startup
-                try
-                {
-                    if (File.Exists(item.Path))
-                    {
-                        string disabledPath = item.Path + ".disabled";
-                        File.Move(item.Path, disabledPath, overwrite: true);
-                        item.Path = disabledPath; // Update the path for storage
-                        success = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to disable file startup item: {ex.Message}");
-                }
-            }
-
-            if (success)
-            {
-                item.Enabled = false;
-                disabled.Add(item);
-                SaveDisabledItems(disabled);
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool EnableStartupItem(StartupItem item)
-        {
-            var disabled = LoadDisabledItems();
-            var found = disabled.FirstOrDefault(d => d.Name.Equals(item.Name, StringComparison.OrdinalIgnoreCase) && d.Location == item.Location);
-            if (found == null)
-            {
-                return false; // Not found in disabled list
-            }
-
-            bool success = false;
-            if (found.Location.Contains("Run"))
-            {
-                try
-                {
-                    var root = found.Location.StartsWith("HKCU") ? Registry.CurrentUser : Registry.LocalMachine;
-                    string subkeyPath = found.Location.Contains("Wow6432Node") 
-                        ? @"Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run"
-                        : @"Software\Microsoft\Windows\CurrentVersion\Run";
-                    using (var key = root.OpenSubKey(subkeyPath, writable: true))
-                    {
-                        if (key != null)
-                        {
-                            key.SetValue(found.Name, found.Path);
-                            success = true;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to enable registry startup item: {ex.Message}");
-                }
-            }
-            else
-            {
-                // File-based startup
-                try
-                {
-                    if (File.Exists(found.Path))
-                    {
-                        string originalPath = found.Path;
-                        if (originalPath.EndsWith(".disabled", StringComparison.OrdinalIgnoreCase))
-                        {
-                            originalPath = originalPath.Substring(0, originalPath.Length - ".disabled".Length);
-                        }
-                        File.Move(found.Path, originalPath, overwrite: true);
-                        found.Path = originalPath;
-                        success = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to enable file startup item: {ex.Message}");
-                }
-            }
-
-            if (success)
-            {
-                disabled.Remove(found);
-                SaveDisabledItems(disabled);
-                return true;
-            }
-
-            return false;
         }
     }
 }

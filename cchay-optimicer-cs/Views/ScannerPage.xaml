@@ -1,0 +1,186 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.ScannerPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Escáner de Amenazas y Seguridad" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+                <TextBlock Text="Analiza procesos en ejecución y archivos bajo demanda en busca de malware, adware y archivos sospechosos no firmados." FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Main Scanner Panel -->
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Status & Controls -->
+                <ui:Card Grid.Column="0" Padding="20" Margin="0,0,10,0" VerticalAlignment="Stretch">
+                    <StackPanel VerticalAlignment="Center">
+                        <!-- Scanning Animation / Shield Icon -->
+                        <Grid Height="120" Width="120" HorizontalAlignment="Center" Margin="0,0,0,16">
+                            <!-- Outer scanning ring (visible during scan) -->
+                            <Ellipse x:Name="ElScanRing" Stroke="#1098AD" StrokeThickness="3" StrokeDashArray="3,3" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+                                <Ellipse.RenderTransform>
+                                    <RotateTransform Angle="0" x:Name="RotateScanRing" />
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                            <!-- Inner static shield icon -->
+                            <ui:SymbolIcon x:Name="ShieldIcon" Symbol="ShieldCheckmark48" FontSize="64" Foreground="#40C057" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <TextBlock x:Name="TxtStatusTitle" Text="Sistema Protegido" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                        <TextBlock x:Name="TxtStatusDesc" Text="El sistema no tiene amenazas activas registradas." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,20" />
+
+                        <!-- Main Scan buttons -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ui:Button x:Name="BtnQuickScan" Content="Análisis Rápido" Appearance="Primary" Grid.Column="0" Margin="0,0,6,0" Padding="12" Click="BtnQuickScan_Click" />
+                            <ui:Button x:Name="BtnCustomScan" Content="Analizar Carpeta" Appearance="Secondary" Grid.Column="1" Margin="6,0,0,0" Padding="12" Click="BtnCustomScan_Click" />
+                        </Grid>
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Right Column: Live Statistics & Metrics -->
+                <ui:Card Grid.Column="1" Padding="20" Margin="10,0,0,0" VerticalAlignment="Stretch">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Métricas del Análisis" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,16" />
+                        
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Procesos Analizados" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtMetricProcessed" Text="0" FontWeight="Bold" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Separator Margin="0,0,0,12" />
+
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Amenazas Encontradas" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtMetricThreats" Text="0" FontWeight="Bold" Foreground="#FA5252" HorizontalAlignment="Right" />
+                        </Grid>
+                        <Separator Margin="0,0,0,12" />
+
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Seguridad del Sistema" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtMetricScore" Text="100% Seguro" FontWeight="Bold" Foreground="#40C057" HorizontalAlignment="Right" />
+                        </Grid>
+                    </StackPanel>
+                </ui:Card>
+            </Grid>
+
+            <!-- Scan Progress bar (Visible only when scanning) -->
+            <ui:Card x:Name="CardProgress" Padding="16" Margin="0,0,0,20" Visibility="Collapsed" BorderBrush="#1098AD">
+                <StackPanel>
+                    <TextBlock x:Name="TxtProgressLabel" Text="Analizando memoria y firmas de procesos..." FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <ProgressBar x:Name="ProgScan" Height="6" Minimum="0" Maximum="100" Value="0" Foreground="#1098AD" Background="{DynamicResource ControlFillColorDefaultBrush}" Margin="0,0,0,8" />
+                    <TextBlock x:Name="TxtCurrentTarget" Text="Iniciando motor de análisis..." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Clean / Shred threats action bar (Visible when threats are detected) -->
+            <ui:Card x:Name="CardActions" Padding="14" Margin="0,0,0,16" Visibility="Collapsed" BorderBrush="#FA5252">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="TxtSelectedCount" Text="0 amenazas seleccionadas" FontSize="14" FontWeight="SemiBold" Foreground="#FA5252" />
+                        <TextBlock Text="Se recomienda cerrar sus procesos y eliminarlos permanentemente del disco." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <ui:Button x:Name="BtnCleanSelected" Content="Eliminar Amenazas" Appearance="Danger" Grid.Column="1" Padding="28,12,28,12" Click="BtnCleanSelected_Click" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Toast / Message Box -->
+            <Border x:Name="BorderToast" Padding="14,10,14,10" CornerRadius="4" Margin="0,0,0,16" Visibility="Collapsed">
+                <TextBlock x:Name="TxtToast" Text="" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" />
+            </Border>
+
+            <!-- List of threats header -->
+            <TextBlock Text="Amenazas Detectadas" FontSize="18" FontWeight="SemiBold" Margin="0,10,0,12" />
+
+            <!-- Threat list / ItemsControl -->
+            <StackPanel>
+                <!-- Clean / Protected State UI (Shows if no threats) -->
+                <ui:Card x:Name="CardNoThreats" Padding="24" HorizontalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ui:SymbolIcon Symbol="ShieldCheckmark24" FontSize="36" Foreground="#40C057" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                        <TextBlock Text="No se encontraron amenazas" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Text="Corre un análisis rápido para verificar tus procesos activos en memoria." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- List of active threats -->
+                <ItemsControl x:Name="ListThreats" Visibility="Collapsed">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ui:Card Padding="14" Margin="0,0,0,8" BorderBrush="#FA5252">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Selection checkbox -->
+                                    <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,12,0" Checked="ThreatCheckBox_Changed" Unchecked="ThreatCheckBox_Changed" />
+
+                                    <!-- Details -->
+                                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                            <Border CornerRadius="4" Background="#7F1D1D" Padding="6,2,6,2" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding RiskLevel}" FontSize="10" FontWeight="Bold" Foreground="#F87171" />
+                                            </Border>
+                                            <TextBlock Text=" [Proceso Activo]" FontSize="11" Foreground="#FA5252" VerticalAlignment="Center" Margin="4,0,0,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ProcessId}" Value="0">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Reason}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Path}" FontSize="10" FontFamily="Consolas" Foreground="#888888" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- Status / PID -->
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock Text="Riesgo Detectado" FontSize="11" Foreground="#FA5252" HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding ProcessId, StringFormat='PID: {0}'}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ProcessId}" Value="0">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </ui:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

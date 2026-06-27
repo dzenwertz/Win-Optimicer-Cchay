@@ -105,5 +105,22 @@ namespace cchay_optimicer_cs
                 throw;
             }
         }
+
+        private void FooterAttribution_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "https://github.com/dzenwertz",
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                Log($"Failed to open GitHub URL: {ex.Message}");
+            }
+        }
     }
 }
