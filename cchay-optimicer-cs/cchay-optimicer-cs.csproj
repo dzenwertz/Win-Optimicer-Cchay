@@ -16,4 +16,9 @@
     <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\cchay_logo.png" />
+    <Resource Include="Assets\cchay_logo.ico" />
+  </ItemGroup>
+
 </Project>

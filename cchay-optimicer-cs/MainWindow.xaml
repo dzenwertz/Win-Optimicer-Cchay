@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:cchay_optimicer_cs"
         xmlns:views="clr-namespace:cchay_optimicer_cs.Views"
         mc:Ignorable="d"
-        Title="Cchay Optimicer" Height="750" Width="1100" Icon="Assets/cchay_logo.png"
+        Title="Cchay Optimicer" Height="750" Width="1100" Icon="pack://application:,,,/Assets/cchay_logo.png"
         Background="{DynamicResource ApplicationBackgroundBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         WindowStartupLocation="CenterScreen">
