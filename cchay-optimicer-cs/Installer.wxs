@@ -1,0 +1,72 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Cchay Optimicer" 
+           Manufacturer="Joseph ICV &amp; dzenwertz" 
+           Version="1.0.0" 
+           UpgradeCode="d21f8a84-0a34-4b5f-9db1-d4ab6f19634e" 
+           Scope="perMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="Una versión más reciente de Cchay Optimicer ya está instalada." />
+
+    <!-- Icon for Add/Remove Programs -->
+    <Icon Id="AppIcon" SourceFile="Assets\cchay_logo.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz" />
+
+    <!-- Directory structure -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Cchay Optimicer" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Cchay Optimicer" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- Components -->
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Main executable -->
+      <Component Id="MainExecutable" Guid="a6582a84-0b34-4b5f-9db1-d4ab6f19635f">
+        <File Id="ExecutableFile" 
+              Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\cchay-optimicer-cs.exe" 
+              KeyPath="yes" />
+
+        <!-- Start Menu Shortcut -->
+        <Shortcut Id="StartMenuShortcut"
+                  Directory="ApplicationProgramsFolder"
+                  Name="Cchay Optimicer"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon"
+                  Advertise="yes" />
+
+        <!-- Desktop Shortcut -->
+        <Shortcut Id="DesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Cchay Optimicer"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon"
+                  Advertise="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Menu folder cleaning -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcutMenuFolder" Guid="b7582a84-0c34-4b5f-9db1-d4ab6f19636f">
+        <RemoveFolder Id="CleanUpShortCut" On="uninstall" />
+        <RegistryValue Root="HKMU" 
+                       Key="Software\CchayOptimicer" 
+                       Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Feature tree -->
+    <Feature Id="ProductFeature" Title="Cchay Optimicer Installation" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcutMenuFolder" />
+    </Feature>
+
+  </Package>
+</Wix>

@@ -32,6 +32,24 @@ namespace cchay_optimicer_cs
 
     public partial class MainWindow : Window
     {
+        [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private void ApplyDarkTitleBar()
+        {
+            try
+            {
+                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                int useDark = 1;
+                DwmSetWindowAttribute(hwnd, 20, ref useDark, sizeof(int));
+                DwmSetWindowAttribute(hwnd, 19, ref useDark, sizeof(int));
+            }
+            catch (Exception ex)
+            {
+                Log($"Failed to apply dark title bar: {ex.Message}");
+            }
+        }
+
         public static MainWindow? Instance { get; private set; }
 
         public MainWindow()
@@ -58,6 +76,7 @@ namespace cchay_optimicer_cs
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Log("MainWindow Loaded");
+            ApplyDarkTitleBar();
             
             // Check Admin Status and self-elevate if necessary
             if (!SystemService.IsRunningAsAdmin())
