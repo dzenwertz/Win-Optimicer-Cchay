@@ -270,9 +270,9 @@ h1, h2, h3, h4 {
     width: 560px;
     height: 380px;
     background-color: #0c0f16;
-    border: 1px solid #2a2d3d;
-    border-radius: 8px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.1);
+    border: 1px solid var(--color-purple);
+    border-radius: 0px;
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -282,9 +282,9 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    background-color: #121620;
-    border-bottom: 1px solid #1e2230;
+    padding: 8px 12px;
+    background-color: #0e111a;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .win-logo-group {
@@ -294,29 +294,33 @@ h1, h2, h3, h4 {
 }
 
 .win-app-icon {
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .win-title {
     font-size: 11px;
-    font-weight: 500;
     font-family: 'JetBrains Mono', monospace;
     color: var(--text-secondary);
 }
 
-.win-controls {
+.win-workspaces {
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
-.win-btn {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+.ws-dot {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 1px 5px;
+    border-radius: 2px;
 }
-.win-min { background-color: #fcc419; }
-.win-max { background-color: #40c057; }
-.win-close { background-color: #fa5252; }
+
+.ws-dot.active {
+    color: var(--color-purple);
+    background-color: rgba(124, 58, 237, 0.15);
+    font-weight: bold;
+}
 
 /* Simulator App Interior */
 .app-container {
