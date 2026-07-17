@@ -97,9 +97,13 @@ h1, h2, h3, h4 {
     cursor: pointer;
 }
 
-.logo-emoji {
-    font-size: 24px;
-    text-shadow: 0 0 10px var(--color-blue);
+.nav-logo-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-purple);
+    object-fit: cover;
+    box-shadow: 0 0 8px var(--glow-purple);
 }
 
 .logo-text {
