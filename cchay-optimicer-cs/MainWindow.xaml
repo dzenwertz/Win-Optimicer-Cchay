@@ -18,13 +18,33 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Admin Mode Warning Bar -->
-        <Border x:Name="AdminWarningBar" Grid.Row="0" Background="#7F1D1D" BorderThickness="0,0,0,1" BorderBrush="#F87171" Padding="14,10,14,10" Visibility="Collapsed">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ui:SymbolIcon Symbol="Warning24" Foreground="#F87171" Margin="0,0,8,0" />
-                <TextBlock Text="Modo limitado: Cchay Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
-            </StackPanel>
-        </Border>
+        <StackPanel Grid.Row="0">
+            <!-- Admin Mode Warning Bar -->
+            <Border x:Name="AdminWarningBar" Background="#7F1D1D" BorderThickness="0,0,0,1" BorderBrush="#F87171" Padding="14,10,14,10" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Warning24" Foreground="#F87171" Margin="0,0,8,0" />
+                    <TextBlock Text="Modo limitado: Cchay Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- Reboot Required Bar -->
+            <Border x:Name="RebootRequiredBar" Background="#0C4A6E" BorderThickness="0,0,0,1" BorderBrush="#38BDF8" Padding="14,10,14,10" Visibility="Collapsed">
+                <Grid HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
+                        <ui:SymbolIcon Symbol="Info24" Foreground="#38BDF8" Margin="0,0,8,0" />
+                        <TextBlock Text="Se recomienda reiniciar el equipo para aplicar todas las optimizaciones y cambios de registro." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Center">
+                        <ui:Button Content="Reiniciar Ahora" Appearance="Primary" Click="BtnRestartNow_Click" Margin="0,0,8,0" Height="28" Padding="10,0,10,0" VerticalAlignment="Center" />
+                        <ui:Button Content="Descartar" Appearance="Secondary" Click="BtnDismissReboot_Click" Height="28" Padding="10,0,10,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
 
         <!-- Main Workspace -->
         <Grid Grid.Row="1">
@@ -42,10 +62,13 @@
                     <ui:NavigationViewItem Content="Eliminar Bloatware" Tag="bloatware" TargetPageType="{x:Type views:BloatwarePage}" Icon="{ui:SymbolIcon Symbol=Delete24}" />
                     <ui:NavigationViewItem Content="Optimizador de Red" Tag="network" TargetPageType="{x:Type views:NetworkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
                     <ui:NavigationViewItem Content="Programas de Inicio" Tag="startup" TargetPageType="{x:Type views:StartupPage}" Icon="{ui:SymbolIcon Symbol=Desktop24}" />
+                    <ui:NavigationViewItem Content="Servicios de Windows" Tag="services" TargetPageType="{x:Type views:ServicesPage}" Icon="{ui:SymbolIcon Symbol=Briefcase24}" />
                     <ui:NavigationViewItem Content="Instalador de Apps" Tag="software" TargetPageType="{x:Type views:SoftwarePage}" Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
                     <ui:NavigationViewItem Content="Escáner de Virus" Tag="scanner" TargetPageType="{x:Type views:ScannerPage}" Icon="{ui:SymbolIcon Symbol=Shield24}" />
+                    <ui:NavigationViewItem Content="Reparar Sistema" Tag="repair" TargetPageType="{x:Type views:RepairPage}" Icon="{ui:SymbolIcon Symbol=Toolbox24}" />
                     <ui:NavigationViewItemSeparator />
                     <ui:NavigationViewItem Content="Backup y Restaurar" Tag="backup" TargetPageType="{x:Type views:BackupPage}" Icon="{ui:SymbolIcon Symbol=ShieldCheckmark24}" />
+                    <ui:NavigationViewItem Content="Configuración" Tag="settings" TargetPageType="{x:Type views:SettingsPage}" Icon="{ui:SymbolIcon Symbol=Settings24}" />
                 </ui:NavigationView.MenuItems>
                 <ui:NavigationView.FooterMenuItems>
                     <ui:NavigationViewItem Content="Desarrollado por Joseph ICV , dzenwertz" Icon="{ui:SymbolIcon Symbol=Heart24}" Click="FooterAttribution_Click" />

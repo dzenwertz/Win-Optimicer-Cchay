@@ -1,0 +1,176 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.RepairPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800">
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="200" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Reparar Sistema" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+            <TextBlock Text="Soluciona problemas comunes de Windows, errores de actualización, corrupción de archivos e inestabilidad de red." FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Repair tool categories / warning -->
+        <ui:Card Grid.Row="1" Margin="0,0,0,16" Padding="12" Background="#1A007ACC" BorderBrush="#007ACC">
+            <StackPanel Orientation="Horizontal">
+                <ui:SymbolIcon Symbol="Info24" Foreground="#007ACC" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <TextBlock Text="Nota: Ejecutar herramientas complejas como SFC y DISM puede demorar varios minutos. No cierres el programa durante la ejecución." FontSize="12.5" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+        </ui:Card>
+
+        <!-- Tool Grid -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <UniformGrid Columns="2" Rows="4" Margin="0,0,0,8">
+                <!-- SFC -->
+                <ui:Card Margin="0,0,6,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="SFC Scannow" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Escanea y repara archivos corruptos del sistema de Windows." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Ejecutar" Click="BtnRepair_Click" Tag="sfc" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- DISM Restore -->
+                <ui:Card Margin="6,0,0,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="DISM Restore Health" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Descarga y repara archivos del sistema utilizando Windows Update." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Ejecutar" Click="BtnRepair_Click" Tag="dism-restore" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- CHKDSK -->
+                <ui:Card Margin="0,0,6,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Comprobación de Disco" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Programa un análisis completo de la unidad C: para el próximo inicio." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Programar" Click="BtnRepair_Click" Tag="chkdsk" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- Reset Network -->
+                <ui:Card Margin="6,0,0,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Restablecer Winsock y TCP/IP" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Resetea la configuración IP y sockets para resolver problemas de red." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Restablecer" Click="BtnRepair_Click" Tag="winsock" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- Flush DNS -->
+                <ui:Card Margin="0,0,6,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Limpiar Caché DNS" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Vacia el DNS Cache del adaptador para corregir errores de conexión." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Limpiar" Click="BtnRepair_Click" Tag="flushdns" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- Reset Windows Update -->
+                <ui:Card Margin="6,0,0,8" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Resetear Windows Update" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Limpia la base de datos corrupta y reinicia el servicio de actualizaciones." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Resetear" Click="BtnRepair_Click" Tag="wu-reset" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- Rebuild Icon Cache -->
+                <ui:Card Margin="0,0,6,0" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Reconstruir Icon Cache" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Elimina la base de datos de iconos y reinicia el shell Explorer." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Reparar" Click="BtnRepair_Click" Tag="iconcache" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+
+                <!-- NTFS Permissions -->
+                <ui:Card Margin="6,0,0,0" Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Restablecer Permisos NTFS" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBlock Text="Restaura permisos por defecto sobre la carpeta de tu usuario." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Restablecer" Click="BtnRepair_Click" Tag="permissions" VerticalAlignment="Center" />
+                    </Grid>
+                </ui:Card>
+            </UniformGrid>
+        </ScrollViewer>
+
+        <!-- Row 3: Console Output -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Consola de Reparación y Registro" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+            <ScrollViewer Grid.Row="1" x:Name="LogScroll" VerticalScrollBarVisibility="Auto" Background="#111" Padding="10">
+                <TextBox x:Name="TxtLog" 
+                         Background="Transparent" 
+                         Foreground="#00FF00" 
+                         BorderThickness="0" 
+                         IsReadOnly="True" 
+                         TextWrapping="Wrap" 
+                         FontFamily="Consolas" 
+                         FontSize="12.5" />
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

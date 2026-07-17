@@ -10,6 +10,7 @@ namespace cchay_optimicer_cs.Views
     public partial class RamPage : UserControl
     {
         private DispatcherTimer? _timer;
+        private bool _isInitialized = false;
 
         public RamPage()
         {
@@ -21,6 +22,23 @@ namespace cchay_optimicer_cs.Views
         private async void RamPage_Loaded(object sender, RoutedEventArgs e)
         {
             await RefreshMemoryInfoAsync();
+
+            // Load settings
+            CheckAutoRam.IsChecked = SettingsService.Settings.AutoRamCleanEnabled;
+            UpdateAutoRamStatusText(SettingsService.Settings.AutoRamCleanEnabled);
+
+            // Select ComboBox item based on threshold
+            int currentThreshold = SettingsService.Settings.AutoRamCleanThreshold;
+            foreach (ComboBoxItem item in ComboThreshold.Items)
+            {
+                if (item.Tag?.ToString() == currentThreshold.ToString())
+                {
+                    ComboThreshold.SelectedItem = item;
+                    break;
+                }
+            }
+
+            _isInitialized = true;
 
             _timer = new DispatcherTimer
             {
@@ -70,6 +88,11 @@ namespace cchay_optimicer_cs.Views
             {
                 long freedBytes = await RamService.CleanAll();
                 double freedMB = freedBytes / 1024.0 / 1024.0;
+
+                // Save stats
+                SettingsService.Settings.TotalBytesRamFreed += (ulong)freedBytes;
+                SettingsService.Settings.TotalOptimizationsRun++;
+                SettingsService.SaveSettings();
 
                 TxtFreedToast.Text = $"✨ Se liberaron aproximadamente {freedMB:F0} MB de RAM.";
                 TxtFreedToast.Visibility = Visibility.Visible;
@@ -127,6 +150,13 @@ namespace cchay_optimicer_cs.Views
                             break;
                     }
 
+                    // Save stats
+                    if (freedBytes > 0)
+                    {
+                        SettingsService.Settings.TotalBytesRamFreed += (ulong)freedBytes;
+                        SettingsService.SaveSettings();
+                    }
+
                     double freedMB = freedBytes / 1024.0 / 1024.0;
 
                     if (statusLabel != null)
@@ -147,6 +177,36 @@ namespace cchay_optimicer_cs.Views
                     btn.Content = oldContent;
                 }
             }
+        }
+
+        private void CheckAutoRam_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckAutoRam == null) return;
+            bool isChecked = CheckAutoRam.IsChecked == true;
+            SettingsService.Settings.AutoRamCleanEnabled = isChecked;
+            SettingsService.SaveSettings();
+            UpdateAutoRamStatusText(isChecked);
+        }
+
+        private void ComboThreshold_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isInitialized || ComboThreshold == null) return;
+            if (ComboThreshold.SelectedItem is ComboBoxItem item && item.Tag is string thresholdStr)
+            {
+                if (int.TryParse(thresholdStr, out int threshold))
+                {
+                    SettingsService.Settings.AutoRamCleanThreshold = threshold;
+                    SettingsService.SaveSettings();
+                }
+            }
+        }
+
+        private void UpdateAutoRamStatusText(bool enabled)
+        {
+            if (TxtAutoRamStatus == null) return;
+            TxtAutoRamStatus.Text = enabled ? "Activo" : "Desactivado";
+            TxtAutoRamStatus.Foreground = new System.Windows.Media.SolidColorBrush(
+                enabled ? System.Windows.Media.Color.FromRgb(0x40, 0xC0, 0x57) : System.Windows.Media.Color.FromRgb(0x86, 0x8E, 0x96));
         }
     }
 }

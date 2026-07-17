@@ -2,8 +2,10 @@
 bin/
 obj/
 
-# Archivos de configuracion de Visual Studio
+# Archivos de configuracion de Visual Studio / VS Code
 .vs/
+.vscode/
+.wix/
 *.user
 *.suo
 *.userosscache
@@ -13,3 +15,14 @@ obj/
 navigation_log.txt
 crash.txt
 tweakStates.json
+
+# Instaladores y comprimidos
+*.cab
+*.msi
+*.wixpdb
+*.zip
+*.rar
+*.7z
+
+# Carpetas externas e integraciones
+esteroides/

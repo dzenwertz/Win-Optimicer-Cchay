@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Security.Principal;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using cchay_optimicer_cs.Models;
@@ -29,6 +30,12 @@ namespace cchay_optimicer_cs.Services
         public int DiskPercent { get; set; }
         public string Username { get; set; } = "Usuario";
         public bool IsAdmin { get; set; }
+        public string CpuTemperature { get; set; } = "N/A";
+        public string SmartStatus { get; set; } = "N/A";
+        public string LocalIp { get; set; } = "N/A";
+        public string PublicIp { get; set; } = "N/A";
+        public string Uptime { get; set; } = "N/A";
+        public int HealthScore { get; set; } = 100;
     }
 
     public class SystemService
@@ -84,11 +91,15 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     using (var searcher = new ManagementObjectSearcher("Select NumberOfCores from Win32_Processor"))
+                    using (var results = searcher.Get())
                     {
-                        foreach (var obj in searcher.Get())
+                        foreach (ManagementObject obj in results)
                         {
-                            info.CpuCores = Convert.ToInt32(obj["NumberOfCores"]);
-                            break;
+                            using (obj)
+                            {
+                                info.CpuCores = Convert.ToInt32(obj["NumberOfCores"]);
+                                break;
+                            }
                         }
                     }
                 }
@@ -102,14 +113,19 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     using (var searcher = new ManagementObjectSearcher("Select Name from Win32_VideoController"))
+                    using (var results = searcher.Get())
                     {
-                        var gpus = searcher.Get().Cast<ManagementObject>()
-                            .Select(o => o["Name"]?.ToString() ?? "")
-                            .Where(n => !string.IsNullOrEmpty(n))
-                            .ToList();
+                        var gpus = new List<string>();
+                        foreach (ManagementObject obj in results)
+                        {
+                            using (obj)
+                            {
+                                string name = obj["Name"]?.ToString() ?? "";
+                                if (!string.IsNullOrEmpty(name)) gpus.Add(name);
+                            }
+                        }
                         if (gpus.Count > 0)
                         {
-                            // Prefer dedicated GPU over integrated if possible
                             var dedicated = gpus.FirstOrDefault(g => g.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase) || 
                                                                      g.Contains("AMD", StringComparison.OrdinalIgnoreCase) || 
                                                                      g.Contains("Radeon", StringComparison.OrdinalIgnoreCase) || 
@@ -131,11 +147,15 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     using (var searcher = new ManagementObjectSearcher("Select Caption from Win32_OperatingSystem"))
+                    using (var results = searcher.Get())
                     {
-                        foreach (var obj in searcher.Get())
+                        foreach (ManagementObject obj in results)
                         {
-                            info.OsName = obj["Caption"]?.ToString() ?? "Windows";
-                            break;
+                            using (obj)
+                            {
+                                info.OsName = obj["Caption"]?.ToString() ?? "Windows";
+                                break;
+                            }
                         }
                     }
                 }
@@ -171,8 +191,198 @@ namespace cchay_optimicer_cs.Services
                 }
                 catch { /* ignore */ }
 
+                // CPU Temperature
+                info.CpuTemperature = GetCpuTemperature();
+
+                // SMART Status
+                info.SmartStatus = GetSmartStatus();
+
+                // Uptime
+                info.Uptime = GetSystemUptime();
+
+                // Local IP
+                info.LocalIp = GetLocalIp();
+
+                // Public IP
+                info.PublicIp = GetPublicIp();
+
+                // Calculate Health Score
+                info.HealthScore = CalculateHealthScore(info);
+
                 return info;
             });
+        }
+
+        private static string GetCpuTemperature()
+        {
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature"))
+                using (var results = searcher.Get())
+                {
+                    foreach (ManagementObject obj in results)
+                    {
+                        using (obj)
+                        {
+                            double tempRaw = Convert.ToDouble(obj["CurrentTemperature"]);
+                            double tempCelsius = (tempRaw / 10.0) - 273.15;
+                            if (tempCelsius < 0 || tempCelsius > 150) continue; // skip invalid readings
+                            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F1} °C", tempCelsius);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return "N/A / Bloqueado";
+        }
+
+        private static string GetSmartStatus()
+        {
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher(@"root\Microsoft\Windows\Storage", "SELECT OperationalStatus FROM MSFT_PhysicalDisk"))
+                using (var results = searcher.Get())
+                {
+                    foreach (ManagementObject obj in results)
+                    {
+                        using (obj)
+                        {
+                            var statusArr = obj["OperationalStatus"] as ushort[];
+                            if (statusArr != null && statusArr.Length > 0)
+                            {
+                                if (statusArr[0] == 2) return "Saludable";
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT PredictFailure FROM MSStorageDriver_FailurePredictStatus"))
+                using (var results = searcher.Get())
+                {
+                    foreach (ManagementObject obj in results)
+                    {
+                        using (obj)
+                        {
+                            bool fail = Convert.ToBoolean(obj["PredictFailure"]);
+                            return fail ? "Alerta (Posible Fallo)" : "Saludable";
+                        }
+                    }
+                }
+            }
+            catch { }
+            return "Desconocido";
+        }
+
+        private static string GetSystemUptime()
+        {
+            try
+            {
+                long tickCount = Environment.TickCount64;
+                TimeSpan ts = TimeSpan.FromMilliseconds(tickCount);
+                if (ts.TotalDays >= 1)
+                    return $"{(int)ts.TotalDays}d {ts.Hours}h {ts.Minutes}m";
+                return $"{(int)ts.TotalHours}h {ts.Minutes}m";
+            }
+            catch
+            {
+                return "N/A";
+            }
+        }
+
+        private static string GetLocalIp()
+        {
+            try
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        return ip.ToString();
+                    }
+                }
+            }
+            catch { }
+            return "127.0.0.1";
+        }
+
+        private static string GetPublicIp()
+        {
+            try
+            {
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromMilliseconds(1500);
+                    return client.GetStringAsync("https://api.ipify.org").Result.Trim();
+                }
+            }
+            catch
+            {
+                return "Desconectado";
+            }
+        }
+
+        public static int CalculateHealthScore(SystemInfoData info)
+        {
+            int score = 100;
+
+            // RAM usage
+            if (info.MemoryPercent > 90) score -= 25;
+            else if (info.MemoryPercent > 80) score -= 15;
+            else if (info.MemoryPercent > 70) score -= 5;
+
+            // Disk usage
+            if (info.DiskPercent > 90) score -= 20;
+            else if (info.DiskPercent > 80) score -= 10;
+
+            // CPU Temp
+            if (info.CpuTemperature != "N/A" && info.CpuTemperature != "N/A / Bloqueado")
+            {
+                string rawTemp = info.CpuTemperature.Replace(" °C", "").Trim();
+                if (double.TryParse(rawTemp, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double temp))
+                {
+                    if (temp > 85) score -= 20;
+                    else if (temp > 75) score -= 10;
+                }
+            }
+
+            if (score < 0) score = 0;
+            return score;
+        }
+
+        public static string GenerateSystemReport(SystemInfoData info)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("==================================================");
+            sb.AppendLine("         CCHAY OPTIMICER - REPORTE DE PC          ");
+            sb.AppendLine("==================================================");
+            sb.AppendLine($"Fecha/Hora:       {DateTime.Now}");
+            sb.AppendLine($"Usuario:          {info.Username}");
+            sb.AppendLine($"Ejecutando Admin: {info.IsAdmin}");
+            sb.AppendLine($"Puntaje de Salud: {info.HealthScore}/100");
+            sb.AppendLine("--------------------------------------------------");
+            sb.AppendLine("INFORMACIÓN DE HARDWARE & SISTEMA:");
+            sb.AppendLine($"SO:               {info.OsName} {info.OsVersion} (Build {info.OsBuild})");
+            sb.AppendLine($"CPU:              {info.CpuModel}");
+            sb.AppendLine($"Núcleos/Hilos:    {info.CpuCores} Cores / {info.CpuThreads} Threads");
+            sb.AppendLine($"Temperatura CPU:  {info.CpuTemperature}");
+            sb.AppendLine($"GPU:              {info.GpuModel}");
+            sb.AppendLine($"RAM Total:        {(info.MemoryTotal / 1024.0 / 1024.0 / 1024.0):F2} GB");
+            sb.AppendLine($"RAM Usada:        {(info.MemoryUsed / 1024.0 / 1024.0 / 1024.0):F2} GB ({info.MemoryPercent}%)");
+            sb.AppendLine($"RAM Libre:        {(info.MemoryFree / 1024.0 / 1024.0 / 1024.0):F2} GB");
+            sb.AppendLine($"Disco C: Total:   {(info.DiskTotal / 1024.0 / 1024.0 / 1024.0):F1} GB");
+            sb.AppendLine($"Disco C: Usado:   {(info.DiskUsed / 1024.0 / 1024.0 / 1024.0):F1} GB ({info.DiskPercent}%)");
+            sb.AppendLine($"Disco C: Libre:   {(info.DiskFree / 1024.0 / 1024.0 / 1024.0):F1} GB");
+            sb.AppendLine($"Estado SMART:     {info.SmartStatus}");
+            sb.AppendLine($"IP Local:         {info.LocalIp}");
+            sb.AppendLine($"IP Pública:       {info.PublicIp}");
+            sb.AppendLine($"Uptime:           {info.Uptime}");
+            sb.AppendLine("==================================================");
+            return sb.ToString();
         }
     }
 }

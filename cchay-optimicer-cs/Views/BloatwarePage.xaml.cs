@@ -165,6 +165,7 @@ namespace cchay_optimicer_cs.Views
 
                 ShowMessage($"✨ Se desinstalaron con éxito {successCount} aplicaciones seleccionadas de Windows.", isError: false);
                 await LoadAppsAsync();
+                MainWindow.Instance?.ShowRebootRequired();
             }
             catch (Exception ex)
             {
@@ -194,6 +195,7 @@ namespace cchay_optimicer_cs.Views
                 if (success)
                 {
                     ShowMessage("✨ Microsoft OneDrive ha sido desinstalado y deshabilitado de forma completa.", isError: false);
+                    MainWindow.Instance?.ShowRebootRequired();
                 }
                 else
                 {
@@ -228,6 +230,7 @@ namespace cchay_optimicer_cs.Views
                 if (success)
                 {
                     ShowMessage("✨ Los Widgets de Windows 11 han sido removidos con éxito.", isError: false);
+                    MainWindow.Instance?.ShowRebootRequired();
                 }
                 else
                 {

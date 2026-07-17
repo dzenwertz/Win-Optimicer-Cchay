@@ -247,6 +247,11 @@ namespace cchay_optimicer_cs.Views
                 var sizes = await Task.WhenAll(tasks);
                 double totalFreedMB = sizes.Sum();
 
+                // Save stats
+                SettingsService.Settings.TotalMbDiskFreed += totalFreedMB;
+                SettingsService.Settings.TotalOptimizationsRun++;
+                SettingsService.SaveSettings();
+
                 TxtFreedSize.Text = totalFreedMB == 0 ? "0 MB" : (totalFreedMB < 1 ? $"{(totalFreedMB * 1024):F0} KB" : $"{totalFreedMB:F1} MB");
                 CardFreed.Visibility = Visibility.Visible;
                 TxtPreviewSize.Text = "0 MB";
@@ -259,6 +264,67 @@ namespace cchay_optimicer_cs.Views
             {
                 SetButtonsState(true);
                 TxtBtnClean.Text = "Iniciar Limpieza";
+            }
+        }
+
+        private async void BtnScanDevices_Click(object sender, RoutedEventArgs e)
+        {
+            BtnScanDevices.IsEnabled = false;
+            BtnScanDevices.Content = "Buscando...";
+
+            try
+            {
+                var devices = await DeviceCleanupService.GetDisconnectedDevicesAsync();
+                ListDevices.ItemsSource = devices;
+
+                TxtDevicesCount.Text = $"{devices.Count} dispositivos desconectados encontrados.";
+                PanelDevicesList.Visibility = devices.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                BtnCleanDevices.IsEnabled = devices.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scanning devices: {ex.Message}");
+            }
+            finally
+            {
+                BtnScanDevices.IsEnabled = true;
+                BtnScanDevices.Content = "Buscar Dispositivos";
+            }
+        }
+
+        private async void BtnCleanDevices_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListDevices.ItemsSource is List<GhostDevice> devices)
+            {
+                var selected = devices.Where(d => d.IsChecked).ToList();
+                if (selected.Count == 0) return;
+
+                var confirm = MessageBox.Show($"Se eliminarán los controladores de {selected.Count} dispositivos desconectados. ¿Deseas continuar?", "Eliminar Dispositivos", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (confirm != MessageBoxResult.Yes) return;
+
+                BtnCleanDevices.IsEnabled = false;
+                BtnScanDevices.IsEnabled = false;
+
+                try
+                {
+                    int removed = 0;
+                    foreach (var dev in selected)
+                    {
+                        bool ok = await DeviceCleanupService.RemoveDeviceAsync(dev.InstanceId);
+                        if (ok) removed++;
+                    }
+
+                    MessageBox.Show($"Se eliminaron {removed} dispositivos desconectados correctamente.", "Limpieza Completada", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Re-scan
+                    BtnScanDevices_Click(sender, e);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error cleaning devices: {ex.Message}");
+                    BtnCleanDevices.IsEnabled = true;
+                    BtnScanDevices.IsEnabled = true;
+                }
             }
         }
 

@@ -1,4 +1,5 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="Cchay Optimicer" 
            Manufacturer="Joseph ICV &amp; dzenwertz" 
            Version="1.0.0" 
@@ -11,6 +12,12 @@
     <Icon Id="AppIcon" SourceFile="Assets\cchay_logo.ico"/>
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz" />
+
+    <!-- Professional Wizard UI -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <!-- Embed cabinet files inside MSI -->
+    <MediaTemplate EmbedCab="yes" />
 
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles64Folder">
@@ -29,23 +36,28 @@
       <Component Id="MainExecutable" Guid="a6582a84-0b34-4b5f-9db1-d4ab6f19635f">
         <File Id="ExecutableFile" 
               Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\cchay-optimicer-cs.exe" 
-              KeyPath="yes" />
+              KeyPath="yes">
+          <!-- Start Menu Shortcut -->
+          <Shortcut Id="StartMenuShortcut"
+                    Directory="ApplicationProgramsFolder"
+                    Name="Cchay Optimicer"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon" />
 
-        <!-- Start Menu Shortcut -->
-        <Shortcut Id="StartMenuShortcut"
-                  Directory="ApplicationProgramsFolder"
-                  Name="Cchay Optimicer"
-                  WorkingDirectory="INSTALLFOLDER"
-                  Icon="AppIcon"
-                  Advertise="yes" />
+          <!-- Desktop Shortcut -->
+          <Shortcut Id="DesktopShortcut"
+                    Directory="DesktopFolder"
+                    Name="Cchay Optimicer"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="AppIcon" />
+        </File>
 
-        <!-- Desktop Shortcut -->
-        <Shortcut Id="DesktopShortcut"
-                  Directory="DesktopFolder"
-                  Name="Cchay Optimicer"
-                  WorkingDirectory="INSTALLFOLDER"
-                  Icon="AppIcon"
-                  Advertise="yes" />
+        <!-- Native WPF DLLs -->
+        <File Id="D3DCompilerDll" Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\D3DCompiler_47_cor3.dll" />
+        <File Id="PenImcDll" Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\PenImc_cor3.dll" />
+        <File Id="PresentationNativeDll" Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\PresentationNative_cor3.dll" />
+        <File Id="VcRuntimeDll" Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\vcruntime140_cor3.dll" />
+        <File Id="WpfGfxDll" Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\wpfgfx_cor3.dll" />
       </Component>
     </ComponentGroup>
 

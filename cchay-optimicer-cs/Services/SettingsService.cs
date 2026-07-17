@@ -7,6 +7,15 @@ namespace cchay_optimicer_cs.Services
     public class AppSettings
     {
         public bool AutoRestorePointEnabled { get; set; } = true;
+        public bool AutoRamCleanEnabled { get; set; } = false;
+        public int AutoRamCleanThreshold { get; set; } = 80;
+        public ulong TotalBytesRamFreed { get; set; } = 0;
+        public double TotalMbDiskFreed { get; set; } = 0;
+        public int TotalOptimizationsRun { get; set; } = 0;
+        public bool MinimizeToTray { get; set; } = false;
+        public bool DailyMaintenanceEnabled { get; set; } = false;
+        public string DailyMaintenanceTime { get; set; } = "03:00";
+        public DateTime LastDailyMaintenanceDate { get; set; } = DateTime.MinValue;
     }
 
     public static class SettingsService

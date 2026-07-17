@@ -241,6 +241,90 @@ namespace cchay_optimicer_cs.Services
                         Description = "Desactiva el servicio Spooler encargado de gestionar colas de impresión.\n⚠️ Consecuencia: No podrás realizar impresiones en papel físico ni utilizar la impresora PDF virtual de Windows para guardar archivos.",
                         Category = "services",
                         Risk = "moderate"
+                    },
+                    new Tweak {
+                        Key = "disable-background-apps",
+                        Name = "Desactivar Apps en Segundo Plano",
+                        Description = "Desactiva la ejecución de aplicaciones UWP de Windows en segundo plano.\n⚠️ Consecuencia: Las aplicaciones de la tienda de Windows no se sincronizarán ni recibirán notificaciones en segundo plano.",
+                        Category = "performance",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-diagnostics-services",
+                        Name = "Desactivar Servicios de Diagnóstico",
+                        Description = "Desactiva servicios de diagnóstico y telemetría avanzada de Windows (DPS, WdiServiceHost, WdiSystemHost, diagsvc).\n⚠️ Consecuencia: Windows no recopilará ni informará problemas complejos de diagnóstico de hardware o software.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-unnecessary-services",
+                        Name = "Desactivar Servicios Innecesarios",
+                        Description = "Desactiva servicios del sistema redundantes o raramente usados (GraphicsPerfSvc, PcaSvc, Wecsvc).\n⚠️ Consecuencia: Se desactivará el Asistente de Compatibilidad de Programas, por lo que Windows no avisará de programas antiguos con problemas conocidos.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-xbox-services",
+                        Name = "Desactivar Servicios de Xbox",
+                        Description = "Desactiva los servicios de Xbox Live (Save, NetApi, Gip, AuthManager) para liberar memoria.\n⚠️ Consecuencia: No podrás sincronizar partidas guardadas de Xbox ni conectarte a los servidores de Xbox Live desde el PC.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-bluetooth-services",
+                        Name = "Desactivar Servicios de Bluetooth",
+                        Description = "Desactiva el servicio de soporte y gateway de Bluetooth (bthserv, BTAGService).\n⚠️ Consecuencia: Los dispositivos Bluetooth (auriculares, mandos, ratones) no funcionarán ni se detectarán en el equipo.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-maps-service",
+                        Name = "Desactivar Administrador de Mapas",
+                        Description = "Desactiva el servicio MapsBroker encargado de descargar mapas sin conexión.\n⚠️ Consecuencia: No se podrán buscar ni descargar mapas offline de la app nativa de Windows.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-fax-service",
+                        Name = "Desactivar Servicio de Fax",
+                        Description = "Desactiva el servicio de Fax heredado de Windows.\n⚠️ Consecuencia: No se podrán enviar ni recibir faxes usando el modem del equipo.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-remote-services",
+                        Name = "Desactivar Registro Remoto",
+                        Description = "Desactiva el servicio RemoteRegistry por seguridad.\n⚠️ Consecuencia: Los administradores de red no podrán modificar el registro de esta máquina de forma remota.",
+                        Category = "services",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "optimize-visual-performance",
+                        Name = "Optimizar Efectos Visuales",
+                        Description = "Ajusta Windows para obtener el mejor rendimiento desactivando animaciones y efectos visuales redundantes.\n⚠️ Consecuencia: Las ventanas se abrirán y cerrarán de forma instantánea sin animaciones de transición, y el Explorador de Windows se sentirá más plano.",
+                        Category = "visual",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-notifications",
+                        Name = "Desactivar Notificaciones del Sistema",
+                        Description = "Desactiva el sistema global de notificaciones y alertas en el Centro de Actividades.\n⚠️ Consecuencia: No verás banners de alertas ni globos de avisos de aplicaciones o de Windows en la barra de tareas.",
+                        Category = "visual",
+                        Risk = "safe"
+                    },
+                    new Tweak {
+                        Key = "disable-windows-update-auto",
+                        Name = "Desactivar Descargas Automáticas de Windows Update",
+                        Description = "Configura Windows Update para notificar antes de descargar e instalar actualizaciones.\n⚠️ Consecuencia: Deberás buscar e instalar manualmente las actualizaciones de seguridad en la configuración de Windows Update.",
+                        Category = "services",
+                        Risk = "moderate"
+                    },
+                    new Tweak {
+                        Key = "disable-power-throttling",
+                        Name = "Desactivar CPU Power Throttling",
+                        Description = "Desactiva la limitación de potencia por núcleo para tareas de fondo en procesadores modernos.\n⚠️ Consecuencia: Aumentará ligeramente el consumo energético de la CPU en laptops a cambio de mejor respuesta en tareas de fondo.",
+                        Category = "performance",
+                        Risk = "safe"
                     }
                 };
 
@@ -414,6 +498,90 @@ namespace cchay_optimicer_cs.Services
                             Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search", "CortanaConsent", 0, RegistryValueKind.DWord);
                             Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search", "DisableWebSearch", 1, RegistryValueKind.DWord);
                             Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search", "ConnectedSearchUseWeb", 0, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-background-apps":
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled", 1, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search", "BackgroundAppGlobalToggle", 0, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-diagnostics-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dmwappushservice", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\diagsvc", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\diagnosticshub.standardcollector.service", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiServiceHost", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiSystemHost", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop DiagTrack");
+                            RunCmd("sc", "stop dmwappushservice");
+                            RunCmd("sc", "stop diagsvc");
+                            RunCmd("sc", "stop DPS");
+                            RunCmd("sc", "stop diagnosticshub.standardcollector.service");
+                            RunCmd("sc", "stop WdiServiceHost");
+                            RunCmd("sc", "stop WdiSystemHost");
+                            break;
+
+                        case "disable-unnecessary-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\GraphicsPerfSvc", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Wecsvc", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop GraphicsPerfSvc");
+                            RunCmd("sc", "stop PcaSvc");
+                            RunCmd("sc", "stop Wecsvc");
+                            break;
+
+                        case "disable-xbox-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XblGameSave", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XboxNetApiSvc", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XboxGipSvc", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XblAuthManager", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop XblGameSave");
+                            RunCmd("sc", "stop XboxNetApiSvc");
+                            RunCmd("sc", "stop XboxGipSvc");
+                            RunCmd("sc", "stop XblAuthManager");
+                            break;
+
+                        case "disable-bluetooth-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTAGService", "Start", 4, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bthserv", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop BTAGService");
+                            RunCmd("sc", "stop bthserv");
+                            break;
+
+                        case "disable-maps-service":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MapsBroker", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop MapsBroker");
+                            break;
+
+                        case "disable-fax-service":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Fax", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop Fax");
+                            break;
+
+                        case "disable-remote-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RemoteRegistry", "Start", 4, RegistryValueKind.DWord);
+                            RunCmd("sc", "stop RemoteRegistry");
+                            break;
+
+                        case "optimize-visual-performance":
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 2, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-notifications":
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings", "NOC_GLOBAL_SETTING_ALLOW_NOTIFICATION", 0, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-windows-update-auto":
+                            {
+                                string auPath = @"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU";
+                                Registry.SetValue(auPath, "AUOptions", 2, RegistryValueKind.DWord);
+                                Registry.SetValue(auPath, "NoAutoUpdate", 0, RegistryValueKind.DWord);
+                            }
+                            break;
+
+                        case "disable-power-throttling":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", 1, RegistryValueKind.DWord);
                             break;
 
                         default:
@@ -684,6 +852,95 @@ namespace cchay_optimicer_cs.Services
                                 {
                                     k?.DeleteValue("DisableWebSearch", false);
                                     k?.DeleteValue("ConnectedSearchUseWeb", false);
+                                }
+                            }
+                            catch { }
+                            break;
+
+                        case "disable-background-apps":
+                            try
+                            {
+                                using (var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", true))
+                                {
+                                    k?.SetValue("GlobalUserDisabled", 0, RegistryValueKind.DWord);
+                                }
+                                using (var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Search", true))
+                                {
+                                    k?.SetValue("BackgroundAppGlobalToggle", 1, RegistryValueKind.DWord);
+                                }
+                            }
+                            catch { }
+                            break;
+
+                        case "disable-diagnostics-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DiagTrack", "Start", 2, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\dmwappushservice", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\diagsvc", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DPS", "Start", 2, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\diagnosticshub.standardcollector.service", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiServiceHost", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdiSystemHost", "Start", 3, RegistryValueKind.DWord);
+                            RunCmd("sc", "start DiagTrack");
+                            RunCmd("sc", "start DPS");
+                            break;
+
+                        case "disable-unnecessary-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\GraphicsPerfSvc", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PcaSvc", "Start", 2, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Wecsvc", "Start", 3, RegistryValueKind.DWord);
+                            RunCmd("sc", "start PcaSvc");
+                            break;
+
+                        case "disable-xbox-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XblGameSave", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XboxNetApiSvc", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XboxGipSvc", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\XblAuthManager", "Start", 3, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-bluetooth-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTAGService", "Start", 3, RegistryValueKind.DWord);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bthserv", "Start", 3, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-maps-service":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MapsBroker", "Start", 2, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-fax-service":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Fax", "Start", 3, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-remote-services":
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\RemoteRegistry", "Start", 3, RegistryValueKind.DWord);
+                            break;
+
+                        case "optimize-visual-performance":
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 0, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-notifications":
+                            Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings", "NOC_GLOBAL_SETTING_ALLOW_NOTIFICATION", 1, RegistryValueKind.DWord);
+                            break;
+
+                        case "disable-windows-update-auto":
+                            try
+                            {
+                                using (var k = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", true))
+                                {
+                                    k?.DeleteValue("AUOptions", false);
+                                    k?.DeleteValue("NoAutoUpdate", false);
+                                }
+                            }
+                            catch { }
+                            break;
+
+                        case "disable-power-throttling":
+                            try
+                            {
+                                using (var k = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", true))
+                                {
+                                    k?.DeleteValue("PowerThrottlingOff", false);
                                 }
                             }
                             catch { }

@@ -24,24 +24,41 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
-                        <TextBlock Text="Optimización en Un Clic" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <TextBlock Text="Libera memoria RAM inactiva y limpia archivos temporales de disco de forma segura." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="Optimización del Sistema" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock Text="Selecciona una opción para liberar recursos rápidamente o realizar una optimización técnica profunda en un solo clic." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <ui:Button x:Name="BtnOptimize" Grid.Column="1" 
-                               Appearance="Primary" 
-                               Padding="24,12,24,12" 
-                               VerticalAlignment="Center"
-                               Click="BtnOptimize_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Flash24" Margin="0,0,8,0" />
-                            <TextBlock x:Name="TxtOptimizeBtn" Text="Optimizar Ahora" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </ui:Button>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:Button x:Name="BtnOptimize" 
+                                   Appearance="Secondary" 
+                                   Padding="18,12,18,12" 
+                                   Margin="0,0,8,0"
+                                   Click="BtnOptimize_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Flash24" Margin="0,0,8,0" />
+                                <TextBlock x:Name="TxtOptimizeBtn" Text="Limpieza Rápida" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </ui:Button>
+
+                        <ui:Button x:Name="BtnTechOptimize" 
+                                   Appearance="Primary" 
+                                   Padding="18,12,18,12" 
+                                   Click="BtnTechOptimize_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Wrench24" Margin="0,0,8,0" />
+                                <TextBlock x:Name="TxtTechOptimizeBtn" Text="Modo Técnico 🔥" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
                 </Grid>
             </ui:Card>
 
             <TextBlock x:Name="TxtResult" Visibility="Collapsed" Text="" Padding="12" FontSize="13" FontWeight="Medium" Background="#1A107C41" Foreground="#40C057" Margin="0,0,0,20" HorizontalAlignment="Stretch" TextAlignment="Center" />
+
+            <StackPanel x:Name="PanelTechProgress" Visibility="Collapsed" Margin="0,0,0,20">
+                <TextBlock x:Name="TxtTechProgress" Text="Iniciando optimización técnica..." FontSize="13" FontWeight="Medium" Foreground="#1098AD" Margin="0,0,0,6" HorizontalAlignment="Center" />
+                <ProgressBar x:Name="ProgTechOptimize" Height="6" Minimum="0" Maximum="100" Value="0" Foreground="#1098AD" Background="{DynamicResource ControlFillColorDefaultBrush}" />
+            </StackPanel>
 
             <!-- Stats Grid -->
             <UniformGrid Columns="2" Rows="2" Margin="0,0,0,20">
@@ -112,6 +129,114 @@
                 </ui:Card>
             </UniformGrid>
 
+            <!-- Diagnostics Grid -->
+            <TextBlock Text="Diagnóstico y Estado de Salud" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,10,0,10" />
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Health Score Card -->
+                <ui:Card Grid.Column="0" Margin="0,0,12,0" Padding="16" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Salud del Sistema" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Medium" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                        <Grid HorizontalAlignment="Center" Width="80" Height="80">
+                            <Ellipse Stroke="{DynamicResource ControlFillColorDefaultBrush}" StrokeThickness="6" />
+                            <TextBlock x:Name="TxtHealthScore" Text="100" FontSize="26" FontWeight="Bold" Foreground="#40C057" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <TextBlock x:Name="TxtHealthStatus" Text="Excelente" FontSize="13.5" FontWeight="SemiBold" Foreground="#40C057" HorizontalAlignment="Center" Margin="0,8,0,4" />
+                        <ui:Button x:Name="BtnExportReport" Content="Exportar Reporte" Click="BtnExportReport_Click" Appearance="Secondary" FontSize="11" Margin="0,8,0,0" Padding="12,6,12,6" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Diagnostics Stats Grid -->
+                <ui:Card Grid.Column="1" Padding="16">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Col 0, Row 0: Temp -->
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,10,16">
+                            <TextBlock Text="Temperatura CPU" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtCpuTemp" Text="Detectando..." FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Col 1, Row 0: SMART -->
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="0,0,10,16">
+                            <TextBlock Text="Estado SMART" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtSmart" Text="Detectando..." FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Col 2, Row 0: Uptime -->
+                        <StackPanel Grid.Column="2" Grid.Row="0" Margin="0,0,0,16">
+                            <TextBlock Text="Tiempo de Actividad" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtUptime" Text="Detectando..." FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Col 0, Row 1: Local IP -->
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,10,0">
+                            <TextBlock Text="IP Local" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtLocalIp" Text="Detectando..." FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Col 1, Row 1: Public IP -->
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="0,0,10,0">
+                            <TextBlock Text="IP Pública" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtPublicIp" Text="Detectando..." FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Col 2, Row 1: UAC Status -->
+                        <StackPanel Grid.Column="2" Grid.Row="1">
+                            <TextBlock Text="Privilegios Admin" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TxtAdminStatus" Text="SÍ" FontSize="14" FontWeight="SemiBold" Foreground="#40C057" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+            </Grid>
+
+            <!-- Cumulative Stats Card -->
+            <TextBlock Text="Estadísticas de Impacto Cchay" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,10,0,10" />
+            <ui:Card Padding="16" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- RAM statistics -->
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                        <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="28" Foreground="#40C057" Margin="0,0,0,8" />
+                        <TextBlock Text="RAM Liberada Total" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="TxtTotalRamFreed" Text="0 GB" FontSize="20" FontWeight="Bold" Foreground="#40C057" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <!-- Disk statistics -->
+                    <Border Grid.Column="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1,0,1,0" Padding="20,0,20,0">
+                        <StackPanel HorizontalAlignment="Center">
+                            <ui:SymbolIcon Symbol="HardDrive24" FontSize="28" Foreground="#1098AD" Margin="0,0,0,8" />
+                            <TextBlock Text="Basura Eliminada Total" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="TxtTotalDiskFreed" Text="0 GB" FontSize="20" FontWeight="Bold" Foreground="#1098AD" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Optimizations run statistics -->
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                        <ui:SymbolIcon Symbol="Flash24" FontSize="28" Foreground="#FD7E14" Margin="0,0,0,8" />
+                        <TextBlock Text="Optimizaciones Realizadas" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="TxtTotalOptimizations" Text="0" FontSize="20" FontWeight="Bold" Foreground="#FD7E14" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
             <!-- Quick Actions -->
             <StackPanel>
                 <TextBlock Text="Acciones Rápidas" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,10,0,10" />
@@ -140,8 +265,32 @@
                 </UniformGrid>
             </StackPanel>
 
+            <!-- App Self Consumption Badge -->
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="14,10,14,10" Margin="0,20,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal" Grid.Column="0">
+                        <ui:SymbolIcon Symbol="Pulse24" FontSize="18" Foreground="#40C057" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Consumo de Cchay Optimicer (Eficiencia):" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="12.5" />
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
+                        <TextBlock Text="RAM Usada: " FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="TxtAppRam" Text="-- MB" FontSize="12" FontWeight="Bold" Foreground="#40C057" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        
+                        <TextBlock Text="Uso de CPU: " FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="TxtAppCpu" Text="-- %" FontSize="12" FontWeight="Bold" Foreground="#40C057" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <!-- Creator Info -->
-            <TextBlock Text="Desarrollado por Joseph ICV, dzenwertz | Cchay Optimicer © 2026" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,30,0,10" />
+            <TextBlock Text="Desarrollado por Joseph ICV, dzenwertz | Cchay Optimicer © 2026" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Margin="0,20,0,10" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

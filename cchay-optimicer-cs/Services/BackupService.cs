@@ -87,28 +87,34 @@ namespace cchay_optimicer_cs.Services
                 var list = new List<RestorePoint>();
                 try
                 {
-                    var searcher = new ManagementObjectSearcher(@"root\default", "SELECT * FROM SystemRestore");
-                    foreach (ManagementObject obj in searcher.Get())
+                    using (var searcher = new ManagementObjectSearcher(@"root\default", "SELECT * FROM SystemRestore"))
+                    using (var results = searcher.Get())
                     {
-                        var creationTimeStr = obj["CreationTime"]?.ToString() ?? "";
-                        string dateStr = creationTimeStr;
-                        if (creationTimeStr.Length >= 14)
+                        foreach (ManagementObject obj in results)
                         {
-                            string year = creationTimeStr.Substring(0, 4);
-                            string month = creationTimeStr.Substring(4, 2);
-                            string day = creationTimeStr.Substring(6, 2);
-                            string hour = creationTimeStr.Substring(8, 2);
-                            string minute = creationTimeStr.Substring(10, 2);
-                            string second = creationTimeStr.Substring(12, 2);
-                            dateStr = $"{year}-{month}-{day} {hour}:{minute}:{second}";
+                            using (obj)
+                            {
+                                var creationTimeStr = obj["CreationTime"]?.ToString() ?? "";
+                                string dateStr = creationTimeStr;
+                                if (creationTimeStr.Length >= 14)
+                                {
+                                    string year = creationTimeStr.Substring(0, 4);
+                                    string month = creationTimeStr.Substring(4, 2);
+                                    string day = creationTimeStr.Substring(6, 2);
+                                    string hour = creationTimeStr.Substring(8, 2);
+                                    string minute = creationTimeStr.Substring(10, 2);
+                                    string second = creationTimeStr.Substring(12, 2);
+                                    dateStr = $"{year}-{month}-{day} {hour}:{minute}:{second}";
+                                }
+                                
+                                list.Add(new RestorePoint
+                                {
+                                    SequenceNumber = obj["SequenceNumber"] != null ? Convert.ToUInt32(obj["SequenceNumber"]) : 0,
+                                    Description = obj["Description"]?.ToString() ?? "",
+                                    CreationTime = dateStr
+                                });
+                            }
                         }
-                        
-                        list.Add(new RestorePoint
-                        {
-                            SequenceNumber = obj["SequenceNumber"] != null ? Convert.ToUInt32(obj["SequenceNumber"]) : 0,
-                            Description = obj["Description"]?.ToString() ?? "",
-                            CreationTime = dateStr
-                        });
                     }
                 }
                 catch (Exception ex)

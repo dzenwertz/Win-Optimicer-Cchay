@@ -42,6 +42,37 @@
                 </Grid>
             </ui:Card>
 
+            <!-- Smart Auto-RAM Config Card -->
+            <ui:Card Padding="16" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Limpieza Automática Inteligente (Segundo Plano)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
+                    <TextBlock Text="Optimiza la RAM automáticamente cuando se alcance un alto porcentaje de uso." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,12" />
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Activar Limpieza Automática:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="13" />
+                            <CheckBox x:Name="CheckAutoRam" Click="CheckAutoRam_Click" VerticalAlignment="Center" />
+                            
+                            <TextBlock Text="Umbral de Activación:" VerticalAlignment="Center" Margin="28,0,10,0" FontSize="13" />
+                            <ComboBox x:Name="ComboThreshold" Width="80" SelectionChanged="ComboThreshold_SelectionChanged">
+                                <ComboBoxItem Content="70%" Tag="70" />
+                                <ComboBoxItem Content="75%" Tag="75" />
+                                <ComboBoxItem Content="80%" Tag="80" />
+                                <ComboBoxItem Content="85%" Tag="85" />
+                                <ComboBoxItem Content="90%" Tag="90" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <TextBlock x:Name="TxtAutoRamStatus" Grid.Column="1" Text="Desactivado" VerticalAlignment="Center" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    </Grid>
+                </StackPanel>
+            </ui:Card>
+
             <!-- Clean All Button -->
             <ui:Button x:Name="BtnCleanAll" 
                        Appearance="Primary" 

@@ -29,6 +29,27 @@
                 </Grid>
             </ui:Card>
 
+            <!-- Search & Filter Category tabs -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ui:TextBox x:Name="TxtSearch" PlaceholderText="Buscar programas por nombre..." Icon="Search24" TextChanged="TxtSearch_TextChanged" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
+                    <ComboBox x:Name="ComboCategory" Width="150" SelectedIndex="0" SelectionChanged="ComboCategory_SelectionChanged">
+                        <ComboBoxItem Content="Todas las Categorías" />
+                        <ComboBoxItem Content="Navegadores" />
+                        <ComboBoxItem Content="Utilidades" />
+                        <ComboBoxItem Content="Multimedia" />
+                        <ComboBoxItem Content="Comunicación" />
+                        <ComboBoxItem Content="Gaming" />
+                        <ComboBoxItem Content="Runtimes" />
+                        <ComboBoxItem Content="Diagnóstico" />
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
             <!-- Action panel -->
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>

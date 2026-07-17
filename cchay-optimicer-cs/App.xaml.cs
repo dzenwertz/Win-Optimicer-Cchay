@@ -37,7 +37,11 @@ public partial class App : Application
     {
         try
         {
-            string crashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.txt");
+            string crashDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "CchayOptimicer");
+            Directory.CreateDirectory(crashDir);
+            string crashPath = Path.Combine(crashDir, "crash.txt");
             string log = $"[{DateTime.Now}] Crash Exception:\n{ex.ToString()}\n";
             if (ex.InnerException != null)
             {

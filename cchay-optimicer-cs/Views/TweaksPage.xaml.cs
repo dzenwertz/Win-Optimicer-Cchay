@@ -72,6 +72,11 @@ namespace cchay_optimicer_cs.Views
                 {
                     success = await TweakService.UnapplyTweakAsync(Key);
                 }
+
+                if (success)
+                {
+                    MainWindow.Instance?.ShowRebootRequired();
+                }
             }
             catch { }
             finally

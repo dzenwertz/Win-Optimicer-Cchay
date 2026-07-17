@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
@@ -149,6 +150,7 @@ namespace cchay_optimicer_cs.Views
             if (success)
             {
                 ShowToast(isChecked ? "¡Optimizaciones TCP aplicadas con éxito!" : "¡Optimizaciones TCP revertidas por defecto!");
+                MainWindow.Instance?.ShowRebootRequired();
             }
             else
             {
@@ -337,6 +339,99 @@ namespace cchay_optimicer_cs.Views
             if (TxtMessage.Text == message)
             {
                 TxtMessage.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async void BtnRunSpeedTest_Click(object sender, RoutedEventArgs e)
+        {
+            BtnRunSpeedTest.IsEnabled = false;
+            TxtSpeedStatus.Text = "Pinguando...";
+            TxtSpeedStatus.Foreground = Brushes.Orange;
+            ProgSpeedTest.Progress = 0;
+            TxtSpeedValue.Text = "0.0";
+            TxtSpeedPing.Text = "-- ms";
+            TxtSpeedDownload.Text = "-- Mbps";
+
+            try
+            {
+                // Measure Ping
+                int pingTime = 999;
+                using (var ping = new Ping())
+                {
+                    try
+                    {
+                        var reply = await ping.SendPingAsync("1.1.1.1", 1000);
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            pingTime = (int)reply.RoundtripTime;
+                            TxtSpeedPing.Text = $"{pingTime} ms";
+                        }
+                    }
+                    catch
+                    {
+                        TxtSpeedPing.Text = "Fallo";
+                    }
+                }
+
+                // Measure Download Speed
+                TxtSpeedStatus.Text = "Descargando...";
+                TxtSpeedStatus.Foreground = Brushes.Cyan;
+
+                string testUrl = "https://speed.cloudflare.com/__down?bytes=5000000"; // 5MB test file
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(15);
+                    var stopwatch = new Stopwatch();
+                    
+                    stopwatch.Start();
+                    using (var response = await client.GetAsync(testUrl, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        long? totalBytes = response.Content.Headers.ContentLength ?? 5000000;
+                        
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        {
+                            byte[] buffer = new byte[65536]; // 64KB chunks
+                            long totalRead = 0;
+                            int read;
+                            
+                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                totalRead += read;
+                                double progress = (double)totalRead / totalBytes.Value * 100;
+                                
+                                double elapsedSec = stopwatch.Elapsed.TotalSeconds;
+                                double currentMbps = elapsedSec > 0 ? (totalRead * 8.0 / 1024.0 / 1024.0) / elapsedSec : 0;
+
+                                Dispatcher.Invoke(() =>
+                                {
+                                    ProgSpeedTest.Progress = Math.Min(100, progress);
+                                    TxtSpeedValue.Text = $"{currentMbps:F1}";
+                                    TxtSpeedDownload.Text = $"{currentMbps:F1} Mbps";
+                                });
+                            }
+                        }
+                    }
+                    stopwatch.Stop();
+
+                    double finalElapsedSec = stopwatch.Elapsed.TotalSeconds;
+                    double finalMbps = finalElapsedSec > 0 ? (5000000.0 * 8.0 / 1024.0 / 1024.0) / finalElapsedSec : 0;
+
+                    TxtSpeedValue.Text = $"{finalMbps:F1}";
+                    TxtSpeedDownload.Text = $"{finalMbps:F1} Mbps";
+                    TxtSpeedStatus.Text = "Completado";
+                    TxtSpeedStatus.Foreground = (Brush)new BrushConverter().ConvertFromString("#40C057")!;
+                }
+            }
+            catch (Exception ex)
+            {
+                TxtSpeedStatus.Text = "Error";
+                TxtSpeedStatus.Foreground = Brushes.Red;
+                System.Diagnostics.Debug.WriteLine($"Speed test failed: {ex.Message}");
+            }
+            finally
+            {
+                BtnRunSpeedTest.IsEnabled = true;
             }
         }
     }

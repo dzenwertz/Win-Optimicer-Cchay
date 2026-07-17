@@ -38,6 +38,61 @@
                 </Grid>
             </ui:Card>
 
+            <!-- Internet Speed Test Card -->
+            <TextBlock Text="Prueba de Velocidad de Internet" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,10" />
+            <ui:Card Padding="16" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Circular progress ring with needle/number -->
+                    <Grid Width="130" Height="130" Margin="0,0,24,0">
+                        <Ellipse Stroke="{DynamicResource ControlFillColorDefaultBrush}" StrokeThickness="8" />
+                        <ui:ProgressRing x:Name="ProgSpeedTest" Progress="0" Width="130" Height="130" Foreground="#1098AD" />
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock x:Name="TxtSpeedValue" Text="0.0" FontSize="26" FontWeight="Bold" Foreground="#1098AD" HorizontalAlignment="Center" />
+                            <TextBlock Text="Mbps" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Right: Info & Button -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Medidor de Ancho de Banda y Ping" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6" />
+                        <TextBlock Text="Mide la latencia y la velocidad real de descarga de tu conexión a internet para validar el impacto de las optimizaciones." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,12" />
+                        
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Ping -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Ping (Latencia)" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <TextBlock x:Name="TxtSpeedPing" Text="-- ms" FontSize="15" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            </StackPanel>
+
+                            <!-- Descarga -->
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Descarga" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <TextBlock x:Name="TxtSpeedDownload" Text="-- Mbps" FontSize="15" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            </StackPanel>
+
+                            <!-- Estado -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Estado" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <TextBlock x:Name="TxtSpeedStatus" Text="Listo" FontSize="14" FontWeight="SemiBold" Foreground="#1098AD" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
+
+                        <ui:Button x:Name="BtnRunSpeedTest" Content="Iniciar Prueba de Velocidad" Appearance="Primary" Padding="20,10,20,10" HorizontalAlignment="Left" Click="BtnRunSpeedTest_Click" />
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
             <!-- Diagnostics Title -->
             <TextBlock Text="Herramientas de Diagnóstico" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,10" />
 
