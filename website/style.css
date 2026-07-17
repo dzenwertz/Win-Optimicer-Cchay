@@ -87,7 +87,7 @@ h1, h2, h3, h4 {
 .nav-logo-img {
     width: 32px;
     height: 32px;
-    border-radius: 0px;
+    border-radius: 50%;
     border: 1px solid var(--color-purple);
     object-fit: cover;
     box-shadow: 0 0 8px var(--glow-purple);
@@ -458,7 +458,7 @@ h1, h2, h3, h4 {
 .score-circle {
     width: 36px;
     height: 36px;
-    border-radius: 0px;
+    border-radius: 50%;
     border: 2px solid var(--color-green);
     display: flex;
     justify-content: center;
@@ -523,7 +523,7 @@ h1, h2, h3, h4 {
 .ram-circle-outer {
     width: 100px;
     height: 100px;
-    border-radius: 0px;
+    border-radius: 50%;
     border: 3px solid #1e2230;
     border-top: 3px solid var(--color-blue);
     display: flex;
@@ -841,7 +841,7 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 0px;
+    border-radius: 50%;
     border: 2px solid var(--color-purple);
     background-color: rgba(124, 58, 237, 0.05);
     overflow: hidden;
