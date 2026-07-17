@@ -49,23 +49,10 @@ body::before {
     width: 100%;
     height: 100%;
     background-image: 
-        linear-gradient(rgba(30, 34, 48, 0.25) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(30, 34, 48, 0.25) 1px, transparent 1px);
-    background-size: 32px 32px;
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
     z-index: -2;
-    pointer-events: none;
-}
-
-/* Dynamic color gradients in background */
-body::after {
-    content: '';
-    position: absolute;
-    top: 15%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%);
-    z-index: -1;
     pointer-events: none;
 }
 
@@ -270,9 +257,9 @@ h1, h2, h3, h4 {
     width: 560px;
     height: 380px;
     background-color: #0c0f16;
-    border: 1px solid var(--color-purple);
+    border: 1px solid #1e2230;
     border-radius: 0px;
-    box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -317,8 +304,8 @@ h1, h2, h3, h4 {
 }
 
 .ws-dot.active {
-    color: var(--color-purple);
-    background-color: rgba(124, 58, 237, 0.15);
+    color: var(--text-primary);
+    background-color: #1e2230;
     font-weight: bold;
 }
 
