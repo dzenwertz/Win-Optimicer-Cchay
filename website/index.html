@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cchay Software — Programas Transparentes y Libres</title>
+    <meta name="description" content="Descarga Cchay Optimicer y otras herramientas de código abierto diseñadas para mejorar el rendimiento de tu PC de forma transparente y sin publicidad.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="../cchay-optimicer-cs/Assets/cchay_logo.ico" type="image/x-icon">
+</head>
+<body>
+
+    <!-- NAV BAR -->
+    <header class="navbar">
+        <div class="nav-logo">
+            <span class="logo-emoji">⚡</span>
+            <span class="logo-text">Cchay Software</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#proyectos">Catálogo</a>
+            <a href="#filosofia">Filosofía</a>
+            <a href="https://github.com/dzenwertz" target="_blank" class="nav-icon-link">
+                <svg class="git-icon" viewBox="0 0 16 16" width="20" height="20"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                GitHub
+            </a>
+            <a href="https://www.youtube.com" target="_blank" class="nav-btn-yt">Mi Canal de YouTube</a>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="badge-status">CÓDIGO ABIERTO & GRATUITO</div>
+            <h1 class="hero-title">Herramientas limpias. Rendimiento honesto.</h1>
+            <p class="hero-description">
+                Hice este software porque me cansé de los optimizadores comerciales que prometen milagros pero terminan llenando tu PC de publicidad, telemetría o ralentizándola más. Mis herramientas son gratuitas, transparentes y puedes ver todo su código.
+            </p>
+            <div class="hero-actions">
+                <a href="https://github.com/dzenwertz/Win-Optimicer-Cchay/releases/latest" class="btn-primary">
+                    <span class="btn-icon">📥</span>
+                    Descargar Cchay Optimicer (.MSI)
+                </a>
+                <a href="https://github.com/dzenwertz/Win-Optimicer-Cchay" target="_blank" class="btn-secondary">
+                    Ver Código en GitHub
+                </a>
+            </div>
+            <div class="hero-meta">
+                <span>Versión: <strong>1.0.0</strong></span>
+                <span class="dot">•</span>
+                <span>Tamaño: <strong>~60.6 MB</strong></span>
+                <span class="dot">•</span>
+                <span>OS: <strong>Windows 10 / 11</strong></span>
+            </div>
+        </div>
+
+        <!-- SIMULATOR PANEL -->
+        <div class="simulator-wrapper">
+            <div class="simulator-window">
+                <!-- Windows Title Bar -->
+                <div class="win-titlebar">
+                    <div class="win-logo-group">
+                        <span class="win-app-icon">⚡</span>
+                        <span class="win-title">Cchay Optimicer (Simulador Web)</span>
+                    </div>
+                    <div class="win-controls">
+                        <div class="win-btn win-min"></div>
+                        <div class="win-btn win-max"></div>
+                        <div class="win-btn win-close"></div>
+                    </div>
+                </div>
+
+                <!-- App Workspace -->
+                <div class="app-container">
+                    <!-- Navigation Sidebar -->
+                    <aside class="app-sidebar">
+                        <div class="sidebar-item active" data-target="page-dashboard">
+                            <span class="sb-icon">🏠</span> Dashboard
+                        </div>
+                        <div class="sidebar-item" data-target="page-ram">
+                            <span class="sb-icon">💻</span> Optimizar RAM
+                        </div>
+                        <div class="sidebar-item" data-target="page-disk">
+                            <span class="sb-icon">💾</span> Limpiar Disco
+                        </div>
+                        <div class="sidebar-footer">
+                            Desarrollado por Joseph
+                        </div>
+                    </aside>
+
+                    <!-- Main App Content -->
+                    <main class="app-main-pane">
+
+                        <!-- PAGE: DASHBOARD -->
+                        <div id="page-dashboard" class="app-page active">
+                            <div class="dash-welcome">
+                                <h3 class="page-title">Bienvenido, Usuario</h3>
+                                <p class="page-subtitle">Estado del sistema en tiempo real.</p>
+                            </div>
+
+                            <div class="dash-stats-grid">
+                                <div class="dash-card">
+                                    <span class="card-icon">🧠</span>
+                                    <div class="card-info">
+                                        <span class="card-label">Memoria RAM</span>
+                                        <span class="card-val" id="sim-ram-txt">5.8 GB / 16.0 GB</span>
+                                    </div>
+                                    <div class="card-progress"><div class="progress-bar" id="sim-ram-progress" style="width: 36%;"></div></div>
+                                </div>
+                                <div class="dash-card">
+                                    <span class="card-icon">💿</span>
+                                    <div class="card-info">
+                                        <span class="card-label">Disco (C:)</span>
+                                        <span class="card-val">240 GB / 500 GB</span>
+                                    </div>
+                                    <div class="card-progress"><div class="progress-bar" style="width: 48%;"></div></div>
+                                </div>
+                            </div>
+
+                            <div class="health-card">
+                                <div class="health-score-container">
+                                    <div class="score-circle">
+                                        <span class="score-number">95</span>
+                                    </div>
+                                    <div class="health-info">
+                                        <h4>Salud del Sistema: Excelente</h4>
+                                        <p>Todas las métricas y servicios recomendados están optimizados.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dash-actions">
+                                <button class="btn-win-primary" id="btn-quick-clean">Limpieza Rápida</button>
+                            </div>
+                        </div>
+
+                        <!-- PAGE: RAM -->
+                        <div id="page-ram" class="app-page">
+                            <h3 class="page-title">Optimizar Memoria RAM</h3>
+                            <p class="page-subtitle">Libera el Working Set, Standby List y Caché de archivos de Windows.</p>
+
+                            <div class="ram-gauge-container">
+                                <div class="ram-circle-outer">
+                                    <div class="ram-circle-inner">
+                                        <span class="ram-percent" id="ram-gauge-val">36%</span>
+                                        <span class="ram-lbl">En Uso</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="console-box" id="ram-console">
+                                <div class="console-header">Salida de Consola Técnica</div>
+                                <div class="console-content" id="ram-console-content">
+                                    [Listo] Esperando comando...
+                                </div>
+                            </div>
+
+                            <div class="dash-actions">
+                                <button class="btn-win-primary" id="btn-clean-ram">Optimizar RAM Ahora</button>
+                            </div>
+                        </div>
+
+                        <!-- PAGE: DISK -->
+                        <div id="page-disk" class="app-page">
+                            <h3 class="page-title">Limpiador de Archivos de Disco</h3>
+                            <p class="page-subtitle">Selecciona los elementos que deseas escanear y eliminar de forma segura.</p>
+
+                            <div class="disk-targets-list">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="checkmark"></span>
+                                    <div class="cb-label">
+                                        <strong>Archivos Temporales</strong>
+                                        <p>Archivos residuales generados por el sistema (Temp, %Temp%).</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="checkmark"></span>
+                                    <div class="cb-label">
+                                        <strong>Papelera de Reciclaje</strong>
+                                        <p>Vacía de forma permanente los archivos eliminados del disco.</p>
+                                    </div>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="checkmark"></span>
+                                    <div class="cb-label">
+                                        <strong>Caché de Navegadores</strong>
+                                        <p>Limpia archivos pesados temporales de Chrome, Edge y Firefox.</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="console-box" id="disk-console">
+                                <div class="console-header">Detalle del Disco</div>
+                                <div class="console-content" id="disk-console-content">
+                                    [Analizado] Se pueden liberar aproximadamente 1.4 GB de espacio.
+                                </div>
+                            </div>
+
+                            <div class="dash-actions">
+                                <button class="btn-win-primary" id="btn-clean-disk">Limpiar Disco</button>
+                            </div>
+                        </div>
+
+                    </main>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROYECTOS / TIENDA SECTION -->
+    <section id="proyectos" class="catalog-section">
+        <h2 class="section-title">Mi Catálogo de Programas</h2>
+        <p class="section-subtitle">Herramientas creadas para solucionar problemas reales sin letra pequeña.</p>
+
+        <div class="catalog-grid">
+            <!-- Card: Cchay Optimicer -->
+            <div class="catalog-card">
+                <div class="card-header">
+                    <span class="card-status active">Estable v1.0.0</span>
+                    <span class="card-cat">Sistemas</span>
+                </div>
+                <h3 class="card-title">Cchay Optimicer</h3>
+                <p class="card-desc">
+                    Limpieza inteligente de RAM (5 métodos), borrado de temporales, control de servicios inútiles, tweaks de registro avanzados y analizador de latencia DNS.
+                </p>
+                <div class="card-tech-meta">
+                    <span>Tamaño: 60.6 MB</span>
+                    <span>Lenguaje: C# / WPF</span>
+                </div>
+                <div class="card-actions">
+                    <a href="https://github.com/dzenwertz/Win-Optimicer-Cchay/releases/latest" class="btn-card-download">Descargar MSI</a>
+                    <a href="https://github.com/dzenwertz/Win-Optimicer-Cchay" target="_blank" class="btn-card-git">GitHub</a>
+                </div>
+            </div>
+
+            <!-- Card: Cchay Dotfiles -->
+            <div class="catalog-card">
+                <div class="card-header">
+                    <span class="card-status active">Estable</span>
+                    <span class="card-cat">Configuraciones</span>
+                </div>
+                <h3 class="card-title">Cchay Dotfiles</h3>
+                <p class="card-desc">
+                    Mis configuraciones personales optimizadas para entornos de desarrollo en Windows y Linux (VS Code, terminales, PowerShell y atajos del teclado).
+                </p>
+                <div class="card-tech-meta">
+                    <span>Tamaño: ~1.2 MB</span>
+                    <span>Formato: Config / Scripts</span>
+                </div>
+                <div class="card-actions">
+                    <a href="https://github.com/dzenwertz" target="_blank" class="btn-card-download">Ver Scripts</a>
+                    <a href="https://github.com/dzenwertz" target="_blank" class="btn-card-git">GitHub</a>
+                </div>
+            </div>
+
+            <!-- Card: Cchay NetBench -->
+            <div class="catalog-card placeholder-card">
+                <div class="card-header">
+                    <span class="card-status developing">En Desarrollo</span>
+                    <span class="card-cat">Redes</span>
+                </div>
+                <h3 class="card-title">Cchay NetBench</h3>
+                <p class="card-desc">
+                    Próxima herramienta interactiva para monitorear y optimizar la pérdida de paquetes y la estabilidad de la conexión Wi-Fi/Ethernet en juegos en línea.
+                </p>
+                <div class="card-tech-meta">
+                    <span>Lanzamiento: Próximamente</span>
+                    <span>Lenguaje: C#</span>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-card-disabled" disabled>Próximamente</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FILOSOFIA / BIO SECTION -->
+    <section id="filosofia" class="about-section">
+        <div class="about-grid">
+            <div class="about-text">
+                <div class="about-badge">FILOSOFÍA DE TRABAJO</div>
+                <h2>¿Por qué hacer esto gratis?</h2>
+                <p>
+                    Comencé a desarrollar programas porque quería resolver mis propias necesidades en mi PC sin tener que pagar licencias abusivas de softwares que te espían. Creo que el código abierto es la forma en la que la comunidad de tecnología crece: compartiendo, aprendiendo y ayudándose mutuamente.
+                </p>
+                <p>
+                    Al compartir el código de mis optimizadores en GitHub y hacer videos en mi canal de YouTube, no solo busco que tu PC funcione mejor de forma gratuita; también busco motivar a otros desarrolladores a programar herramientas transparentes que respeten al usuario final.
+                </p>
+            </div>
+            <div class="creator-card">
+                <div class="creator-avatar-container">
+                    <img src="avatar.png" class="creator-img" alt="Joseph Logo" onerror="this.style.display='none'; document.getElementById('fallback-avatar').style.display='block';">
+                    <div id="fallback-avatar" class="creator-avatar">👨‍💻</div>
+                </div>
+                <h3>Joseph ICV & dzenwertz</h3>
+                <p class="creator-role">Creador de Cchay Software & Desarrollador</p>
+                <p class="creator-bio">
+                    Entusiasta del hardware, la programación nativa en C# y la optimización de sistemas operativos. Subo videos a YouTube explicando cómo funcionan los componentes internos de Windows y la informática en general.
+                </p>
+                <a href="https://github.com/dzenwertz" target="_blank" class="btn-creator-git">Mi GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 Cchay Software. Hecho con orgullo por Joseph ICV y dzenwertz.</p>
+        <p class="footer-license">Este sitio y sus proyectos son distribuidos bajo la Licencia GNU GPL-3.0 de código libre.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
