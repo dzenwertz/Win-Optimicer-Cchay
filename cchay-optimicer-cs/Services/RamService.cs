@@ -1,8 +1,5 @@
-// ==========================================
-// Cchay Optimicer - System Optimizer for Windows
-// © 2026 Joseph ICV & dzenwertz. All rights reserved.
-// Licensed under the GNU General Public License v3.0 (GPL-3.0).
-// ==========================================
+// Hecho con cariño por Joseph ICV y dzenwertz para ayudar a la comunidad.
+// Código libre bajo licencia GPL-3.0. ¡Siéntete libre de mejorarlo y colaborar!
 
 using System;
 using System.Diagnostics;
