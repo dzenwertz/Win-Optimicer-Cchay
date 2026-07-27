@@ -109,6 +109,13 @@ namespace cchay_optimicer_cs.Services
                         Risk = "moderate"
                     },
                     new Tweak {
+                        Key = "cool-quiet-laptop",
+                        Name = "Modo Laptop Fresca y Silenciosa (Estudio / Dev)",
+                        Description = "Optimiza la gestión energética para mantener temperaturas bajas, silenciar ventiladores y ahorrar batería mientras programas o estudias.\n⚠️ Consecuencia: El rendimiento gráfico en juegos 3D pesados será menor mientras esté activo.",
+                        Category = "performance",
+                        Risk = "safe"
+                    },
+                    new Tweak {
                         Key = "optimize-multimedia",
                         Name = "Optimizar Perfil Multimedia",
                         Description = "Ajusta prioridades de GPU y CPU para juegos y contenido multimedia.\n⚠️ Consecuencia: Tareas de fondo no relacionadas con juegos (compiladores, servidores locales) podrían ralentizarse temporalmente.",
@@ -371,6 +378,11 @@ namespace cchay_optimicer_cs.Services
                         case "ultimate-performance":
                             RunCmd("powercfg", "-duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61");
                             RunCmd("powercfg", "-setactive e9a42b02-d5df-448d-aa00-03f14749eb61");
+                            break;
+
+                        case "cool-quiet-laptop":
+                            RunCmd("powercfg", "-setactive 381b4222-f694-41f0-9685-ff5bb260df2e"); // Balanced plan
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\54533251-825c-42af-9646-d08a0d4c9873\be337238-0d82-4146-a960-4f3749d470c7", "Attributes", 2, RegistryValueKind.DWord);
                             break;
 
                         case "optimize-multimedia":

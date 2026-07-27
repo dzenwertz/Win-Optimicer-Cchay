@@ -102,7 +102,7 @@ namespace cchay_optimicer_cs.Services
             }
         };
 
-        private static void RunPowerShell(string script)
+        private static bool RunPowerShell(string script)
         {
             try
             {
@@ -110,17 +110,24 @@ namespace cchay_optimicer_cs.Services
                 var psi = new ProcessStartInfo
                 {
                     FileName = "powershell.exe",
-                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {base64Script}",
+                    Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {base64Script}",
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                var proc = Process.Start(psi);
-                proc?.WaitForExit(15000);
+                using var proc = Process.Start(psi);
+                if (proc == null) return false;
+                if (!proc.WaitForExit(15000))
+                {
+                    proc.Kill(true);
+                    return false;
+                }
+                return proc.ExitCode == 0;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Failed to run PowerShell script: " + ex.Message);
+                return false;
             }
         }
 
@@ -181,7 +188,7 @@ namespace cchay_optimicer_cs.Services
                             Get-AppxPackage -Name '{pkg}' -AllUsers -ErrorAction SilentlyContinue | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
                             Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object {{ $_.PackageName -like '*{pkg}*' }} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
                         ";
-                        RunPowerShell(script);
+                        if (!RunPowerShell(script)) return false;
                     }
                     return true;
                 }
@@ -217,8 +224,7 @@ namespace cchay_optimicer_cs.Services
                         }
                         Set-ItemProperty -Path $registryPath -Name 'DisableFileSyncNGSC' -Value 1 -Force -ErrorAction SilentlyContinue
                     ";
-                    RunPowerShell(script);
-                    return true;
+                    return RunPowerShell(script);
                 }
                 catch
                 {
@@ -237,8 +243,7 @@ namespace cchay_optimicer_cs.Services
                         Get-AppxPackage -Name 'MicrosoftWindows.Client.WebExperience' -AllUsers -ErrorAction SilentlyContinue | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
                         Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object {{ $_.PackageName -like '*MicrosoftWindows.Client.WebExperience*' }} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
                     ";
-                    RunPowerShell(script);
-                    return true;
+                    return RunPowerShell(script);
                 }
                 catch
                 {

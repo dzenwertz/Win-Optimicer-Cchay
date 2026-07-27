@@ -208,6 +208,9 @@ namespace cchay_optimicer_cs.Views
             TxtOptimizeBtn.Text = "Limpiando...";
             TxtResult.Visibility = Visibility.Collapsed;
             PanelTechProgress.Visibility = Visibility.Collapsed;
+            PanelQuickProgress.Visibility = Visibility.Visible;
+            ProgQuickClean.Value = 0;
+            TxtQuickFreedLive.Text = "0 MB liberados";
             _timer?.Stop();
 
             try
@@ -215,21 +218,41 @@ namespace cchay_optimicer_cs.Views
                 // Create backup first
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
+                    TxtQuickProgress.Text = "Creando punto de restauración...";
+                    ProgQuickClean.Value = 5;
                     await BackupService.CreateRestorePointAsync("Cchay Quick Optimize");
                 }
 
-                // Clean RAM
-                long ramFreed = await RamService.CleanAll();
+                // Clean RAM with progress
+                long ramFreed = await RamService.CleanAllWithProgressAsync((stepText, percent, bytesSoFar) =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        TxtQuickProgress.Text = stepText;
+                        ProgQuickClean.Value = 5 + (percent * 0.7); // 5% to 75%
+                        double liveMB = bytesSoFar / 1024.0 / 1024.0;
+                        TxtQuickFreedLive.Text = $"{liveMB:F0} MB liberados";
+                    });
+                });
                 double ramFreedMB = ramFreed / 1024.0 / 1024.0;
 
                 // Clean select temp disk files
+                TxtQuickProgress.Text = "Limpiando archivos temporales y papelera...";
+                ProgQuickClean.Value = 85;
                 double diskFreedMB = 0;
                 var targets = DiskService.GetTargets().Where(t => t.Key == "temp" || t.Key == "windowsTemp" || t.Key == "recycleBin" || t.Key == "thumbnails");
                 foreach (var t in targets)
                 {
                     var processed = await DiskService.ProcessTargetAsync(t, delete: true);
                     diskFreedMB += processed.SizeMB;
+                    double liveMB = ramFreedMB + diskFreedMB;
+                    TxtQuickFreedLive.Text = $"{liveMB:F0} MB liberados";
+                    await Task.Delay(150);
                 }
+
+                ProgQuickClean.Value = 100;
+                TxtQuickProgress.Text = "¡Limpieza completada!";
+                await Task.Delay(400);
 
                 // Update cumulative stats
                 SettingsService.Settings.TotalBytesRamFreed += (ulong)ramFreed;
@@ -240,6 +263,7 @@ namespace cchay_optimicer_cs.Views
                 double totalFreed = ramFreedMB + diskFreedMB;
                 TxtResult.Text = $"✨ ¡Limpieza rápida completada! Se liberaron {totalFreed:F0} MB de RAM y disco.";
                 TxtResult.Visibility = Visibility.Visible;
+                PanelQuickProgress.Visibility = Visibility.Collapsed;
 
                 await RefreshMemoryInfoAsync();
                 await RefreshDiskInfoAsync();
@@ -249,6 +273,7 @@ namespace cchay_optimicer_cs.Views
             {
                 TxtResult.Text = "⚠️ Hubo un error durante la limpieza rápida.";
                 TxtResult.Visibility = Visibility.Visible;
+                PanelQuickProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Optimization error: {ex.Message}");
             }
             finally

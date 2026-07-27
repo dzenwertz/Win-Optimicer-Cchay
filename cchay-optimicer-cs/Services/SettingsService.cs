@@ -12,10 +12,16 @@ namespace cchay_optimicer_cs.Services
         public ulong TotalBytesRamFreed { get; set; } = 0;
         public double TotalMbDiskFreed { get; set; } = 0;
         public int TotalOptimizationsRun { get; set; } = 0;
-        public bool MinimizeToTray { get; set; } = false;
+        public bool MinimizeToTray { get; set; } = true;
         public bool DailyMaintenanceEnabled { get; set; } = false;
         public string DailyMaintenanceTime { get; set; } = "03:00";
         public DateTime LastDailyMaintenanceDate { get; set; } = DateTime.MinValue;
+        public bool GamerModeEnabled { get; set; } = false;
+        public List<string> GamerProcesses { get; set; } = new List<string> { "csgo", "cs2", "valorant", "fortnite", "leagueoflegends", "gta5" };
+        public bool DevModeEnabled { get; set; } = false;
+        public List<string> DevProcesses { get; set; } = new List<string> { "code", "devenv", "idea64", "rider64", "androidstudio64", "dotnet", "node", "python", "git" };
+        public bool WidgetEnabled { get; set; } = false;
+        public bool AntiStutterEnabled { get; set; } = true;
     }
 
     public static class SettingsService

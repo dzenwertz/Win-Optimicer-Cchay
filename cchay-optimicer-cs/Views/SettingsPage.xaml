@@ -28,7 +28,7 @@
                     
                     <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <ui:SymbolIcon Symbol="Glance24" FontSize="20" Foreground="{DynamicResource AccentTextWritableBrush}" Margin="0,0,8,0" />
+                            <ui:SymbolIcon Symbol="Desktop24" FontSize="20" Foreground="{DynamicResource AccentTextWritableBrush}" Margin="0,0,8,0" />
                             <TextBlock Text="Minimizar a la Bandeja del Sistema" FontSize="14.5" FontWeight="SemiBold" />
                         </StackPanel>
                         <TextBlock Text="Cuando se minimiza o cierra la ventana principal, el optimizador continuará ejecutándose de forma invisible en la bandeja de sistema (System Tray)." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
@@ -82,7 +82,7 @@
                         
                         <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                <ui:SymbolIcon Symbol="Flash24" FontSize="20" Foreground="#FD7E14" Margin="0,0,8,0" />
+                                <ui:SymbolIcon Symbol="Pulse24" FontSize="20" Foreground="#FD7E14" Margin="0,0,8,0" />
                                 <TextBlock Text="Mantenimiento Diario Automático" FontSize="14.5" FontWeight="SemiBold" />
                             </StackPanel>
                             <TextBlock Text="Programa una optimización completa en segundo plano (Modo Técnico) a una hora específica del día para mantener el sistema óptimo de forma permanente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
@@ -125,6 +125,110 @@
                     </StackPanel>
                     
                     <ui:ToggleSwitch x:Name="ToggleAutoRestore" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleAutoRestore_Changed" Unchecked="ToggleAutoRestore_Changed" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Gamer Mode CPU Priority Card -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="Games24" FontSize="20" Foreground="#F59E0B" Margin="0,0,8,0" />
+                            <TextBlock Text="Prioridad CPU Automática Modo Gamer" FontSize="14.5" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Detecta ejecutables de juegos en tiempo real e incrementa la prioridad de CPU a Alta (High) automáticamente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    
+                    <ui:ToggleSwitch x:Name="ToggleGamerMode" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleGamerMode_Changed" Unchecked="ToggleGamerMode_Changed" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Developer Mode CPU Priority Card -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="20" Foreground="#1098AD" Margin="0,0,8,0" />
+                            <TextBlock Text="Prioridad CPU Automática Modo Desarrollador / Estudiante" FontSize="14.5" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Detecta editores de código e IDEs (VS Code, Visual Studio, Android Studio, IntelliJ, Node, Python) y optimiza su prioridad sin elevar el consumo general." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    
+                    <ui:ToggleSwitch x:Name="ToggleDevMode" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleDevMode_Changed" Unchecked="ToggleDevMode_Changed" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Anti-Stuttering Engine Card -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="Flash24" FontSize="20" Foreground="#E03131" Margin="0,0,8,0" />
+                            <TextBlock Text="Motor Anti-Stuttering (Purga Proactiva de Memoria)" FontSize="14.5" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Previene tirones y caídas de FPS purgando automáticamente la memoria Standby antes de que se inicien juegos o programas pesados." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    
+                    <ui:ToggleSwitch x:Name="ToggleAntiStutter" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleAntiStutter_Changed" Unchecked="ToggleAntiStutter_Changed" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Desktop Widget Card -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="Desktop24" FontSize="20" Foreground="#38BDF8" Margin="0,0,8,0" />
+                            <TextBlock Text="Widget Flotante de Escritorio" FontSize="14.5" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Muestra un widget flotante siempre visible en el escritorio con medidor de RAM y botón de limpieza rápida." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    
+                    <ui:ToggleSwitch x:Name="ToggleWidget" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleWidget_Changed" Unchecked="ToggleWidget_Changed" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Creator Info Card -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="Person24" FontSize="20" Foreground="{DynamicResource AccentTextWritableBrush}" Margin="0,0,8,0" />
+                            <TextBlock Text="Desarrollador y Creador" FontSize="14.5" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <TextBlock Text="Cchay Optimicer fue desarrollado por Joseph Ivan Cachay Vargas. Es software libre, gratuito y transparente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    
+                    <ui:Button Grid.Column="1" Content="Visitar mi GitHub" Click="BtnGitHub_Click" VerticalAlignment="Center">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="OpenFolder24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
                 </Grid>
             </ui:Card>
         </StackPanel>

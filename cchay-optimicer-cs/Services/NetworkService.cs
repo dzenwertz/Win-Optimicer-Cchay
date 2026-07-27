@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -61,7 +62,7 @@ namespace cchay_optimicer_cs.Services
             }
         }
 
-        private static void RunPowerShell(string script)
+        private static bool RunPowerShell(string script)
         {
             try
             {
@@ -69,17 +70,24 @@ namespace cchay_optimicer_cs.Services
                 var psi = new ProcessStartInfo
                 {
                     FileName = "powershell.exe",
-                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -EncodedCommand {base64Script}",
+                    Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand {base64Script}",
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                var proc = Process.Start(psi);
-                proc?.WaitForExit(15000);
+                using var proc = Process.Start(psi);
+                if (proc == null) return false;
+                if (!proc.WaitForExit(15000))
+                {
+                    proc.Kill(true);
+                    return false;
+                }
+                return proc.ExitCode == 0;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Failed to run PowerShell script: " + ex.Message);
+                return false;
             }
         }
 
@@ -133,17 +141,19 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
+                    if (servers is null || servers.Length is < 1 or > 2 || servers.Any(s => !IPAddress.TryParse(s, out _)))
+                        return false;
+
                     string serverStr = string.Join(",", servers.Select(s => $"'{s}'"));
                     string script = $@"
+                        $ErrorActionPreference = 'Stop'
                         $adapters = Get-NetAdapter | Where-Object {{ $_.Status -eq 'Up' }}
-                        if ($adapters) {{
-                            foreach ($a in $adapters) {{
-                                Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ServerAddresses ({serverStr}) -ErrorAction SilentlyContinue
-                            }}
+                        if (-not $adapters) {{ exit 2 }}
+                        foreach ($a in $adapters) {{
+                            Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ServerAddresses ({serverStr}) -ErrorAction Stop
                         }}
                     ";
-                    RunPowerShell(script);
-                    return true;
+                    return RunPowerShell(script);
                 }
                 catch
                 {
@@ -159,15 +169,14 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     string script = @"
+                        $ErrorActionPreference = 'Stop'
                         $adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
-                        if ($adapters) {
-                            foreach ($a in $adapters) {
-                                Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ResetServerAddresses -ErrorAction SilentlyContinue
-                            }
+                        if (-not $adapters) { exit 2 }
+                        foreach ($a in $adapters) {
+                            Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ResetServerAddresses -ErrorAction Stop
                         }
                     ";
-                    RunPowerShell(script);
-                    return true;
+                    return RunPowerShell(script);
                 }
                 catch
                 {
@@ -182,9 +191,7 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
-                    string script = "Clear-DnsClientCache";
-                    RunPowerShell(script);
-                    return true;
+                    return RunPowerShell("$ErrorActionPreference = 'Stop'; Clear-DnsClientCache -ErrorAction Stop");
                 }
                 catch
                 {
@@ -200,25 +207,57 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     string script = enabled ? @"
-                        netsh int tcp set global autotuninglevel=normal 2>$null
-                        netsh int tcp set global rss=enabled 2>$null
-                        netsh int tcp set global chimney=enabled 2>$null
-                        netsh int tcp set global dca=enabled 2>$null
-                        netsh int tcp set global netdma=enabled 2>$null
-                        netsh int tcp set global ecncapability=enabled 2>$null
-                        netsh int tcp set global timestamps=disabled 2>$null
+                        netsh int tcp set global autotuninglevel=normal; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global rss=enabled; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global ecncapability=enabled; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global timestamps=disabled; if ($LASTEXITCODE) { exit $LASTEXITCODE }
                     " : @"
-                        netsh int tcp set global autotuninglevel=normal 2>$null
-                        netsh int tcp set global rss=default 2>$null
-                        netsh int tcp set global chimney=default 2>$null
-                        netsh int tcp set global dca=default 2>$null
-                        netsh int tcp set global netdma=default 2>$null
-                        netsh int tcp set global ecncapability=default 2>$null
-                        netsh int tcp set global timestamps=default 2>$null
+                        netsh int tcp set global autotuninglevel=normal; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global rss=default; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global ecncapability=default; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+                        netsh int tcp set global timestamps=default; if ($LASTEXITCODE) { exit $LASTEXITCODE }
                     ";
-                    RunPowerShell(script);
+                    if (!RunPowerShell(script)) return false;
                     SaveNetworkState(new NetworkState { TcpTweaksEnabled = enabled });
                     return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+        }
+
+        public static Task<bool> ApplyQosPoliciesAsync()
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    string script = @"
+                        New-NetQosPolicy -Name 'CchayGamingQoS' -AppPathNameMatchCondition '*cs2.exe*' -ThrottleRateActionBitsPerSecond 0 -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
+                        New-NetQosPolicy -Name 'CchayDiscordQoS' -AppPathNameMatchCondition '*Discord.exe*' -ThrottleRateActionBitsPerSecond 0 -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
+                    ";
+                    return RunPowerShell(script);
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+        }
+
+        public static Task<bool> RemoveQosPoliciesAsync()
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    string script = @"
+                        Remove-NetQosPolicy -Name 'CchayGamingQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
+                        Remove-NetQosPolicy -Name 'CchayDiscordQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
+                    ";
+                    return RunPowerShell(script);
                 }
                 catch
                 {

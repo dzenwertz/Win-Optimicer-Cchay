@@ -54,6 +54,7 @@ namespace cchay_optimicer_cs
 
         public static MainWindow? Instance { get; private set; }
         private Forms.NotifyIcon? _notifyIcon;
+        private WidgetWindow? _widgetWindow;
         private bool _isExitingFromTray = false;
 
         public MainWindow()
@@ -65,7 +66,25 @@ namespace cchay_optimicer_cs
             RootNavigation.SetPageService(new SimplePageService());
 
             Loaded += MainWindow_Loaded;
-            InitializeTrayIcon();
+        }
+
+        public void SetWidgetVisible(bool visible)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (visible)
+                {
+                    if (_widgetWindow == null)
+                    {
+                        _widgetWindow = new WidgetWindow();
+                    }
+                    _widgetWindow.Show();
+                }
+                else
+                {
+                    _widgetWindow?.Hide();
+                }
+            });
         }
 
         private void Log(string msg)
@@ -100,6 +119,7 @@ namespace cchay_optimicer_cs
                         Verb = "runas" // This triggers UAC elevation prompt
                     };
                     
+                    _notifyIcon?.Dispose();
                     Process.Start(processInfo);
                     Application.Current.Shutdown();
                     return;
@@ -116,8 +136,15 @@ namespace cchay_optimicer_cs
                 AdminWarningBar.Visibility = Visibility.Collapsed;
             }
 
+            InitializeTrayIcon();
+
             // Start background smart RAM & maintenance service
             BackgroundMaintenanceService.Initialize();
+
+            if (SettingsService.Settings.WidgetEnabled)
+            {
+                SetWidgetVisible(true);
+            }
 
             // Default Page
             Navigate(typeof(DashboardPage));
@@ -191,6 +218,38 @@ namespace cchay_optimicer_cs
             // Hook closing and state changed events
             Closing += MainWindow_Closing;
             StateChanged += MainWindow_StateChanged;
+
+            // Timer to keep tray status updated with live RAM usage
+            var trayTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            trayTimer.Tick += (s, e) => UpdateTrayStatus(menu);
+            trayTimer.Start();
+            UpdateTrayStatus(menu);
+        }
+
+        private void UpdateTrayStatus(Forms.ContextMenuStrip menu)
+        {
+            try
+            {
+                var mem = RamService.GetMemoryUsage();
+                double freeGB = mem.FreeBytes / 1024.0 / 1024.0 / 1024.0;
+                string status = $"Cchay Optimicer — {mem.PercentUsed}% RAM Usada ({freeGB:F1} GB Libres)";
+                
+                if (_notifyIcon != null)
+                {
+                    // NotifyIcon.Text max length is 63 chars
+                    string shortText = $"Cchay Optimicer: {mem.PercentUsed}% RAM ({freeGB:F1}GB libre)";
+                    _notifyIcon.Text = shortText.Length > 63 ? shortText.Substring(0, 63) : shortText;
+                }
+
+                if (menu.Items.Count > 0 && menu.Items[0] is Forms.ToolStripMenuItem item)
+                {
+                    item.Text = $"Abrir ({mem.PercentUsed}% RAM Usada)";
+                }
+            }
+            catch { }
         }
 
         public void RestoreWindow()
@@ -213,7 +272,8 @@ namespace cchay_optimicer_cs
             {
                 e.Cancel = true;
                 Hide();
-                _notifyIcon?.ShowBalloonTip(3000, "Cchay Optimicer", "La aplicación sigue ejecutándose en segundo plano.", Forms.ToolTipIcon.Info);
+                RamService.TrimAppWorkingSet(); // Shrink RAM usage to ~5MB when minimized!
+                _notifyIcon?.ShowBalloonTip(3000, "Cchay Optimicer (Modo Ultra-Ligero)", "Ejecutándose en segundo plano con consumo mínimo de RAM.", Forms.ToolTipIcon.Info);
             }
             else
             {
@@ -226,6 +286,7 @@ namespace cchay_optimicer_cs
             if (WindowState == WindowState.Minimized && SettingsService.Settings.MinimizeToTray)
             {
                 Hide();
+                RamService.TrimAppWorkingSet(); // Shrink RAM usage to ~5MB when minimized!
             }
         }
 

@@ -83,10 +83,22 @@ namespace cchay_optimicer_cs.Views
             BtnCleanAll.IsEnabled = false;
             TxtCleanAll.Text = "Limpiando RAM...";
             TxtFreedToast.Visibility = Visibility.Collapsed;
+            PanelRamCleanProgress.Visibility = Visibility.Visible;
+            ProgRamClean.Value = 0;
+            TxtRamFreedLive.Text = "0 MB liberados";
 
             try
             {
-                long freedBytes = await RamService.CleanAll();
+                long freedBytes = await RamService.CleanAllWithProgressAsync((stepText, percent, bytesSoFar) =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        TxtRamProgressStep.Text = stepText;
+                        ProgRamClean.Value = percent;
+                        double liveMB = bytesSoFar / 1024.0 / 1024.0;
+                        TxtRamFreedLive.Text = $"{liveMB:F0} MB liberados";
+                    });
+                });
                 double freedMB = freedBytes / 1024.0 / 1024.0;
 
                 // Save stats
@@ -96,6 +108,7 @@ namespace cchay_optimicer_cs.Views
 
                 TxtFreedToast.Text = $"✨ Se liberaron aproximadamente {freedMB:F0} MB de RAM.";
                 TxtFreedToast.Visibility = Visibility.Visible;
+                PanelRamCleanProgress.Visibility = Visibility.Collapsed;
 
                 await RefreshMemoryInfoAsync();
             }
@@ -103,6 +116,7 @@ namespace cchay_optimicer_cs.Views
             {
                 TxtFreedToast.Text = "⚠️ Hubo un error al optimizar la memoria.";
                 TxtFreedToast.Visibility = Visibility.Visible;
+                PanelRamCleanProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Error cleaning RAM: {ex.Message}");
             }
             finally
@@ -125,30 +139,43 @@ namespace cchay_optimicer_cs.Views
                 {
                     long freedBytes = 0;
                     TextBlock? statusLabel = null;
+                    Wpf.Ui.Controls.ProgressRing? ring = null;
 
                     switch (areaKey)
                     {
                         case "workingSet":
+                            ring = Ring_workingSet;
+                            if (ring != null) ring.Visibility = Visibility.Visible;
                             freedBytes = await RamService.CleanWorkingSet();
                             statusLabel = TxtFreed_workingSet;
                             break;
                         case "standby":
+                            ring = Ring_standby;
+                            if (ring != null) ring.Visibility = Visibility.Visible;
                             freedBytes = await RamService.CleanStandbyList();
                             statusLabel = TxtFreed_standby;
                             break;
                         case "fileCache":
+                            ring = Ring_fileCache;
+                            if (ring != null) ring.Visibility = Visibility.Visible;
                             freedBytes = await RamService.CleanSystemFileCache();
                             statusLabel = TxtFreed_fileCache;
                             break;
                         case "modified":
+                            ring = Ring_modified;
+                            if (ring != null) ring.Visibility = Visibility.Visible;
                             freedBytes = await RamService.CleanModifiedPageList();
                             statusLabel = TxtFreed_modified;
                             break;
                         case "combined":
+                            ring = Ring_combined;
+                            if (ring != null) ring.Visibility = Visibility.Visible;
                             freedBytes = await RamService.CleanCombinedPageList();
                             statusLabel = TxtFreed_combined;
                             break;
                     }
+
+                    if (ring != null) ring.Visibility = Visibility.Collapsed;
 
                     // Save stats
                     if (freedBytes > 0)
@@ -170,6 +197,13 @@ namespace cchay_optimicer_cs.Views
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error cleaning area {areaKey}: {ex.Message}");
+                    
+                    // Ensure rings are hidden on error
+                    if (areaKey == "workingSet") Ring_workingSet.Visibility = Visibility.Collapsed;
+                    if (areaKey == "standby") Ring_standby.Visibility = Visibility.Collapsed;
+                    if (areaKey == "fileCache") Ring_fileCache.Visibility = Visibility.Collapsed;
+                    if (areaKey == "modified") Ring_modified.Visibility = Visibility.Collapsed;
+                    if (areaKey == "combined") Ring_combined.Visibility = Visibility.Collapsed;
                 }
                 finally
                 {

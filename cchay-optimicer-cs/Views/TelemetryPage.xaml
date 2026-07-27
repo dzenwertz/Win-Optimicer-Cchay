@@ -1,0 +1,72 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.TelemetryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Escudo y Blasteador de Telemetría" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+                <TextBlock Text="Bloquea rastreo silencioso de Windows, Edge, NVIDIA, Adobe y marcas de laptop en el archivo Hosts y Firewall de Windows." FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Main Shield Card -->
+            <ui:Card Margin="0,0,0,20" Padding="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <ui:SymbolIcon x:Name="IconShield" Symbol="ShieldCheckmark24" FontSize="28" Foreground="#40C057" Margin="0,0,10,0" />
+                            <TextBlock x:Name="TxtShieldStatus" Text="Estado del Escudo: INACTIVO" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock x:Name="TxtShieldDescription" Text="Presiona 'Activar Escudo Total' para bloquear más de 500 dominios de telemetría." FontSize="12.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:Button x:Name="BtnEnableShield" Content="Activar Escudo Total" Icon="Shield24" Appearance="Primary" Click="BtnEnableShield_Click" Height="40" Margin="0,0,10,0" />
+                        <ui:Button x:Name="BtnDisableShield" Content="Desactivar" Icon="Dismiss24" Click="BtnDisableShield_Click" Height="40" />
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <!-- Details Grid -->
+            <UniformGrid Columns="3" Rows="1" Margin="0,0,0,20">
+                <!-- Hosts File Status -->
+                <ui:Card Margin="0,0,8,0" Padding="16">
+                    <StackPanel>
+                        <ui:SymbolIcon Symbol="Document24" FontSize="24" Foreground="#1098AD" Margin="0,0,0,8" />
+                        <TextBlock Text="Filtro Hosts" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="TxtHostsStatus" Text="Pendiente" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Firewall Rules -->
+                <ui:Card Margin="4,0,4,0" Padding="16">
+                    <StackPanel>
+                        <ui:SymbolIcon Symbol="LockClosed24" FontSize="24" Foreground="#FD7E14" Margin="0,0,0,8" />
+                        <TextBlock Text="Reglas de Firewall" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="TxtFirewallStatus" Text="Pendiente" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Telemetry Services -->
+                <ui:Card Margin="8,0,0,0" Padding="16">
+                    <StackPanel>
+                        <ui:SymbolIcon Symbol="Settings24" FontSize="24" Foreground="#E03131" Margin="0,0,0,8" />
+                        <TextBlock Text="Servicios DiagTrack" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="TxtServicesStatus" Text="Pendiente" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </ui:Card>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

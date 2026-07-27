@@ -86,6 +86,15 @@
                 </StackPanel>
             </ui:Button>
 
+            <!-- RAM Clean Progress Panel -->
+            <StackPanel x:Name="PanelRamCleanProgress" Visibility="Collapsed" Margin="0,0,0,20">
+                <Grid Margin="0,0,0,6">
+                    <TextBlock x:Name="TxtRamProgressStep" Text="Iniciando limpieza profunda de RAM..." FontSize="13" FontWeight="Medium" Foreground="#40C057" HorizontalAlignment="Left" />
+                    <TextBlock x:Name="TxtRamFreedLive" Text="0 MB liberados" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Right" />
+                </Grid>
+                <ProgressBar x:Name="ProgRamClean" Height="8" Minimum="0" Maximum="100" Value="0" Foreground="#40C057" Background="{DynamicResource ControlFillColorDefaultBrush}" />
+            </StackPanel>
+
             <TextBlock x:Name="TxtFreedToast" Visibility="Collapsed" Text="Se liberaron 0 MB de RAM." Padding="12" FontSize="13" FontWeight="Medium" Background="#1A107C41" Foreground="#40C057" Margin="0,0,0,20" HorizontalAlignment="Stretch" TextAlignment="Center" />
 
             <!-- Memory Areas Title -->
@@ -99,13 +108,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Working Set (Procesos)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Reduce el conjunto de trabajo de todos los procesos activos liberando páginas de memoria física no utilizadas." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock x:Name="TxtFreed_workingSet" FontSize="11" Foreground="#40C057" Visibility="Collapsed" />
                         </StackPanel>
-                        <ui:Button Grid.Column="1" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="workingSet" Content="Limpiar" Padding="16,8,16,8" />
+                        <ui:ProgressRing x:Name="Ring_workingSet" Grid.Column="1" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,12,0" Width="20" Height="20" />
+                        <ui:Button Grid.Column="2" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="workingSet" Content="Limpiar" Padding="16,8,16,8" />
                     </Grid>
                 </ui:Card>
 
@@ -115,13 +126,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Standby List (Caché de Sistema)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Libera la memoria en espera que Windows reserva para páginas cargadas previamente. Ideal para juegos." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock x:Name="TxtFreed_standby" FontSize="11" Foreground="#40C057" Visibility="Collapsed" />
                         </StackPanel>
-                        <ui:Button Grid.Column="1" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="standby" Content="Limpiar" Padding="16,8,16,8" />
+                        <ui:ProgressRing x:Name="Ring_standby" Grid.Column="1" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,12,0" Width="20" Height="20" />
+                        <ui:Button Grid.Column="2" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="standby" Content="Limpiar" Padding="16,8,16,8" />
                     </Grid>
                 </ui:Card>
 
@@ -131,13 +144,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="System File Cache (Caché de Archivos)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Vacía la memoria caché de archivos del sistema de archivos de Windows." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock x:Name="TxtFreed_fileCache" FontSize="11" Foreground="#40C057" Visibility="Collapsed" />
                         </StackPanel>
-                        <ui:Button Grid.Column="1" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="fileCache" Content="Limpiar" Padding="16,8,16,8" />
+                        <ui:ProgressRing x:Name="Ring_fileCache" Grid.Column="1" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,12,0" Width="20" Height="20" />
+                        <ui:Button Grid.Column="2" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="fileCache" Content="Limpiar" Padding="16,8,16,8" />
                     </Grid>
                 </ui:Card>
 
@@ -147,13 +162,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Modified Page List (Páginas Modificadas)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Escribe páginas de memoria modificadas pendientes en el disco y las libera." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock x:Name="TxtFreed_modified" FontSize="11" Foreground="#40C057" Visibility="Collapsed" />
                         </StackPanel>
-                        <ui:Button Grid.Column="1" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="modified" Content="Limpiar" Padding="16,8,16,8" />
+                        <ui:ProgressRing x:Name="Ring_modified" Grid.Column="1" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,12,0" Width="20" Height="20" />
+                        <ui:Button Grid.Column="2" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="modified" Content="Limpiar" Padding="16,8,16,8" />
                     </Grid>
                 </ui:Card>
 
@@ -163,13 +180,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,12,0">
                             <TextBlock Text="Combined Page List (Páginas Combinadas)" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Combina páginas de memoria duplicadas y libera el exceso." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock x:Name="TxtFreed_combined" FontSize="11" Foreground="#40C057" Visibility="Collapsed" />
                         </StackPanel>
-                        <ui:Button Grid.Column="1" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="combined" Content="Limpiar" Padding="16,8,16,8" />
+                        <ui:ProgressRing x:Name="Ring_combined" Grid.Column="1" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,12,0" Width="20" Height="20" />
+                        <ui:Button Grid.Column="2" VerticalAlignment="Center" Click="BtnCleanArea_Click" Tag="combined" Content="Limpiar" Padding="16,8,16,8" />
                     </Grid>
                 </ui:Card>
             </StackPanel>

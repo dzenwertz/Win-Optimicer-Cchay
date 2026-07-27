@@ -58,14 +58,18 @@
                     <ui:NavigationViewItemSeparator />
                     <ui:NavigationViewItem Content="Optimizar RAM" Tag="ram" TargetPageType="{x:Type views:RamPage}" Icon="{ui:SymbolIcon Symbol=DeveloperBoard24}" />
                     <ui:NavigationViewItem Content="Limpiar Disco" Tag="disk" TargetPageType="{x:Type views:DiskPage}" Icon="{ui:SymbolIcon Symbol=HardDrive24}" />
+                    <ui:NavigationViewItem Content="Analizador de Disco" Tag="diskanalyzer" TargetPageType="{x:Type views:DiskAnalyzerPage}" Icon="{ui:SymbolIcon Symbol=FolderSearch24}" />
                     <ui:NavigationViewItem Content="Ajustes de Sistema" Tag="tweaks" TargetPageType="{x:Type views:TweaksPage}" Icon="{ui:SymbolIcon Symbol=Wrench24}" />
                     <ui:NavigationViewItem Content="Eliminar Bloatware" Tag="bloatware" TargetPageType="{x:Type views:BloatwarePage}" Icon="{ui:SymbolIcon Symbol=Delete24}" />
+                    <ui:NavigationViewItem Content="Escudo de Telemetría" Tag="telemetry" TargetPageType="{x:Type views:TelemetryPage}" Icon="{ui:SymbolIcon Symbol=ShieldLock24}" />
+                    <ui:NavigationViewItem Content="Desinstalador Profundo" Tag="uninstaller" TargetPageType="{x:Type views:UninstallerPage}" Icon="{ui:SymbolIcon Symbol=AppsList24}" />
                     <ui:NavigationViewItem Content="Optimizador de Red" Tag="network" TargetPageType="{x:Type views:NetworkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
                     <ui:NavigationViewItem Content="Programas de Inicio" Tag="startup" TargetPageType="{x:Type views:StartupPage}" Icon="{ui:SymbolIcon Symbol=Desktop24}" />
                     <ui:NavigationViewItem Content="Servicios de Windows" Tag="services" TargetPageType="{x:Type views:ServicesPage}" Icon="{ui:SymbolIcon Symbol=Briefcase24}" />
                     <ui:NavigationViewItem Content="Instalador de Apps" Tag="software" TargetPageType="{x:Type views:SoftwarePage}" Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
                     <ui:NavigationViewItem Content="Escáner de Virus" Tag="scanner" TargetPageType="{x:Type views:ScannerPage}" Icon="{ui:SymbolIcon Symbol=Shield24}" />
                     <ui:NavigationViewItem Content="Reparar Sistema" Tag="repair" TargetPageType="{x:Type views:RepairPage}" Icon="{ui:SymbolIcon Symbol=Toolbox24}" />
+                    <ui:NavigationViewItem Content="Benchmark PC" Tag="benchmark" TargetPageType="{x:Type views:BenchmarkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
                     <ui:NavigationViewItemSeparator />
                     <ui:NavigationViewItem Content="Backup y Restaurar" Tag="backup" TargetPageType="{x:Type views:BackupPage}" Icon="{ui:SymbolIcon Symbol=ShieldCheckmark24}" />
                     <ui:NavigationViewItem Content="Configuración" Tag="settings" TargetPageType="{x:Type views:SettingsPage}" Icon="{ui:SymbolIcon Symbol=Settings24}" />

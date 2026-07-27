@@ -78,6 +78,16 @@ namespace cchay_optimicer_cs.Services
 
                         if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) continue;
 
+                        // Skip self process by name or path
+                        string currentProcName = Process.GetCurrentProcess().ProcessName;
+                        if (name.Equals(currentProcName, StringComparison.OrdinalIgnoreCase) ||
+                            name.Contains("Cchay", StringComparison.OrdinalIgnoreCase) ||
+                            name.Contains("cchay", StringComparison.OrdinalIgnoreCase) ||
+                            filePath.Contains(@"\Cchay Optimicer\", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
                         // Rule A: Runs from a temporary folder
                         bool isFromTemp = filePath.Contains(tempPath, StringComparison.OrdinalIgnoreCase) ||
                                           filePath.Contains(@"\AppData\Local\Temp", StringComparison.OrdinalIgnoreCase);
@@ -119,15 +129,22 @@ namespace cchay_optimicer_cs.Services
                             if (!signed)
                             {
                                 bool isDeveloperTool = filePath.Contains(@"\.vscode\", StringComparison.OrdinalIgnoreCase) || 
+                                                       filePath.Contains(@"\.vscode-server\", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\.git\", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\.antigravity", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\antigravity", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\DotRush", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\OmniSharp", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\AppData\Local\Programs\Microsoft VS Code", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\AppData\Local\Programs\Antigravity IDE", StringComparison.OrdinalIgnoreCase) ||
-                                                       filePath.Contains(@"\antigravity", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\AppData\Local\Programs\Cchay Optimicer", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\npm", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\node_modules", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\bin\Debug\", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\bin\Release\", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\Visual Studio", StringComparison.OrdinalIgnoreCase) ||
-                                                       filePath.Contains(@"\JetBrains", StringComparison.OrdinalIgnoreCase);
+                                                       filePath.Contains(@"\JetBrains", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\Android\Sdk", StringComparison.OrdinalIgnoreCase);
 
                                 if (!isDeveloperTool)
                                 {

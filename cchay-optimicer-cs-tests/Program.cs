@@ -25,6 +25,14 @@ namespace cchay_optimicer_cs_tests
             await AssertTest("Registry Tweaks Integrity & Structure", TestTweakService);
             await AssertTest("Windows Services Enumeration & Critical Tagging", TestWindowsServices);
             await AssertTest("Disconnected Devices (Ghost Drivers) Scan", TestDeviceCleanup);
+            await AssertTest("Optimization Profile Presets & Import/Export", TestProfileService);
+            await AssertTest("Disk Analyzer Directory Size Scanner", TestDiskAnalyzerService);
+            await AssertTest("Benchmark Engine (Disk, RAM & CPU Speed Test)", TestBenchmarkService);
+            await AssertTest("Anti-Stuttering Engine Proactive Memory Purge", TestAntiStutterService);
+            await AssertTest("Telemetry Shield & Domain Blocking Status", TestTelemetryService);
+            await AssertTest("Uninstaller Registry Application Enumeration", TestUninstallerService);
+            await AssertTest("Network Pro & QoS Policy Tuning Engine", TestNetworkService);
+            await AssertTest("XAML Symbol Icons Integrity & Validity", TestAllXamlSymbolIcons);
 
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -141,6 +149,104 @@ namespace cchay_optimicer_cs_tests
             {
                 if (string.IsNullOrEmpty(dev.InstanceId)) throw new Exception("Device InstanceId is null or empty");
             }
+        }
+
+        static Task TestProfileService()
+        {
+            var gaming = ProfileService.GetGamingPreset();
+            if (gaming.ProfileName != "Perfil Gamer Máximo Rendimiento") throw new Exception("Gaming profile name invalid");
+            if (!gaming.TweakStates.ContainsKey("ultimate-performance") || !gaming.TweakStates["ultimate-performance"])
+                throw new Exception("Gaming preset missing ultimate-performance tweak");
+
+            var balanced = ProfileService.GetBalancedPreset();
+            if (balanced.ProfileName != "Perfil Equilibrado / Diario") throw new Exception("Balanced profile name invalid");
+
+            var dev = ProfileService.GetDeveloperPreset();
+            if (!dev.ProfileName.Contains("Desarrollador")) throw new Exception("Developer profile name invalid");
+            if (!dev.TweakStates.ContainsKey("disable-superfetch") || !dev.TweakStates["disable-superfetch"])
+                throw new Exception("Developer preset missing disable-superfetch tweak");
+            return Task.CompletedTask;
+        }
+
+        static async Task TestDiskAnalyzerService()
+        {
+            string tempDir = System.IO.Path.GetTempPath();
+            var items = await DiskAnalyzerService.ScanDirectoryAsync(tempDir);
+            if (items == null) throw new Exception("Disk analyzer returned null list");
+        }
+
+        static async Task TestBenchmarkService()
+        {
+            var res = await BenchmarkService.RunBenchmarkAsync();
+            if (res == null) throw new Exception("Benchmark returned null result");
+            if (res.TotalScore < 50 || res.TotalScore > 1000) throw new Exception($"Invalid total score: {res.TotalScore}");
+            if (string.IsNullOrEmpty(res.Grade)) throw new Exception("Grade is null or empty");
+        }
+
+        static async Task TestAntiStutterService()
+        {
+            SettingsService.Settings.AntiStutterEnabled = true;
+            bool purged = await AntiStutterService.CheckAndPurgeIfNeededAsync();
+            bool cooldown = AntiStutterService.IsCooldownActive();
+            // Just verify no exception thrown
+        }
+
+        static async Task TestTelemetryService()
+        {
+            var status = await TelemetryService.GetStatusAsync();
+            if (status == null) throw new Exception("Telemetry status returned null");
+            if (status.BlockedDomainsCount <= 0) throw new Exception("Telemetry domain count invalid");
+        }
+
+        static async Task TestUninstallerService()
+        {
+            var apps = await UninstallerService.GetInstalledProgramsAsync();
+            if (apps == null) throw new Exception("Installed apps list returned null");
+        }
+
+        static async Task TestNetworkService()
+        {
+            var providers = NetworkService.GetDnsProviders();
+            if (providers == null || providers.Count == 0) throw new Exception("DNS providers list empty");
+            var state = NetworkService.LoadNetworkState();
+            if (state == null) throw new Exception("Network state returned null");
+            if (await NetworkService.SetDnsAsync(new[] { "not-an-ip" }))
+                throw new Exception("Network service accepted an invalid DNS address");
+        }
+
+        static Task TestAllXamlSymbolIcons()
+        {
+            string xamlDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "cchay-optimicer-cs");
+            if (!System.IO.Directory.Exists(xamlDir)) return Task.CompletedTask;
+
+            var files = System.IO.Directory.GetFiles(xamlDir, "*.xaml", System.IO.SearchOption.AllDirectories);
+            var regex = new System.Text.RegularExpressions.Regex(@"(?:Symbol|Icon)=(?:""|)?([a-zA-Z0-9_]+)", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+            var invalidSymbols = new List<string>();
+            foreach (var file in files)
+            {
+                string text = System.IO.File.ReadAllText(file);
+                var matches = regex.Matches(text);
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    string symName = match.Groups[1].Value;
+                    try
+                    {
+                        Enum.Parse(typeof(Wpf.Ui.Controls.SymbolRegular), symName);
+                    }
+                    catch
+                    {
+                        invalidSymbols.Add($"{System.IO.Path.GetFileName(file)}: {symName}");
+                    }
+                }
+            }
+
+            if (invalidSymbols.Count > 0)
+            {
+                throw new Exception("Invalid WPF-UI Symbol names found:\n" + string.Join("\n", invalidSymbols));
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,0 +1,104 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.BenchmarkPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Benchmark de Rendimiento" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+                <TextBlock Text="Mide en tiempo real la velocidad de tu disco, la respuesta de RAM y CPU antes y después de optimizar." FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Main Score Card -->
+            <ui:Card Margin="0,0,0,20" Padding="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="PUNTAJE ACTUAL DE RENDIMIENTO" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="TxtScore" Text="---" FontSize="44" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,12,0" />
+                            <Border x:Name="BadgeGrade" Background="#38BDF8" CornerRadius="8" Padding="12,4" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtGrade" Text="-" FontSize="20" FontWeight="Bold" Foreground="Black" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="TxtImprovement" Text="Presiona 'Iniciar Benchmark' para evaluar la velocidad de tu PC." FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <ui:Button x:Name="BtnStartBenchmark" Grid.Column="1" Content="Iniciar Benchmark" Icon="Play24" Appearance="Primary" Click="BtnStartBenchmark_Click" Height="42" Padding="16,0" VerticalAlignment="Center" />
+                </Grid>
+            </ui:Card>
+
+            <!-- Progress Bar -->
+            <StackPanel x:Name="ProgressSection" Visibility="Collapsed" Margin="0,0,0,20">
+                <TextBlock x:Name="TxtStatus" Text="Realizando pruebas de disco, RAM y CPU..." FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
+                <ProgressBar x:Name="BenchProgressBar" Height="8" IsIndeterminate="False" Value="0" />
+            </StackPanel>
+
+            <!-- Detailed Metrics Grid -->
+            <UniformGrid Columns="3" Rows="1" Margin="0,0,0,20">
+                <!-- Disk Speed -->
+                <ui:Card Margin="0,0,8,0" Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:SymbolIcon Symbol="HardDrive24" FontSize="24" Foreground="#1098AD" Margin="0,0,8,0" />
+                            <TextBlock Text="Lectura / Escritura" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock x:Name="TxtDiskSpeed" Text="--- MB/s" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Velocidad Disco C:" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- RAM Latency -->
+                <ui:Card Margin="4,0,4,0" Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="24" Foreground="#40C057" Margin="0,0,8,0" />
+                            <TextBlock Text="Respuesta de Memoria" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock x:Name="TxtRamLatency" Text="--- ms" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Latencia de RAM" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- CPU Response -->
+                <ui:Card Margin="8,0,0,0" Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:SymbolIcon Symbol="DeveloperBoard24" FontSize="24" Foreground="#FD7E14" Margin="0,0,8,0" />
+                            <TextBlock Text="Cálculo Multihilo CPU" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock x:Name="TxtCpuResponse" Text="--- ms" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Respuesta de CPU" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </ui:Card>
+            </UniformGrid>
+
+            <!-- Actions Card -->
+            <ui:Card Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Guardar este puntaje como línea base" FontSize="14.5" FontWeight="SemiBold" />
+                        <TextBlock Text="Guarda este puntaje antes de optimizar para comparar el % exacto de ganancia tras aplicar los cambios." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <ui:Button x:Name="BtnSaveBaseline" Grid.Column="1" Content="Guardar Base" Icon="Save24" Click="BtnSaveBaseline_Click" VerticalAlignment="Center" />
+                </Grid>
+            </ui:Card>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

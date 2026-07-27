@@ -55,6 +55,15 @@
 
             <TextBlock x:Name="TxtResult" Visibility="Collapsed" Text="" Padding="12" FontSize="13" FontWeight="Medium" Background="#1A107C41" Foreground="#40C057" Margin="0,0,0,20" HorizontalAlignment="Stretch" TextAlignment="Center" />
 
+            <!-- Quick Clean Progress Panel -->
+            <StackPanel x:Name="PanelQuickProgress" Visibility="Collapsed" Margin="0,0,0,20">
+                <Grid Margin="0,0,0,6">
+                    <TextBlock x:Name="TxtQuickProgress" Text="Iniciando limpieza rápida..." FontSize="13" FontWeight="Medium" Foreground="#40C057" HorizontalAlignment="Left" />
+                    <TextBlock x:Name="TxtQuickFreedLive" Text="0 MB liberados" FontSize="13" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Right" />
+                </Grid>
+                <ProgressBar x:Name="ProgQuickClean" Height="8" Minimum="0" Maximum="100" Value="0" Foreground="#40C057" Background="{DynamicResource ControlFillColorDefaultBrush}" />
+            </StackPanel>
+
             <StackPanel x:Name="PanelTechProgress" Visibility="Collapsed" Margin="0,0,0,20">
                 <TextBlock x:Name="TxtTechProgress" Text="Iniciando optimización técnica..." FontSize="13" FontWeight="Medium" Foreground="#1098AD" Margin="0,0,0,6" HorizontalAlignment="Center" />
                 <ProgressBar x:Name="ProgTechOptimize" Height="6" Minimum="0" Maximum="100" Value="0" Foreground="#1098AD" Background="{DynamicResource ControlFillColorDefaultBrush}" />

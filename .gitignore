@@ -27,3 +27,5 @@ tweakStates.json
 # Carpetas externas e integraciones
 esteroides/
 .firebase/
+dist/
+publish/

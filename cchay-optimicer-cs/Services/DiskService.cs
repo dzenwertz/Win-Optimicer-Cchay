@@ -35,6 +35,11 @@ namespace cchay_optimicer_cs.Services
                 new CleanTarget { Key = "braveCache", Name = "Brave - Caché", Description = "Caché de Brave Browser.", Category = "browser" },
                 new CleanTarget { Key = "deliveryOptimization", Name = "Caché de Optimización de Entrega", Description = "Archivos de actualizaciones de Windows compartidos en red P2P.", Category = "windows" },
                 new CleanTarget { Key = "shaderCache", Name = "Caché de Sombreadores DirectX/GPUs", Description = "Caché de texturas y sombreadores gráficos (DirectX, NVIDIA, AMD).", Category = "system" },
+                new CleanTarget { Key = "npmCache", Name = "NPM / Yarn - Caché de Paquetes", Description = "Caché temporal de descargables de Node.js (npm/yarn).", Category = "developer" },
+                new CleanTarget { Key = "nugetCache", Name = "NuGet / .NET - Caché de Paquetes", Description = "Caché v3 de paquetes NuGet (.NET).", Category = "developer" },
+                new CleanTarget { Key = "gradleCache", Name = "Gradle / Android - Caché de Build", Description = "Caché de builds de Gradle y Android Studio.", Category = "developer" },
+                new CleanTarget { Key = "pipCache", Name = "Pip / Python - Caché", Description = "Caché de paquetes wheel de Python (pip).", Category = "developer" },
+                new CleanTarget { Key = "vscodeCache", Name = "VS Code - Caché de Datos", Description = "Cachés de ejecuciones pasadas de Visual Studio Code.", Category = "developer" },
                 new CleanTarget { Key = "windowsUpdateReset", Name = "Limpieza de Componentes Windows", Description = "Libera espacio de actualizaciones viejas de Windows usando DISM. Puede tardar unos minutos.", Category = "windows" },
                 new CleanTarget { Key = "defragTrim", Name = "Optimización de Unidad (TRIM/Defrag)", Description = "Ejecuta TRIM en SSD o desfragmentación en HDD para la unidad C:.", Category = "system" }
             };
@@ -45,6 +50,7 @@ namespace cchay_optimicer_cs.Services
             var paths = new List<string>();
             string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
             switch (key)
             {
@@ -103,6 +109,25 @@ namespace cchay_optimicer_cs.Services
                     paths.Add(Path.Combine(local, @"NVIDIA Corporation\NV_Cache"));
                     paths.Add(Path.Combine(local, @"AMD\DxCache"));
                     break;
+                case "npmCache":
+                    paths.Add(Path.Combine(local, @"npm-cache"));
+                    paths.Add(Path.Combine(local, @"Yarn\Cache"));
+                    break;
+                case "nugetCache":
+                    paths.Add(Path.Combine(userProfile, @".nuget\v3-cache"));
+                    paths.Add(Path.Combine(local, @"NuGet\v3-cache"));
+                    break;
+                case "gradleCache":
+                    paths.Add(Path.Combine(userProfile, @".gradle\caches"));
+                    break;
+                case "pipCache":
+                    paths.Add(Path.Combine(local, @"pip\cache"));
+                    break;
+                case "vscodeCache":
+                    paths.Add(Path.Combine(appData, @"Code\Cache"));
+                    paths.Add(Path.Combine(appData, @"Code\CachedData"));
+                    paths.Add(Path.Combine(local, @"Programs\Microsoft VS Code\CodeCache"));
+                    break;
             }
             return paths;
         }
@@ -120,9 +145,9 @@ namespace cchay_optimicer_cs.Services
             }
         }
 
-        private static void CleanDirectory(string path, ref double freedMB, ref int itemsCount, bool delete, string filter = "*")
+        private static void CleanDirectory(string path, ref double freedMB, ref int itemsCount, bool delete, string filter = "*", System.Threading.CancellationToken ct = default)
         {
-            if (!Directory.Exists(path)) return;
+            if (ct.IsCancellationRequested || !Directory.Exists(path)) return;
 
             // Clean files in current directory
             try
@@ -130,6 +155,7 @@ namespace cchay_optimicer_cs.Services
                 var dirInfo = new DirectoryInfo(path);
                 foreach (var file in dirInfo.GetFiles(filter))
                 {
+                    if (ct.IsCancellationRequested) break;
                     try
                     {
                         freedMB += file.Length / 1024.0 / 1024.0;
@@ -150,8 +176,9 @@ namespace cchay_optimicer_cs.Services
                 var dirInfo = new DirectoryInfo(path);
                 foreach (var subDir in dirInfo.GetDirectories())
                 {
-                    CleanDirectory(subDir.FullName, ref freedMB, ref itemsCount, delete, filter);
-                    if (delete)
+                    if (ct.IsCancellationRequested) break;
+                    CleanDirectory(subDir.FullName, ref freedMB, ref itemsCount, delete, filter, ct);
+                    if (delete && !ct.IsCancellationRequested)
                     {
                         try
                         {
@@ -168,12 +195,14 @@ namespace cchay_optimicer_cs.Services
             catch { /* Access denied to subdirectories, ignore */ }
         }
 
-        public static Task<CleanTarget> ProcessTargetAsync(CleanTarget target, bool delete)
+        public static Task<CleanTarget> ProcessTargetAsync(CleanTarget target, bool delete, System.Threading.CancellationToken ct = default, IProgress<double>? progress = null)
         {
             return Task.Run(() =>
             {
                 double freedMB = 0;
                 int itemsCount = 0;
+
+                if (ct.IsCancellationRequested) return target;
 
                 if (target.Key == "recycleBin")
                 {
@@ -189,7 +218,6 @@ namespace cchay_optimicer_cs.Services
                     }
                     else
                     {
-                        // Set size to 0 for preview since calculating recycle bin size natively in C# requires complex Shell COM interfaces
                         target.SizeMB = 0;
                     }
                 }
@@ -208,8 +236,16 @@ namespace cchay_optimicer_cs.Services
                                 WindowStyle = ProcessWindowStyle.Hidden
                             };
                             var dismProc = Process.Start(dismPsi);
-                            dismProc?.WaitForExit(300000); // up to 5 min
-                            target.Cleaned = true;
+                            while (dismProc != null && !dismProc.HasExited)
+                            {
+                                if (ct.IsCancellationRequested)
+                                {
+                                    try { dismProc.Kill(); } catch { }
+                                    break;
+                                }
+                                dismProc.WaitForExit(1000);
+                            }
+                            target.Cleaned = !ct.IsCancellationRequested;
                         }
                         catch { }
                     }
@@ -233,8 +269,16 @@ namespace cchay_optimicer_cs.Services
                                 WindowStyle = ProcessWindowStyle.Hidden
                             };
                             var defragProc = Process.Start(defragPsi);
-                            defragProc?.WaitForExit(60000);
-                            target.Cleaned = true;
+                            while (defragProc != null && !defragProc.HasExited)
+                            {
+                                if (ct.IsCancellationRequested)
+                                {
+                                    try { defragProc.Kill(); } catch { }
+                                    break;
+                                }
+                                defragProc.WaitForExit(1000);
+                            }
+                            target.Cleaned = !ct.IsCancellationRequested;
                         }
                         catch { }
                     }
@@ -248,18 +292,20 @@ namespace cchay_optimicer_cs.Services
                     var paths = GetPathsForTarget(target.Key);
                     string filter = target.Key == "thumbnails" ? "thumbcache_*" : "*";
                     
-                    foreach (var path in paths)
+                    for (int i = 0; i < paths.Count; i++)
                     {
-                        CleanDirectory(path, ref freedMB, ref itemsCount, delete, filter);
+                        if (ct.IsCancellationRequested) break;
+                        CleanDirectory(paths[i], ref freedMB, ref itemsCount, delete, filter, ct);
+                        progress?.Report((double)(i + 1) / paths.Count * 100);
                     }
                     
                     target.SizeMB = Math.Round(freedMB, 2);
                     target.ItemsCount = itemsCount;
-                    target.Cleaned = delete;
+                    target.Cleaned = delete && !ct.IsCancellationRequested;
                 }
 
                 return target;
-            });
+            }, ct);
         }
     }
 }

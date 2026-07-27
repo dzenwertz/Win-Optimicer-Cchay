@@ -9,6 +9,9 @@ namespace cchay_optimicer_cs.Services
     {
         private static System.Threading.Timer? _ramTimer;
         private static System.Threading.Timer? _dailyTimer;
+        private static System.Threading.Timer? _gamerTimer;
+        private static System.Threading.Timer? _devTimer;
+        private static System.Threading.Timer? _stutterTimer;
         private static bool _isRamRunning = false;
         private static bool _isDailyRunning = false;
 
@@ -21,6 +24,15 @@ namespace cchay_optimicer_cs.Services
 
             // Timer 2: Daily maintenance check every 15 minutes
             _dailyTimer = new System.Threading.Timer(async _ => await CheckDailyMaintenanceAsync(), null, TimeSpan.FromSeconds(45), TimeSpan.FromMinutes(15));
+
+            // Timer 3: Gamer process priority watcher every 15 seconds
+            _gamerTimer = new System.Threading.Timer(_ => CheckGamerProcessesPriority(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+
+            // Timer 4: Dev process priority watcher every 15 seconds
+            _devTimer = new System.Threading.Timer(_ => CheckDevProcessesPriority(), null, TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(15));
+
+            // Timer 5: Anti-Stuttering proactive memory purge check every 30 seconds
+            _stutterTimer = new System.Threading.Timer(async _ => await AntiStutterService.CheckAndPurgeIfNeededAsync(), null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
         }
 
         private static async Task CheckAndCleanRamAsync()
@@ -99,6 +111,84 @@ namespace cchay_optimicer_cs.Services
             finally
             {
                 _isDailyRunning = false;
+            }
+        }
+
+        private static void CheckGamerProcessesPriority()
+        {
+            try
+            {
+                var settings = SettingsService.Settings;
+                if (!settings.GamerModeEnabled || settings.GamerProcesses == null || settings.GamerProcesses.Count == 0)
+                    return;
+
+                var processes = Process.GetProcesses();
+                foreach (var proc in processes)
+                {
+                    try
+                    {
+                        string name = proc.ProcessName.ToLowerInvariant();
+                        if (settings.GamerProcesses.Exists(p => p.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            if (proc.PriorityClass != ProcessPriorityClass.High)
+                            {
+                                proc.PriorityClass = ProcessPriorityClass.High;
+                                Debug.WriteLine($"[GamerMode] Elevated CPU priority for {proc.ProcessName} (PID: {proc.Id}) to High.");
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Access denied to system process
+                    }
+                    finally
+                    {
+                        proc.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[GamerMode] Error checking gamer processes: {ex.Message}");
+            }
+        }
+
+        private static void CheckDevProcessesPriority()
+        {
+            try
+            {
+                var settings = SettingsService.Settings;
+                if (!settings.DevModeEnabled || settings.DevProcesses == null || settings.DevProcesses.Count == 0)
+                    return;
+
+                var processes = Process.GetProcesses();
+                foreach (var proc in processes)
+                {
+                    try
+                    {
+                        string name = proc.ProcessName.ToLowerInvariant();
+                        if (settings.DevProcesses.Exists(p => p.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            if (proc.PriorityClass != ProcessPriorityClass.AboveNormal && proc.PriorityClass != ProcessPriorityClass.High)
+                            {
+                                proc.PriorityClass = ProcessPriorityClass.AboveNormal;
+                                Debug.WriteLine($"[DevMode] Elevated CPU priority for {proc.ProcessName} (PID: {proc.Id}) to AboveNormal.");
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Access denied to system process
+                    }
+                    finally
+                    {
+                        proc.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DevMode] Error checking dev processes: {ex.Message}");
             }
         }
     }

@@ -40,6 +40,14 @@ namespace cchay_optimicer_cs.Services
 
     public class SystemService
     {
+        private static string? _cachedCpuModel;
+        private static int _cachedCpuCores = 0;
+        private static int _cachedCpuThreads = 0;
+        private static string? _cachedGpuModel;
+        private static string? _cachedOsName;
+        private static string? _cachedOsVersion;
+        private static string? _cachedOsBuild;
+
         public static bool IsRunningAsAdmin()
         {
             try
@@ -58,7 +66,7 @@ namespace cchay_optimicer_cs.Services
 
         public static Task<SystemInfoData> GetSystemInfoAsync()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 var info = new SystemInfoData();
 
@@ -73,109 +81,135 @@ namespace cchay_optimicer_cs.Services
                 info.MemoryFree = mem.FreeBytes;
                 info.MemoryPercent = mem.PercentUsed;
 
-                // CPU Model via Registry (fastest & most reliable)
-                try
+                // CPU Model via Registry (cached)
+                if (_cachedCpuModel == null)
                 {
-                    using (var key = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0"))
+                    try
                     {
-                        if (key != null)
+                        using (var key = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0"))
                         {
-                            info.CpuModel = key.GetValue("ProcessorNameString")?.ToString()?.Trim() ?? "Unknown CPU";
-                        }
-                    }
-                }
-                catch { /* ignore */ }
-
-                // CPU Cores & Threads
-                info.CpuThreads = Environment.ProcessorCount;
-                try
-                {
-                    using (var searcher = new ManagementObjectSearcher("Select NumberOfCores from Win32_Processor"))
-                    using (var results = searcher.Get())
-                    {
-                        foreach (ManagementObject obj in results)
-                        {
-                            using (obj)
+                            if (key != null)
                             {
-                                info.CpuCores = Convert.ToInt32(obj["NumberOfCores"]);
-                                break;
+                                _cachedCpuModel = key.GetValue("ProcessorNameString")?.ToString()?.Trim() ?? "Unknown CPU";
                             }
                         }
                     }
+                    catch { /* ignore */ }
+                    _cachedCpuModel ??= "Unknown CPU";
                 }
-                catch
-                {
-                    info.CpuCores = Environment.ProcessorCount / 2;
-                    if (info.CpuCores < 1) info.CpuCores = 1;
-                }
+                info.CpuModel = _cachedCpuModel;
 
-                // GPU Model
-                try
+                // CPU Cores & Threads (cached)
+                if (_cachedCpuThreads == 0)
                 {
-                    using (var searcher = new ManagementObjectSearcher("Select Name from Win32_VideoController"))
-                    using (var results = searcher.Get())
+                    _cachedCpuThreads = Environment.ProcessorCount;
+                    try
                     {
-                        var gpus = new List<string>();
-                        foreach (ManagementObject obj in results)
+                        using (var searcher = new ManagementObjectSearcher("Select NumberOfCores from Win32_Processor"))
+                        using (var results = searcher.Get())
                         {
-                            using (obj)
+                            foreach (ManagementObject obj in results)
                             {
-                                string name = obj["Name"]?.ToString() ?? "";
-                                if (!string.IsNullOrEmpty(name)) gpus.Add(name);
-                            }
-                        }
-                        if (gpus.Count > 0)
-                        {
-                            var dedicated = gpus.FirstOrDefault(g => g.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase) || 
-                                                                     g.Contains("AMD", StringComparison.OrdinalIgnoreCase) || 
-                                                                     g.Contains("Radeon", StringComparison.OrdinalIgnoreCase) || 
-                                                                     g.Contains("GeForce", StringComparison.OrdinalIgnoreCase));
-                            info.GpuModel = dedicated ?? gpus[0];
-                        }
-                        else
-                        {
-                            info.GpuModel = "Microsoft Basic Display Adapter";
-                        }
-                    }
-                }
-                catch
-                {
-                    info.GpuModel = "Unknown GPU";
-                }
-
-                // OS Info
-                try
-                {
-                    using (var searcher = new ManagementObjectSearcher("Select Caption from Win32_OperatingSystem"))
-                    using (var results = searcher.Get())
-                    {
-                        foreach (ManagementObject obj in results)
-                        {
-                            using (obj)
-                            {
-                                info.OsName = obj["Caption"]?.ToString() ?? "Windows";
-                                break;
+                                using (obj)
+                                {
+                                    _cachedCpuCores = Convert.ToInt32(obj["NumberOfCores"]);
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                catch
-                {
-                    info.OsName = "Windows " + (Environment.OSVersion.Version.Major == 10 ? (Environment.OSVersion.Version.Build >= 22000 ? "11" : "10") : "10");
-                }
-
-                try
-                {
-                    using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                    catch
                     {
-                        if (key != null)
-                        {
-                            info.OsVersion = key.GetValue("DisplayVersion")?.ToString() ?? "Unknown";
-                            info.OsBuild = key.GetValue("CurrentBuildNumber")?.ToString() ?? "Unknown";
-                        }
+                        _cachedCpuCores = Environment.ProcessorCount / 2;
+                        if (_cachedCpuCores < 1) _cachedCpuCores = 1;
                     }
                 }
-                catch { /* ignore */ }
+                info.CpuCores = _cachedCpuCores;
+                info.CpuThreads = _cachedCpuThreads;
+
+                // GPU Model (cached)
+                if (_cachedGpuModel == null)
+                {
+                    try
+                    {
+                        using (var searcher = new ManagementObjectSearcher("Select Name from Win32_VideoController"))
+                        using (var results = searcher.Get())
+                        {
+                            var gpus = new List<string>();
+                            foreach (ManagementObject obj in results)
+                            {
+                                using (obj)
+                                {
+                                    string name = obj["Name"]?.ToString() ?? "";
+                                    if (!string.IsNullOrEmpty(name)) gpus.Add(name);
+                                }
+                            }
+                            if (gpus.Count > 0)
+                            {
+                                var dedicated = gpus.FirstOrDefault(g => g.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase) || 
+                                                                         g.Contains("AMD", StringComparison.OrdinalIgnoreCase) || 
+                                                                         g.Contains("Radeon", StringComparison.OrdinalIgnoreCase) || 
+                                                                         g.Contains("GeForce", StringComparison.OrdinalIgnoreCase));
+                                _cachedGpuModel = dedicated ?? gpus[0];
+                            }
+                            else
+                            {
+                                _cachedGpuModel = "Microsoft Basic Display Adapter";
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        _cachedGpuModel = "Unknown GPU";
+                    }
+                }
+                info.GpuModel = _cachedGpuModel;
+
+                // OS Info (cached)
+                if (_cachedOsName == null)
+                {
+                    try
+                    {
+                        using (var searcher = new ManagementObjectSearcher("Select Caption from Win32_OperatingSystem"))
+                        using (var results = searcher.Get())
+                        {
+                            foreach (ManagementObject obj in results)
+                            {
+                                using (obj)
+                                {
+                                    _cachedOsName = obj["Caption"]?.ToString() ?? "Windows";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        _cachedOsName = "Windows " + (Environment.OSVersion.Version.Major == 10 ? (Environment.OSVersion.Version.Build >= 22000 ? "11" : "10") : "10");
+                    }
+                    _cachedOsName ??= "Windows";
+                }
+                info.OsName = _cachedOsName;
+
+                if (_cachedOsVersion == null)
+                {
+                    try
+                    {
+                        using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                        {
+                            if (key != null)
+                            {
+                                _cachedOsVersion = key.GetValue("DisplayVersion")?.ToString() ?? "Unknown";
+                                _cachedOsBuild = key.GetValue("CurrentBuildNumber")?.ToString() ?? "Unknown";
+                            }
+                        }
+                    }
+                    catch { /* ignore */ }
+                    _cachedOsVersion ??= "Unknown";
+                    _cachedOsBuild ??= "Unknown";
+                }
+                info.OsVersion = _cachedOsVersion;
+                info.OsBuild = _cachedOsBuild ?? "Unknown";
 
                 // Disk Info (Drive C:)
                 try
@@ -203,8 +237,8 @@ namespace cchay_optimicer_cs.Services
                 // Local IP
                 info.LocalIp = GetLocalIp();
 
-                // Public IP
-                info.PublicIp = GetPublicIp();
+                // Public IP (async)
+                info.PublicIp = await GetPublicIpAsync();
 
                 // Calculate Health Score
                 info.HealthScore = CalculateHealthScore(info);
@@ -310,19 +344,56 @@ namespace cchay_optimicer_cs.Services
             return "127.0.0.1";
         }
 
-        private static string GetPublicIp()
+        private static async Task<string> GetPublicIpAsync()
         {
             try
             {
+                using (var cts = new System.Threading.CancellationTokenSource(1500))
                 using (var client = new System.Net.Http.HttpClient())
                 {
-                    client.Timeout = TimeSpan.FromMilliseconds(1500);
-                    return client.GetStringAsync("https://api.ipify.org").Result.Trim();
+                    var response = await client.GetAsync("https://api.ipify.org", cts.Token);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string ip = await response.Content.ReadAsStringAsync(cts.Token);
+                        return ip.Trim();
+                    }
                 }
             }
             catch
             {
-                return "Desconectado";
+                /* Offline or timeout */
+            }
+            return "Desconectado";
+        }
+
+        public static bool EnableUltimatePerformancePlan()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powercfg",
+                    Arguments = "-duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                var proc = Process.Start(psi);
+                proc?.WaitForExit(3000);
+
+                var psi2 = new ProcessStartInfo
+                {
+                    FileName = "powercfg",
+                    Arguments = "-setactive e9a42b02-d5df-448d-aa00-03f14749eb61",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                var proc2 = Process.Start(psi2);
+                proc2?.WaitForExit(3000);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 

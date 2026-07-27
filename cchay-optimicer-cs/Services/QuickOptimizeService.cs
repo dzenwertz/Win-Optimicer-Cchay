@@ -31,12 +31,20 @@ namespace cchay_optimicer_cs.Services
             }
             catch { }
 
-            // Step 3: Clean Disk Temp Files (40%)
+            // Step 3: Clean Disk Temp Files & Dev Caches (40%)
             progressCallback("Eliminando archivos temporales de disco y caché...", 40);
             await Task.Delay(200);
             try
             {
-                var targets = DiskService.GetTargets().Where(t => t.Key == "temp" || t.Key == "windowsTemp" || t.Key == "recycleBin" || t.Key == "thumbnails" || t.Key == "errorReports" || t.Key == "windowsLogs");
+                var targetKeys = new System.Collections.Generic.HashSet<string> { "temp", "windowsTemp", "recycleBin", "thumbnails", "errorReports", "windowsLogs" };
+                if (SettingsService.Settings.DevModeEnabled)
+                {
+                    targetKeys.Add("npmCache");
+                    targetKeys.Add("nugetCache");
+                    targetKeys.Add("pipCache");
+                    targetKeys.Add("vscodeCache");
+                }
+                var targets = DiskService.GetTargets().Where(t => targetKeys.Contains(t.Key));
                 double diskFreed = 0;
                 foreach (var t in targets)
                 {

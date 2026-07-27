@@ -116,6 +116,24 @@ namespace cchay_optimicer_cs.Views
             ApplyFilter();
             ListTargets.ItemsSource = _filteredTargets;
             UpdateSelectedStats();
+            UpdateDriveFreeSpace();
+        }
+
+        private void UpdateDriveFreeSpace()
+        {
+            try
+            {
+                var drive = new System.IO.DriveInfo("C");
+                if (drive.IsReady)
+                {
+                    double freeGB = drive.AvailableFreeSpace / 1024.0 / 1024.0 / 1024.0;
+                    TxtDriveFreeSpace.Text = $"{freeGB:F1} GB";
+                }
+            }
+            catch
+            {
+                TxtDriveFreeSpace.Text = "Desconocido";
+            }
         }
 
         private void ApplyFilter()
@@ -191,25 +209,41 @@ namespace cchay_optimicer_cs.Views
             SetButtonsState(false);
             TxtBtnPreview.Text = "Analizando...";
             CardFreed.Visibility = Visibility.Collapsed;
+            PanelDiskCleanProgress.Visibility = Visibility.Visible;
+            ProgDiskClean.Value = 0;
+            TxtDiskFreedLive.Text = "Analizando espacio...";
 
             try
             {
-                var tasks = selectedItems.Select(async vm =>
+                double totalMB = 0;
+                for (int i = 0; i < selectedItems.Count; i++)
                 {
+                    var vm = selectedItems[i];
+                    TxtDiskProgressStep.Text = $"Analizando ({i + 1}/{selectedItems.Count}): {vm.Name}...";
+                    ProgDiskClean.Value = (double)(i + 1) / selectedItems.Count * 100;
+
                     var processed = await DiskService.ProcessTargetAsync(vm.Target, delete: false);
                     vm.SizeMB = processed.SizeMB;
                     vm.ItemsCount = processed.ItemsCount;
                     vm.Cleaned = false;
-                    return processed.SizeMB > 0 ? processed.SizeMB : 0;
-                });
 
-                var sizes = await Task.WhenAll(tasks);
-                double totalMB = sizes.Sum();
+                    if (processed.SizeMB > 0)
+                    {
+                        totalMB += processed.SizeMB;
+                        TxtDiskFreedLive.Text = totalMB < 1 ? $"{(totalMB * 1024):F0} KB calculados" : $"{totalMB:F1} MB calculados";
+                    }
+
+                    await Task.Delay(100);
+                }
 
                 TxtPreviewSize.Text = totalMB == 0 ? "0 MB" : (totalMB < 1 ? $"{(totalMB * 1024):F0} KB" : $"{totalMB:F1} MB");
+                TxtDiskProgressStep.Text = "¡Análisis de espacio completado!";
+                await Task.Delay(300);
+                PanelDiskCleanProgress.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
+                PanelDiskCleanProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Disk preview error: {ex.Message}");
             }
             finally
@@ -227,25 +261,38 @@ namespace cchay_optimicer_cs.Views
             SetButtonsState(false);
             TxtBtnClean.Text = "Limpiando...";
             CardFreed.Visibility = Visibility.Collapsed;
+            PanelDiskCleanProgress.Visibility = Visibility.Visible;
+            ProgDiskClean.Value = 0;
+            TxtDiskFreedLive.Text = "0 MB liberados";
 
             try
             {
                 // Create backup first
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
+                    TxtDiskProgressStep.Text = "Creando punto de restauración...";
                     await BackupService.CreateRestorePointAsync("Cchay Disk Cleanup");
                 }
 
-                var tasks = selectedItems.Select(async vm =>
+                double totalFreedMB = 0;
+                for (int i = 0; i < selectedItems.Count; i++)
                 {
-                    var processed = await DiskService.ProcessTargetAsync(vm.Target, delete: true);
-                    vm.SizeMB = -1; // Clear size preview
-                    vm.Cleaned = true;
-                    return processed.SizeMB > 0 ? processed.SizeMB : 0;
-                });
+                    var vm = selectedItems[i];
+                    TxtDiskProgressStep.Text = $"Limpiando ({i + 1}/{selectedItems.Count}): {vm.Name}...";
+                    ProgDiskClean.Value = (double)(i + 1) / selectedItems.Count * 100;
 
-                var sizes = await Task.WhenAll(tasks);
-                double totalFreedMB = sizes.Sum();
+                    var processed = await DiskService.ProcessTargetAsync(vm.Target, delete: true);
+                    vm.SizeMB = -1;
+                    vm.Cleaned = true;
+
+                    if (processed.SizeMB > 0)
+                    {
+                        totalFreedMB += processed.SizeMB;
+                        TxtDiskFreedLive.Text = totalFreedMB < 1 ? $"{(totalFreedMB * 1024):F0} KB liberados" : $"{totalFreedMB:F1} MB liberados";
+                    }
+
+                    await Task.Delay(120);
+                }
 
                 // Save stats
                 SettingsService.Settings.TotalMbDiskFreed += totalFreedMB;
@@ -255,9 +302,17 @@ namespace cchay_optimicer_cs.Views
                 TxtFreedSize.Text = totalFreedMB == 0 ? "0 MB" : (totalFreedMB < 1 ? $"{(totalFreedMB * 1024):F0} KB" : $"{totalFreedMB:F1} MB");
                 CardFreed.Visibility = Visibility.Visible;
                 TxtPreviewSize.Text = "0 MB";
+                
+                // Update the C: drive free space after cleanup
+                UpdateDriveFreeSpace();
+
+                TxtDiskProgressStep.Text = "¡Limpieza de disco completada!";
+                await Task.Delay(400);
+                PanelDiskCleanProgress.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
+                PanelDiskCleanProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Disk cleanup error: {ex.Message}");
             }
             finally

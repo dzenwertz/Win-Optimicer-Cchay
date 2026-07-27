@@ -257,14 +257,51 @@ namespace cchay_optimicer_cs.Services
             return CleanSystemInformation(6);
         }
 
+        public static void TrimAppWorkingSet()
+        {
+            try
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+            }
+            catch { }
+        }
+
         public static async Task<long> CleanAll()
         {
+            return await CleanAllWithProgressAsync((_, _, _) => { });
+        }
+
+        public static async Task<long> CleanAllWithProgressAsync(Action<string, double, long> onProgress)
+        {
             long total = 0;
-            total += await CleanWorkingSet();
-            total += await CleanStandbyList();
-            total += await CleanSystemFileCache();
-            total += await CleanModifiedPageList();
-            total += await CleanCombinedPageList();
+
+            onProgress("Purgando conjuntos de trabajo (Working Sets)...", 20, total);
+            long step1 = await CleanWorkingSet();
+            total += step1;
+            await Task.Delay(250);
+
+            onProgress("Vaciando lista de espera (Standby List)...", 40, total);
+            long step2 = await CleanStandbyList();
+            total += step2;
+            await Task.Delay(250);
+
+            onProgress("Purgando caché del sistema de archivos...", 60, total);
+            long step3 = await CleanSystemFileCache();
+            total += step3;
+            await Task.Delay(250);
+
+            onProgress("Liberando páginas modificadas de memoria...", 80, total);
+            long step4 = await CleanModifiedPageList();
+            total += step4;
+            await Task.Delay(250);
+
+            onProgress("Optimizando lista combinada de memoria...", 100, total);
+            long step5 = await CleanCombinedPageList();
+            total += step5;
+            await Task.Delay(250);
+
             return total;
         }
     }
