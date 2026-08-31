@@ -1,20 +1,20 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="Cchay Optimicer" 
-           Manufacturer="Joseph Ivan Cachay Vargas" 
-           Version="2.0.1" 
+  <Package Name="RETH Optimicer" 
+           Manufacturer="RETH" 
+           Version="3.0.0" 
            UpgradeCode="d21f8a84-0a34-4b5f-9db1-d4ab6f19634e" 
            Scope="perMachine">
 
-    <MajorUpgrade DowngradeErrorMessage="Una versión más reciente de Cchay Optimicer ya está instalada." />
+    <MajorUpgrade DowngradeErrorMessage="Una versión más reciente de RETH Optimicer ya está instalada." />
 
     <!-- Icon for Add/Remove Programs -->
-    <Icon Id="AppIcon" SourceFile="Assets\cchay_logo.ico"/>
+    <Icon Id="AppIcon" SourceFile="Assets\reth.ico"/>
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz/RETH-Optimicer" />
 
     <!-- Professional Wizard UI with Launch Checkbox -->
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Ejecutar Cchay Optimicer al finalizar" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Ejecutar RETH Optimicer al finalizar" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
 
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
@@ -39,11 +39,11 @@
 
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Cchay Optimicer" />
+      <Directory Id="INSTALLFOLDER" Name="RETH Optimicer" />
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="ApplicationProgramsFolder" Name="Cchay Optimicer" />
+      <Directory Id="ApplicationProgramsFolder" Name="RETH Optimicer" />
     </StandardDirectory>
 
     <StandardDirectory Id="DesktopFolder" />
@@ -53,19 +53,19 @@
       <!-- Main executable -->
       <Component Id="MainExecutable" Guid="a6582a84-0b34-4b5f-9db1-d4ab6f19635f">
         <File Id="ExecutableFile" 
-              Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\cchay-optimicer-cs.exe" 
+              Source="bin\Release\net8.0-windows10.0.19041.0\win-x64\publish\RethOptimicer.exe" 
               KeyPath="yes">
           <!-- Start Menu Shortcut -->
           <Shortcut Id="StartMenuShortcut"
                     Directory="ApplicationProgramsFolder"
-                    Name="Cchay Optimicer"
+                    Name="RETH Optimicer"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="AppIcon" />
 
           <!-- Desktop Shortcut -->
           <Shortcut Id="DesktopShortcut"
                     Directory="DesktopFolder"
-                    Name="Cchay Optimicer"
+                    Name="RETH Optimicer"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="AppIcon" />
         </File>
@@ -84,7 +84,7 @@
       <Component Id="ApplicationShortcutMenuFolder" Guid="b7582a84-0c34-4b5f-9db1-d4ab6f19636f">
         <RemoveFolder Id="CleanUpShortCut" On="uninstall" />
         <RegistryValue Root="HKMU" 
-                       Key="Software\CchayOptimicer" 
+                       Key="Software\RethOptimicer" 
                        Name="installed" 
                        Type="integer" 
                        Value="1" 
@@ -93,7 +93,7 @@
     </DirectoryRef>
 
     <!-- Feature tree -->
-    <Feature Id="ProductFeature" Title="Cchay Optimicer Installation" Level="1">
+    <Feature Id="ProductFeature" Title="RETH Optimicer Installation" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="ApplicationShortcutMenuFolder" />
     </Feature>

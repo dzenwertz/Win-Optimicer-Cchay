@@ -34,9 +34,8 @@
                 </Grid>
             </ui:Card>
 
-            <!-- Progress Bar -->
+            <TextBlock x:Name="TxtStatus" Text="" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
             <StackPanel x:Name="ProgressSection" Visibility="Collapsed" Margin="0,0,0,20">
-                <TextBlock x:Name="TxtStatus" Text="Escaneando archivos..." FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                 <ProgressBar x:Name="ScanProgressBar" Height="8" IsIndeterminate="True" />
             </StackPanel>
 

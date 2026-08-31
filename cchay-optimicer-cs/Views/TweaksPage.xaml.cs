@@ -61,7 +61,7 @@ namespace cchay_optimicer_cs.Views
                 // Create backup restore point automatically before applying tweaks for safety (only if admin)
                 if (SystemService.IsRunningAsAdmin() && SettingsService.Settings.AutoRestorePointEnabled)
                 {
-                    await BackupService.CreateRestorePointAsync($"Cchay Tweak {Name}");
+                    await BackupService.CreateRestorePointAsync($"RETH Tweak {Name}");
                 }
 
                 if (enable)

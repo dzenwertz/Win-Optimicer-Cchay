@@ -37,8 +37,8 @@
                             <ui:SymbolIcon x:Name="ShieldIcon" Symbol="ShieldCheckmark48" FontSize="64" Foreground="#40C057" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Grid>
 
-                        <TextBlock x:Name="TxtStatusTitle" Text="Sistema Protegido" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,6" />
-                        <TextBlock x:Name="TxtStatusDesc" Text="El sistema no tiene amenazas activas registradas." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,20" />
+                        <TextBlock x:Name="TxtStatusTitle" Text="Sin análisis reciente" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                        <TextBlock x:Name="TxtStatusDesc" Text="Ejecuta un análisis heurístico de procesos. No sustituye a un antivirus." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,20" />
 
                         <!-- Main Scan buttons -->
                         <Grid>

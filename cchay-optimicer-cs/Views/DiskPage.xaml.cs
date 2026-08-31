@@ -271,7 +271,7 @@ namespace cchay_optimicer_cs.Views
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
                     TxtDiskProgressStep.Text = "Creando punto de restauración...";
-                    await BackupService.CreateRestorePointAsync("Cchay Disk Cleanup");
+                    await BackupService.CreateRestorePointAsync("RETH Disk Cleanup");
                 }
 
                 double totalFreedMB = 0;

@@ -1,40 +1,88 @@
-# Win-Optimicer-Cchay
+# RETH Optimicer
 
-Herramienta gratuita y de codigo abierto para la optimizacion de rendimiento en sistemas operativos Windows, desarrollada en C# utilizando WPF y WPF-UI.
+Optimizador todo en uno para **Windows** y **Linux**. Producto de RETH Labs: sin publicidad, sin telemetría oculta, código auditable.
 
-## Vision del Proyecto
-Win-Optimicer-Cchay ha sido creada como una contribucion de codigo abierto para la comunidad, ofreciendo diagnostico de hardware, mantenimiento profundo del sistema y ajuste de parametros de rendimiento sin publicidad ni software no deseado.
+Versión **3.0.0** · Licencia [GPL-3.0](LICENSE) · Repositorio: [dzenwertz/Win-Optimicer-Cchay](https://github.com/dzenwertz/Win-Optimicer-Cchay)
 
-## Caracteristicas Tecnicas
+## Descargar
 
-- **Optimizador de Memoria RAM:** Limpieza de Working Set, Standby List, System File Cache, Modified Page List y Combined Page List.
-- **Limpieza de Almacenamiento:** Eliminacion de archivos temporales, registros de auditoria, componentes obsoletos de Windows Update (DISM) y cache de navegadores (Chrome, Edge, Firefox, Brave).
-- **Ajustes del Sistema (Tweaks):** Optimizacion de prioridad de CPU, latencia de red TCP/IP, perfiles de rendimiento para juegos y desactivacion de servicios redundantes de telemetria.
-- **Gestion de Bloatware:** Desinstalacion profunda de aplicaciones nativas innecesarias.
-- **Optimizacion de Red:** Configuracion rapida de servidores DNS (Cloudflare, Google, OpenDNS, AdGuard, Quad9) con verificacion de latencia en tiempo real.
-- **Administrador de Inicio:** Control de programas de arranque automatico con el sistema operativo.
-- **Respaldo:** Creacion y gestion de Puntos de Restauracion del Sistema nativos.
+Instaladores y paquetes en **[Releases](https://github.com/dzenwertz/Win-Optimicer-Cchay/releases)**:
 
-## Requisitos del Sistema
+| Archivo | Para |
+|---|---|
+| `RETH-Optimicer-Windows-portable-v3.0.0.zip` | Windows 10/11 (x64), ejecutable autónomo |
+| `RETH-Optimicer-Linux-v3.0.0.tar.gz` | Linux (GTK 4 + libadwaita) |
+| `RETH-Optimicer-Website-v3.0.0.zip` | Landing del producto |
+| `SHA256SUMS.txt` | Verificación de integridad |
 
-- Windows 10 (Build 19041 o superior) o Windows 11.
-- .NET 8.0 Runtime / SDK.
-- Privilegios de Administrador.
+Cada tag `vX.Y.Z` dispara el workflow de Release y publica esos archivos.
 
-## Compilacion e Instalacion
+## Qué hace
 
-1. Clonar el repositorio:
-   `ash
-   git clone https://github.com/dzenwertz/Win-Optimicer-Cchay.git
-   `
-2. Restaurar dependencias:
-   `ash
-   dotnet restore
-   `
-3. Compilar en modo Release:
-   `ash
-   dotnet build -c Release
-   `
+- Diagnóstico de CPU, RAM, disco y red
+- Limpieza de memoria y temporales
+- Ajustes de rendimiento y privacidad con confirmación
+- Programas de inicio y servicios
+- DNS, respaldo y reparación básica
+- Un clic para mantenimiento **seguro** (sin desactivar Bluetooth, Xbox ni OneDrive)
 
-## Licencia
-Este proyecto se distribuye como software libre y gratuito para la comunidad bajo la licencia MIT.
+## Estructura del repositorio
+
+```
+cchay-optimicer-cs/        App Windows (WPF, .NET 8)
+cchay-optimicer-cs-tests/  Tests Windows
+linux/                     App Linux (Python + GTK 4)
+installer/                 Inno Setup y scripts Windows
+installer_project/         Asistente de instalación embebido
+website/                   Landing RETH Optimicer
+.github/workflows/         CI y Releases
+```
+
+## Windows
+
+Requisitos: Windows 10 (build 19041+) o 11, administrador.
+
+Portable (Release):
+
+1. Baja el zip `RETH-Optimicer-Windows-portable-*.zip`
+2. Extrae y ejecuta `RethOptimicer.exe`
+
+Compilar:
+
+```bat
+dotnet publish cchay-optimicer-cs\cchay-optimicer-cs.csproj -c Release -r win-x64 --self-contained true -o publish
+```
+
+Instalador Inno Setup: `installer/installer.iss` → `RETH_Optimicer_Setup_v3.0.0.exe`
+
+## Linux
+
+Requisitos: Python 3.10+, GTK 4, libadwaita, `pkexec` para acciones de root.
+
+```bash
+git clone https://github.com/dzenwertz/Win-Optimicer-Cchay.git
+cd Win-Optimicer-Cchay/linux
+chmod +x install.sh
+./install.sh
+reth-optimicer
+```
+
+Arch / EndeavourOS:
+
+```bash
+sudo pacman -S python gtk4 libadwaita polkit
+```
+
+## Pruebas
+
+```bash
+python3 -m unittest linux.tests.test_modules
+```
+
+```bat
+dotnet test cchay-optimicer-cs-tests
+```
+
+## Marca
+
+Ave RETH + wordmark. Acento `#7ED4F5`, fondo `#07090B`.

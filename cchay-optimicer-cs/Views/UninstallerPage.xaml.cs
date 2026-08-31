@@ -55,10 +55,14 @@ namespace cchay_optimicer_cs.Views
             await LoadProgramsAsync();
         }
 
-        private async void ListPrograms_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void BtnUninstall_Click(object sender, RoutedEventArgs e)
         {
             var selected = ListPrograms.SelectedItem as InstalledProgram;
-            if (selected == null) return;
+            if (selected == null)
+            {
+                MessageBox.Show("Selecciona un programa de la lista.", "Desinstalador", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"¿Deseas desinstalar '{selected.Name}' y escanear sus archivos huérfanos residuo en el sistema?",
@@ -72,7 +76,7 @@ namespace cchay_optimicer_cs.Views
                 bool launched = await UninstallerService.UninstallProgramAsync(selected);
                 if (!launched)
                 {
-                    MessageBox.Show("No se pudo iniciar el desinstalador. Verifica que la aplicaciÃ³n siga instalada e inténtalo de nuevo.", "Error de desinstalación", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("No se pudo iniciar el desinstalador. Verifica que la aplicación siga instalada e inténtalo de nuevo.", "Error de desinstalación", MessageBoxButton.OK, MessageBoxImage.Error);
                     ListPrograms.SelectedItem = null;
                     return;
                 }

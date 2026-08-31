@@ -9,6 +9,14 @@
                 <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Wpf.Ui.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="RethAccentColor">#7ED4F5</Color>
+            <Color x:Key="RethInkColor">#07090B</Color>
+            <Color x:Key="RethSurfaceColor">#101418</Color>
+            <SolidColorBrush x:Key="RethAccentBrush" Color="#7ED4F5" />
+            <SolidColorBrush x:Key="RethInkBrush" Color="#07090B" />
+            <SolidColorBrush x:Key="RethSurfaceBrush" Color="#101418" />
+            <SolidColorBrush x:Key="RethMutedBrush" Color="#9AB3C0" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

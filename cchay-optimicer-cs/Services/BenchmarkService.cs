@@ -21,7 +21,7 @@ namespace cchay_optimicer_cs.Services
     {
         private static readonly string BaselineFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CchayOptimicer",
+            "RethOptimicer",
             "benchmarkBaseline.json"
         );
 

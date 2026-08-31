@@ -146,7 +146,7 @@ namespace cchay_optimicer_cs.Views
                 // Create restore point before modifying startup entries
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
-                    await BackupService.CreateRestorePointAsync($"Cchay Startup {vm.Name}");
+                    await BackupService.CreateRestorePointAsync($"RETH Startup {vm.Name}");
                 }
 
                 success = await StartupService.ToggleStartupItemAsync(vm.Item, enabled);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
-                    await BackupService.CreateRestorePointAsync("Cchay Tech Optimize");
+                    await BackupService.CreateRestorePointAsync("RETH Optimicer");
                 }
                 catch { }
             }
@@ -60,52 +61,46 @@ namespace cchay_optimicer_cs.Services
             }
             catch { }
 
-            // Step 4: Apply Performance Tweaks (55%)
-            progressCallback("Aplicando tweaks de registro y rendimiento seguros...", 55);
+            // Step 4: Apply a small whitelist of reversible performance tweaks.
+            progressCallback("Aplicando ajustes de rendimiento seguros...", 55);
             await Task.Delay(200);
             try
             {
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "ultimate-performance",
+                    "disable-nagle",
+                    "disable-gamebar",
+                    "visual-performance"
+                };
                 var tweaks = await TweakService.GetTweaksAsync();
                 foreach (var tweak in tweaks)
                 {
-                    if (tweak.Risk == "safe" && !tweak.Enabled)
+                    if (!allowed.Contains(tweak.Key) || tweak.Enabled)
+                        continue;
+                    try
                     {
-                        try
-                        {
-                            await TweakService.ApplyTweakAsync(tweak.Key);
-                        }
-                        catch { } // Skip individual tweak failures
+                        await TweakService.ApplyTweakAsync(tweak.Key);
                     }
+                    catch { }
                 }
             }
             catch { }
 
-            // Step 5: Disable widgets & OneDrive (70%)
-            progressCallback("Desactivando componentes de bloatware (Widgets y OneDrive)...", 70);
+            // Step 5: Flush DNS only (do not disable OneDrive/Widgets from one-click).
+            progressCallback("Vaciando caché DNS...", 70);
             await Task.Delay(200);
             try
             {
-                await BloatwareService.DisableOneDriveAsync();
-            }
-            catch { }
-            try
-            {
-                await BloatwareService.DisableWidgetsAsync();
-            }
-            catch { }
-
-            // Step 6: Optimize Network/DNS (85%)
-            progressCallback("Analizando latencia DNS y configurando servidor más rápido...", 85);
-            await Task.Delay(200);
-            try
-            {
-                var dnsProviders = await NetworkService.TestAllPingsAsync();
-                var fastest = dnsProviders.FirstOrDefault();
-                if (fastest != null && fastest.Ping != 999)
-                {
-                    await NetworkService.SetDnsAsync(new[] { fastest.Primary, fastest.Secondary });
-                }
                 await NetworkService.FlushDnsAsync();
+            }
+            catch { }
+
+            // Step 6: TCP tweaks only — do not hijack the user's DNS.
+            progressCallback("Aplicando ajustes TCP de baja latencia...", 85);
+            await Task.Delay(200);
+            try
+            {
                 await NetworkService.ApplyTcpTweaksAsync(true);
             }
             catch { }

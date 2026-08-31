@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:cchay_optimicer_cs"
         xmlns:views="clr-namespace:cchay_optimicer_cs.Views"
         mc:Ignorable="d"
-        Title="Cchay Optimicer" Height="750" Width="1100" Icon="pack://application:,,,/Assets/cchay_logo.png"
+        Title="RETH Optimicer" Height="750" Width="1100" Icon="pack://application:,,,/Assets/reth_logo.png"
         Background="{DynamicResource ApplicationBackgroundBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         WindowStartupLocation="CenterScreen">
@@ -23,19 +23,19 @@
             <Border x:Name="AdminWarningBar" Background="#7F1D1D" BorderThickness="0,0,0,1" BorderBrush="#F87171" Padding="14,10,14,10" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <ui:SymbolIcon Symbol="Warning24" Foreground="#F87171" Margin="0,0,8,0" />
-                    <TextBlock Text="Modo limitado: Cchay Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
+                    <TextBlock Text="Modo limitado: RETH Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
 
             <!-- Reboot Required Bar -->
-            <Border x:Name="RebootRequiredBar" Background="#0C4A6E" BorderThickness="0,0,0,1" BorderBrush="#38BDF8" Padding="14,10,14,10" Visibility="Collapsed">
+            <Border x:Name="RebootRequiredBar" Background="#0A2A33" BorderThickness="0,0,0,1" BorderBrush="#7ED4F5" Padding="14,10,14,10" Visibility="Collapsed">
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
-                        <ui:SymbolIcon Symbol="Info24" Foreground="#38BDF8" Margin="0,0,8,0" />
+                        <ui:SymbolIcon Symbol="Info24" Foreground="#7ED4F5" Margin="0,0,8,0" />
                         <TextBlock Text="Se recomienda reiniciar el equipo para aplicar todas las optimizaciones y cambios de registro." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Center">
@@ -52,7 +52,19 @@
             <ui:NavigationView x:Name="RootNavigation"
                                 PaneDisplayMode="Left"
                                 IsBackButtonVisible="Collapsed"
-                                IsPaneToggleVisible="True">
+                                IsPaneToggleVisible="True"
+                                OpenPaneLength="248">
+                <ui:NavigationView.PaneHeader>
+                    <StackPanel Orientation="Horizontal" Margin="16,12,12,8">
+                        <Image Source="pack://application:,,,/Assets/reth_logo.png"
+                               Width="28" Height="28" Margin="0,0,10,0"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="RETH" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource RethAccentBrush}" />
+                            <TextBlock Text="Optimicer" FontSize="11" Foreground="{StaticResource RethMutedBrush}" Margin="0,-1,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                </ui:NavigationView.PaneHeader>
                 <ui:NavigationView.MenuItems>
                     <ui:NavigationViewItem Content="Dashboard" Tag="dashboard" TargetPageType="{x:Type views:DashboardPage}" Icon="{ui:SymbolIcon Symbol=Home24}" />
                     <ui:NavigationViewItemSeparator />
@@ -67,7 +79,7 @@
                     <ui:NavigationViewItem Content="Programas de Inicio" Tag="startup" TargetPageType="{x:Type views:StartupPage}" Icon="{ui:SymbolIcon Symbol=Desktop24}" />
                     <ui:NavigationViewItem Content="Servicios de Windows" Tag="services" TargetPageType="{x:Type views:ServicesPage}" Icon="{ui:SymbolIcon Symbol=Briefcase24}" />
                     <ui:NavigationViewItem Content="Instalador de Apps" Tag="software" TargetPageType="{x:Type views:SoftwarePage}" Icon="{ui:SymbolIcon Symbol=ArrowDownload24}" />
-                    <ui:NavigationViewItem Content="Escáner de Virus" Tag="scanner" TargetPageType="{x:Type views:ScannerPage}" Icon="{ui:SymbolIcon Symbol=Shield24}" />
+                    <ui:NavigationViewItem Content="Análisis de procesos" Tag="scanner" TargetPageType="{x:Type views:ScannerPage}" Icon="{ui:SymbolIcon Symbol=Shield24}" />
                     <ui:NavigationViewItem Content="Reparar Sistema" Tag="repair" TargetPageType="{x:Type views:RepairPage}" Icon="{ui:SymbolIcon Symbol=Toolbox24}" />
                     <ui:NavigationViewItem Content="Benchmark PC" Tag="benchmark" TargetPageType="{x:Type views:BenchmarkPage}" Icon="{ui:SymbolIcon Symbol=Pulse24}" />
                     <ui:NavigationViewItemSeparator />
@@ -75,7 +87,7 @@
                     <ui:NavigationViewItem Content="Configuración" Tag="settings" TargetPageType="{x:Type views:SettingsPage}" Icon="{ui:SymbolIcon Symbol=Settings24}" />
                 </ui:NavigationView.MenuItems>
                 <ui:NavigationView.FooterMenuItems>
-                    <ui:NavigationViewItem Content="Desarrollado por Joseph ICV , dzenwertz" Icon="{ui:SymbolIcon Symbol=Heart24}" Click="FooterAttribution_Click" />
+                    <ui:NavigationViewItem Content="RETH Labs" Icon="{ui:SymbolIcon Symbol=Globe24}" Click="FooterAttribution_Click" />
                 </ui:NavigationView.FooterMenuItems>
             </ui:NavigationView>
         </Grid>

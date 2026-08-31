@@ -85,7 +85,7 @@
                                 <ui:SymbolIcon Symbol="Pulse24" FontSize="20" Foreground="#FD7E14" Margin="0,0,8,0" />
                                 <TextBlock Text="Mantenimiento Diario Automático" FontSize="14.5" FontWeight="SemiBold" />
                             </StackPanel>
-                            <TextBlock Text="Programa una optimización completa en segundo plano (Modo Técnico) a una hora específica del día para mantener el sistema óptimo de forma permanente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="Programa una optimización completa en segundo plano (Optimización profunda) a una hora específica del día para mantener el sistema óptimo de forma permanente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                         
                         <ui:ToggleSwitch x:Name="ToggleDailyMaintenance" Grid.Column="1" VerticalAlignment="Center" Checked="ToggleDailyMaintenance_Changed" Unchecked="ToggleDailyMaintenance_Changed" />
@@ -219,12 +219,12 @@
                     <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <ui:SymbolIcon Symbol="Person24" FontSize="20" Foreground="{DynamicResource AccentTextWritableBrush}" Margin="0,0,8,0" />
-                            <TextBlock Text="Desarrollador y Creador" FontSize="14.5" FontWeight="SemiBold" />
+                            <TextBlock Text="RETH Labs" FontSize="14.5" FontWeight="SemiBold" />
                         </StackPanel>
-                        <TextBlock Text="Cchay Optimicer fue desarrollado por Joseph Ivan Cachay Vargas. Es software libre, gratuito y transparente." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="RETH Optimicer es un producto de RETH Labs. Software libre, sin publicidad y sin telemetría." FontSize="11.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                     
-                    <ui:Button Grid.Column="1" Content="Visitar mi GitHub" Click="BtnGitHub_Click" VerticalAlignment="Center">
+                    <ui:Button Grid.Column="1" Content="GitHub" Click="BtnGitHub_Click" VerticalAlignment="Center">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="OpenFolder24" />
                         </ui:Button.Icon>

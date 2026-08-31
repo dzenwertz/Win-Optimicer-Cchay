@@ -15,6 +15,7 @@ obj/
 navigation_log.txt
 crash.txt
 tweakStates.json
+networkState.json
 
 # Instaladores y comprimidos
 *.cab
@@ -23,9 +24,25 @@ tweakStates.json
 *.zip
 *.rar
 *.7z
+*.exe
+*.pdb
+
+# Carpetas de salida de build e instaladores
+dist/
+publish/
+installer_output/
 
 # Carpetas externas e integraciones
 esteroides/
 .firebase/
-dist/
-publish/
+
+# Python (Linux)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Linux packaging leftovers
+*.deb
+*.rpm
+linux/dist/

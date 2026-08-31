@@ -52,7 +52,7 @@ namespace cchay_optimicer_cs.Views
                     double diffPercent = ((double)_lastResult.TotalScore - baseline.TotalScore) / baseline.TotalScore * 100;
                     if (diffPercent >= 0)
                     {
-                        improvementText = $"🚀 ¡Rendimiento +{diffPercent:F1}% superior comparado con tu línea base previa!";
+                        improvementText = $"Rendimiento +{diffPercent:F1}% respecto a la línea base.";
                     }
                     else
                     {

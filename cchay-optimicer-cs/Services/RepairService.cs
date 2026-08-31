@@ -106,7 +106,12 @@ namespace cchay_optimicer_cs.Services
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    process.WaitForExit(600000); // 10 minutes max timeout
+                    if (!process.WaitForExit(600000)) // 10 minutes max timeout
+                    {
+                        try { process.Kill(true); } catch { }
+                        outputCallback("[ERROR] El proceso excedió el tiempo límite de 10 minutos y fue cancelado.\r\n");
+                        return false;
+                    }
                     return process.ExitCode == 0;
                 }
             }

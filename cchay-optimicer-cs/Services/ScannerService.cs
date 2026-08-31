@@ -82,8 +82,9 @@ namespace cchay_optimicer_cs.Services
                         string currentProcName = Process.GetCurrentProcess().ProcessName;
                         if (name.Equals(currentProcName, StringComparison.OrdinalIgnoreCase) ||
                             name.Contains("Cchay", StringComparison.OrdinalIgnoreCase) ||
+                            name.Contains("RethOptimicer", StringComparison.OrdinalIgnoreCase) ||
                             name.Contains("cchay", StringComparison.OrdinalIgnoreCase) ||
-                            filePath.Contains(@"\Cchay Optimicer\", StringComparison.OrdinalIgnoreCase))
+                            filePath.Contains(@"\RETH Optimicer\", StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
                         }
@@ -137,7 +138,7 @@ namespace cchay_optimicer_cs.Services
                                                        filePath.Contains(@"\OmniSharp", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\AppData\Local\Programs\Microsoft VS Code", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\AppData\Local\Programs\Antigravity IDE", StringComparison.OrdinalIgnoreCase) ||
-                                                       filePath.Contains(@"\AppData\Local\Programs\Cchay Optimicer", StringComparison.OrdinalIgnoreCase) ||
+                                                       filePath.Contains(@"\AppData\Local\Programs\RETH Optimicer", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\npm", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\node_modules", StringComparison.OrdinalIgnoreCase) ||
                                                        filePath.Contains(@"\bin\Debug\", StringComparison.OrdinalIgnoreCase) ||
@@ -284,32 +285,7 @@ namespace cchay_optimicer_cs.Services
                     }
                 }
 
-                if (!processKilled) return false;
-
-                // Delete file
-                try
-                {
-                    if (File.Exists(threat.Path))
-                    {
-                        File.SetAttributes(threat.Path, FileAttributes.Normal);
-                        File.Delete(threat.Path);
-                    }
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to delete threat file: {ex.Message}");
-                    
-                    // Delay until reboot
-                    try
-                    {
-                        return MoveFileEx(threat.Path, null, MoveFileFlags.MOVEFILE_DELAY_UNTIL_REBOOT);
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
+                return processKilled;
             });
         }
     }

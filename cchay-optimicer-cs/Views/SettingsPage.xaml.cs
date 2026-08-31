@@ -18,6 +18,7 @@ namespace cchay_optimicer_cs.Views
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _isInitialized = false;
             var settings = SettingsService.Settings;
 
             // Bind values
@@ -163,10 +164,10 @@ namespace cchay_optimicer_cs.Views
 
         private async void ShowMessage(string message)
         {
-            TxtMessage.Text = "⚙️ " + message;
+            TxtMessage.Text = message;
             TxtMessage.Visibility = Visibility.Visible;
             await Task.Delay(2500);
-            if (TxtMessage.Text == "⚙️ " + message)
+            if (TxtMessage.Text == message)
             {
                 TxtMessage.Visibility = Visibility.Collapsed;
             }
@@ -178,7 +179,7 @@ namespace cchay_optimicer_cs.Views
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "https://github.com/dzenwertz",
+                    FileName = "https://github.com/dzenwertz/RETH-Optimicer",
                     UseShellExecute = true
                 });
             }

@@ -15,7 +15,7 @@ namespace cchay_optimicer_cs.Services
     {
         private static readonly string StateFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CchayOptimicer",
+            "RethOptimicer",
             "networkState.json"
         );
 
@@ -235,8 +235,8 @@ namespace cchay_optimicer_cs.Services
                 try
                 {
                     string script = @"
-                        New-NetQosPolicy -Name 'CchayGamingQoS' -AppPathNameMatchCondition '*cs2.exe*' -ThrottleRateActionBitsPerSecond 0 -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
-                        New-NetQosPolicy -Name 'CchayDiscordQoS' -AppPathNameMatchCondition '*Discord.exe*' -ThrottleRateActionBitsPerSecond 0 -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
+                        New-NetQosPolicy -Name 'RethGamingQoS' -AppPathNameMatchCondition '*cs2.exe*' -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
+                        New-NetQosPolicy -Name 'RethDiscordQoS' -AppPathNameMatchCondition '*Discord.exe*' -DSCPAction 46 -ErrorAction SilentlyContinue 2>$null
                     ";
                     return RunPowerShell(script);
                 }
@@ -256,6 +256,8 @@ namespace cchay_optimicer_cs.Services
                     string script = @"
                         Remove-NetQosPolicy -Name 'CchayGamingQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
                         Remove-NetQosPolicy -Name 'CchayDiscordQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
+                        Remove-NetQosPolicy -Name 'RethGamingQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
+                        Remove-NetQosPolicy -Name 'RethDiscordQoS' -Confirm:$false -ErrorAction SilentlyContinue 2>$null
                     ";
                     return RunPowerShell(script);
                 }

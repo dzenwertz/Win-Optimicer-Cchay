@@ -278,7 +278,7 @@ namespace cchay_optimicer_cs.Views
                     // Create system restore point first for safety
                     if (SettingsService.Settings.AutoRestorePointEnabled)
                     {
-                        await BackupService.CreateRestorePointAsync($"Cchay DNS Config {vm.Name}");
+                        await BackupService.CreateRestorePointAsync($"RETH DNS Config {vm.Name}");
                     }
 
                     bool success = await NetworkService.SetDnsAsync(new[] { vm.Primary, vm.Secondary });

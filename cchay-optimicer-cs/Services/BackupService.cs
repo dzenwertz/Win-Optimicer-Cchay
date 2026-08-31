@@ -65,7 +65,7 @@ namespace cchay_optimicer_cs.Services
                         dwEventType = BEGIN_SYSTEM_CHANGE,
                         dwRestorePtType = MODIFY_SETTINGS,
                         llSequenceNumber = 0,
-                        szDescription = string.IsNullOrEmpty(description) ? "CchayOptimicer_Backup" : $"CchayOptimicer_{description}"
+                        szDescription = string.IsNullOrEmpty(description) ? "RethOptimicer_Backup" : $"RethOptimicer_{description}"
                     };
 
                     var status = new STATEMGRSTATUS();
@@ -131,17 +131,11 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = "vssadmin",
-                        Arguments = "delete shadows /all /quiet",
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
-                    var process = Process.Start(psi);
-                    process?.WaitForExit(10000);
-                    return process?.ExitCode == 0;
+                    // Only System Restore on C:, not every VSS snapshot (File History, backups).
+                    var result = ProcessRunner.RunPowerShell(
+                        "Disable-ComputerRestore -Drive 'C:\\'; Enable-ComputerRestore -Drive 'C:\\'",
+                        60000);
+                    return result.Success;
                 }
                 catch
                 {

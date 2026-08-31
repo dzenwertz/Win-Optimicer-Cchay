@@ -33,7 +33,7 @@ namespace CchaySetup
 
         public MainWindow()
         {
-            Title = "Asistente de Instalación y Reparación - Cchay Optimicer";
+            Title = "Asistente de Instalación y Reparación - RETH Optimicer";
             Width = 540;
             Height = 380;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -43,9 +43,9 @@ namespace CchaySetup
             _targetDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Programs",
-                "Cchay Optimicer"
+                "RETH Optimicer"
             );
-            _targetExe = Path.Combine(_targetDir, "CchayOptimicer.exe");
+            _targetExe = Path.Combine(_targetDir, "RethOptimicer.exe");
             _isAlreadyInstalled = File.Exists(_targetExe);
 
             BuildUI();
@@ -62,7 +62,7 @@ namespace CchaySetup
             // Title
             var title = new TextBlock
             {
-                Text = _isAlreadyInstalled ? "Actualizar / Reparar Cchay Optimicer" : "Instalar Cchay Optimicer",
+                Text = _isAlreadyInstalled ? "Actualizar / Reparar RETH Optimicer" : "Instalar RETH Optimicer",
                 FontSize = 22,
                 FontWeight = FontWeights.Bold,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xF8, 0xFA, 0xFC)),
@@ -171,7 +171,7 @@ namespace CchaySetup
 
         private static void KillRunningProcesses()
         {
-            string[] procNames = { "CchayOptimicer", "cchay-optimicer-cs" };
+            string[] procNames = { "RethOptimicer", "cchay-optimicer-cs" };
             foreach (var name in procNames)
             {
                 try
@@ -196,7 +196,7 @@ namespace CchaySetup
             SetButtonsState(false);
             _progressBar.Visibility = Visibility.Visible;
             _progressBar.Value = 10;
-            _statusText.Text = "Deteniendo procesos activos de Cchay Optimicer para liberar archivos...";
+            _statusText.Text = "Deteniendo procesos activos de RETH Optimicer para liberar archivos...";
 
             await Task.Run(() => KillRunningProcesses());
 
@@ -211,7 +211,7 @@ namespace CchaySetup
 
                 // Extract embedded payload
                 _progressBar.Value = 60;
-                _statusText.Text = "Extrayendo payload autónomo de Cchay Optimicer...";
+                _statusText.Text = "Extrayendo payload autónomo de RETH Optimicer...";
                 var asm = Assembly.GetExecutingAssembly();
                 using (var stream = asm.GetManifestResourceStream("Payload.exe"))
                 {
@@ -235,8 +235,8 @@ namespace CchaySetup
 
                 var res = MessageBox.Show(
                     _isAlreadyInstalled
-                        ? "¡Cchay Optimicer ha sido actualizado y reparado con éxito!\n\n¿Deseas iniciar la aplicación ahora?"
-                        : "¡Cchay Optimicer se ha instalado correctamente en tu equipo!\n\n¿Deseas iniciar la aplicación ahora?",
+                        ? "¡RETH Optimicer ha sido actualizado y reparado con éxito!\n\n¿Deseas iniciar la aplicación ahora?"
+                        : "¡RETH Optimicer se ha instalado correctamente en tu equipo!\n\n¿Deseas iniciar la aplicación ahora?",
                     "Operación Exitosa",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Information
@@ -260,7 +260,7 @@ namespace CchaySetup
         private async void BtnUninstall_Click(object sender, RoutedEventArgs e)
         {
             var confirm = MessageBox.Show(
-                "¿Estás seguro de que deseas desinstalar Cchay Optimicer de tu sistema?\nSe eliminarán la carpeta del programa y sus accesos directos.",
+                "¿Estás seguro de que deseas desinstalar RETH Optimicer de tu sistema?\nSe eliminarán la carpeta del programa y sus accesos directos.",
                 "Confirmar Desinstalación",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning
@@ -271,7 +271,7 @@ namespace CchaySetup
             SetButtonsState(false);
             _progressBar.Visibility = Visibility.Visible;
             _progressBar.Value = 20;
-            _statusText.Text = "Deteniendo procesos activos de Cchay Optimicer...";
+            _statusText.Text = "Deteniendo procesos activos de RETH Optimicer...";
 
             await Task.Run(() =>
             {
@@ -280,10 +280,10 @@ namespace CchaySetup
                 // Delete shortcuts
                 try
                 {
-                    string desktopLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Cchay Optimicer.lnk");
+                    string desktopLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RETH Optimicer.lnk");
                     if (File.Exists(desktopLink)) File.Delete(desktopLink);
 
-                    string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Cchay Optimicer");
+                    string startMenuDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "RETH Optimicer");
                     if (Directory.Exists(startMenuDir)) Directory.Delete(startMenuDir, true);
                 }
                 catch { }
@@ -292,7 +292,7 @@ namespace CchaySetup
                 try
                 {
                     using var hkcu = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", true);
-                    hkcu?.DeleteSubKeyTree("CchayOptimicer", false);
+                    hkcu?.DeleteSubKeyTree("RethOptimicer", false);
                 }
                 catch { }
 
@@ -308,10 +308,10 @@ namespace CchaySetup
             });
 
             _progressBar.Value = 100;
-            _statusText.Text = "¡Cchay Optimicer ha sido desinstalado completamente de tu PC!";
+            _statusText.Text = "¡RETH Optimicer ha sido desinstalado completamente de tu PC!";
 
             MessageBox.Show(
-                "¡Cchay Optimicer ha sido desinstalado completamente de tu equipo!",
+                "¡RETH Optimicer ha sido desinstalado completamente de tu equipo!",
                 "Desinstalación Completa",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information
@@ -337,17 +337,17 @@ namespace CchaySetup
 
                 // Desktop shortcut
                 string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string desktopLink = Path.Combine(desktop, "Cchay Optimicer.lnk");
+                string desktopLink = Path.Combine(desktop, "RETH Optimicer.lnk");
                 dynamic shortcut = shell.CreateShortcut(desktopLink);
                 shortcut.TargetPath = targetExe;
                 shortcut.WorkingDirectory = workingDir;
-                shortcut.Description = "Cchay Optimicer - Optimizador de Rendimiento de PC";
+                shortcut.Description = "RETH Optimicer - Optimizador de Rendimiento de PC";
                 shortcut.Save();
 
                 // Start Menu shortcut
-                string startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Cchay Optimicer");
+                string startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "RETH Optimicer");
                 if (!Directory.Exists(startMenu)) Directory.CreateDirectory(startMenu);
-                string startLink = Path.Combine(startMenu, "Cchay Optimicer.lnk");
+                string startLink = Path.Combine(startMenu, "RETH Optimicer.lnk");
                 dynamic startShortcut = shell.CreateShortcut(startLink);
                 startShortcut.TargetPath = targetExe;
                 startShortcut.WorkingDirectory = workingDir;
@@ -360,15 +360,15 @@ namespace CchaySetup
         {
             try
             {
-                string regPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CchayOptimicer";
+                string regPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RethOptimicer";
                 using var key = Registry.CurrentUser.CreateSubKey(regPath);
                 if (key != null)
                 {
-                    key.SetValue("DisplayName", "Cchay Optimicer");
-                    key.SetValue("DisplayVersion", "2.0.1");
-                    key.SetValue("Publisher", "Joseph ICV & dzenwertz");
+                    key.SetValue("DisplayName", "RETH Optimicer");
+                    key.SetValue("DisplayVersion", "3.0.0");
+                    key.SetValue("Publisher", "RETH");
                     key.SetValue("DisplayIcon", targetExe);
-                    string uninstallCmd = $"powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Stop-Process -Name 'CchayOptimicer' -Force -ErrorAction SilentlyContinue; Remove-Item -Path '{workingDir}' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CchayOptimicer' -Recurse -Force -ErrorAction SilentlyContinue\"";
+                    string uninstallCmd = $"powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Stop-Process -Name 'RethOptimicer' -Force -ErrorAction SilentlyContinue; Remove-Item -Path '{workingDir}' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RethOptimicer' -Recurse -Force -ErrorAction SilentlyContinue\"";
                     key.SetValue("UninstallString", uninstallCmd);
                     key.SetValue("InstallLocation", workingDir);
                 }

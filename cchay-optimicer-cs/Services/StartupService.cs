@@ -14,7 +14,7 @@ namespace cchay_optimicer_cs.Services
     {
         private static readonly string StateFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CchayOptimicer",
+            "RethOptimicer",
             "startupState.json"
         );
 

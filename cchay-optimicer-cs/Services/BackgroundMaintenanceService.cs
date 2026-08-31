@@ -20,19 +20,39 @@ namespace cchay_optimicer_cs.Services
             if (_ramTimer != null) return;
 
             // Timer 1: Auto RAM check every 2 minutes
-            _ramTimer = new System.Threading.Timer(async _ => await CheckAndCleanRamAsync(), null, TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2));
+            _ramTimer = new System.Threading.Timer(async _ =>
+            {
+                try { await CheckAndCleanRamAsync(); }
+                catch (Exception ex) { Debug.WriteLine($"[BackgroundMaintenance] RAM timer error: {ex.Message}"); }
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2));
 
             // Timer 2: Daily maintenance check every 15 minutes
-            _dailyTimer = new System.Threading.Timer(async _ => await CheckDailyMaintenanceAsync(), null, TimeSpan.FromSeconds(45), TimeSpan.FromMinutes(15));
+            _dailyTimer = new System.Threading.Timer(async _ =>
+            {
+                try { await CheckDailyMaintenanceAsync(); }
+                catch (Exception ex) { Debug.WriteLine($"[BackgroundMaintenance] Daily timer error: {ex.Message}"); }
+            }, null, TimeSpan.FromSeconds(45), TimeSpan.FromMinutes(15));
 
             // Timer 3: Gamer process priority watcher every 15 seconds
-            _gamerTimer = new System.Threading.Timer(_ => CheckGamerProcessesPriority(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+            _gamerTimer = new System.Threading.Timer(_ =>
+            {
+                try { CheckGamerProcessesPriority(); }
+                catch (Exception ex) { Debug.WriteLine($"[BackgroundMaintenance] Gamer timer error: {ex.Message}"); }
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
 
             // Timer 4: Dev process priority watcher every 15 seconds
-            _devTimer = new System.Threading.Timer(_ => CheckDevProcessesPriority(), null, TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(15));
+            _devTimer = new System.Threading.Timer(_ =>
+            {
+                try { CheckDevProcessesPriority(); }
+                catch (Exception ex) { Debug.WriteLine($"[BackgroundMaintenance] Dev timer error: {ex.Message}"); }
+            }, null, TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(15));
 
             // Timer 5: Anti-Stuttering proactive memory purge check every 30 seconds
-            _stutterTimer = new System.Threading.Timer(async _ => await AntiStutterService.CheckAndPurgeIfNeededAsync(), null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+            _stutterTimer = new System.Threading.Timer(async _ =>
+            {
+                try { await AntiStutterService.CheckAndPurgeIfNeededAsync(); }
+                catch (Exception ex) { Debug.WriteLine($"[BackgroundMaintenance] AntiStutter timer error: {ex.Message}"); }
+            }, null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
         }
 
         private static async Task CheckAndCleanRamAsync()

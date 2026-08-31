@@ -24,9 +24,9 @@ namespace cchay_optimicer_cs.Views
         {
             var status = await TelemetryService.GetStatusAsync();
 
-            TxtHostsStatus.Text = status.HostsBlocked ? "Bloqueado 🛡️" : "No Bloqueado";
-            TxtFirewallStatus.Text = status.FirewallRulesApplied ? "Activo 🔥" : "Inactivo";
-            TxtServicesStatus.Text = status.ServicesDisabled ? "Desactivados 🚫" : "Activos";
+            TxtHostsStatus.Text = status.HostsBlocked ? "Bloqueado" : "No bloqueado";
+            TxtFirewallStatus.Text = status.FirewallRulesApplied ? "Activo" : "Inactivo";
+            TxtServicesStatus.Text = status.ServicesDisabled ? "Desactivados" : "Activos";
 
             bool isFullyProtected = status.HostsBlocked && status.ServicesDisabled;
             if (isFullyProtected)

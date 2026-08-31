@@ -220,7 +220,7 @@ namespace cchay_optimicer_cs.Views
                 {
                     TxtQuickProgress.Text = "Creando punto de restauración...";
                     ProgQuickClean.Value = 5;
-                    await BackupService.CreateRestorePointAsync("Cchay Quick Optimize");
+                    await BackupService.CreateRestorePointAsync("RETH Optimicer");
                 }
 
                 // Clean RAM with progress
@@ -271,7 +271,7 @@ namespace cchay_optimicer_cs.Views
             }
             catch (Exception ex)
             {
-                TxtResult.Text = "⚠️ Hubo un error durante la limpieza rápida.";
+                TxtResult.Text = "Hubo un error durante la limpieza rápida.";
                 TxtResult.Visibility = Visibility.Visible;
                 PanelQuickProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Optimization error: {ex.Message}");
@@ -287,7 +287,7 @@ namespace cchay_optimicer_cs.Views
 
         private async void BtnTechOptimize_Click(object sender, RoutedEventArgs e)
         {
-            var confirm = MessageBox.Show("Estás por iniciar el Modo Técnico de Cchay Optimicer. Se aplicarán tweaks de registro, se deshabilitará bloatware, se optimizará la red y se liberará espacio. ¿Deseas continuar?", "Modo Técnico 🔥", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var confirm = MessageBox.Show("Vas a iniciar la optimización profunda de RETH Optimicer. Se aplicarán ajustes de registro, se deshabilitará bloatware, se optimizará la red y se liberará espacio. ¿Deseas continuar?", "Optimización profunda", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (confirm != MessageBoxResult.Yes) return;
 
             BtnOptimize.IsEnabled = false;
@@ -314,7 +314,7 @@ namespace cchay_optimicer_cs.Views
 
                 MainWindow.Instance?.ShowRebootRequired();
 
-                TxtResult.Text = "🔥 ¡Optimización técnica del sistema completada con éxito!";
+                TxtResult.Text = "Optimización profunda completada.";
                 TxtResult.Visibility = Visibility.Visible;
                 PanelTechProgress.Visibility = Visibility.Collapsed;
 
@@ -324,7 +324,7 @@ namespace cchay_optimicer_cs.Views
             }
             catch (Exception ex)
             {
-                TxtResult.Text = "⚠️ Hubo un error durante la optimización técnica.";
+                TxtResult.Text = "Hubo un error durante la optimización técnica.";
                 TxtResult.Visibility = Visibility.Visible;
                 PanelTechProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Tech optimization error: {ex.Message}");
@@ -333,7 +333,7 @@ namespace cchay_optimicer_cs.Views
             {
                 BtnOptimize.IsEnabled = true;
                 BtnTechOptimize.IsEnabled = true;
-                TxtTechOptimizeBtn.Text = "Modo Técnico 🔥";
+                TxtTechOptimizeBtn.Text = "Optimización profunda";
                 _timer?.Start();
             }
         }

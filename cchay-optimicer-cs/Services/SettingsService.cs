@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Text.Json;
 
 namespace cchay_optimicer_cs.Services
 {
@@ -21,17 +19,11 @@ namespace cchay_optimicer_cs.Services
         public bool DevModeEnabled { get; set; } = false;
         public List<string> DevProcesses { get; set; } = new List<string> { "code", "devenv", "idea64", "rider64", "androidstudio64", "dotnet", "node", "python", "git" };
         public bool WidgetEnabled { get; set; } = false;
-        public bool AntiStutterEnabled { get; set; } = true;
+        public bool AntiStutterEnabled { get; set; } = false;
     }
 
     public static class SettingsService
     {
-        private static readonly string SettingsFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CchayOptimicer",
-            "settings.json"
-        );
-
         private static AppSettings _settings = new AppSettings();
 
         static SettingsService()
@@ -43,33 +35,12 @@ namespace cchay_optimicer_cs.Services
 
         public static void LoadSettings()
         {
-            try
-            {
-                if (File.Exists(SettingsFilePath))
-                {
-                    string json = File.ReadAllText(SettingsFilePath);
-                    _settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
-                }
-            }
-            catch
-            {
-                _settings = new AppSettings();
-            }
+            _settings = JsonStorageHelper.Load<AppSettings>("settings.json");
         }
 
         public static void SaveSettings()
         {
-            try
-            {
-                string? dir = Path.GetDirectoryName(SettingsFilePath);
-                if (dir != null && !Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-                string json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(SettingsFilePath, json);
-            }
-            catch { }
+            JsonStorageHelper.Save("settings.json", _settings);
         }
     }
 }

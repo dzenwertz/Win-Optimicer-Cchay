@@ -153,7 +153,7 @@ namespace cchay_optimicer_cs.Views
                 // Create backup first
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
-                    await BackupService.CreateRestorePointAsync("Cchay Uninstall Bloatware");
+                    await BackupService.CreateRestorePointAsync("RETH Uninstall Bloatware");
                 }
 
                 int successCount = 0;
@@ -169,7 +169,7 @@ namespace cchay_optimicer_cs.Views
             }
             catch (Exception ex)
             {
-                ShowMessage($"⚠️ Error al desinstalar: {ex.Message}", isError: true);
+                ShowMessage($"Error al desinstalar: {ex.Message}", isError: true);
             }
             finally
             {
@@ -189,7 +189,7 @@ namespace cchay_optimicer_cs.Views
             {
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
-                    await BackupService.CreateRestorePointAsync("Cchay Disable OneDrive");
+                    await BackupService.CreateRestorePointAsync("RETH Disable OneDrive");
                 }
                 bool success = await BloatwareService.DisableOneDriveAsync();
                 if (success)
@@ -199,12 +199,12 @@ namespace cchay_optimicer_cs.Views
                 }
                 else
                 {
-                    ShowMessage("⚠️ Error al desactivar OneDrive.", isError: true);
+                    ShowMessage("Error al desactivar OneDrive.", isError: true);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage($"⚠️ Excepción al desactivar OneDrive: {ex.Message}", isError: true);
+                ShowMessage($"Excepción al desactivar OneDrive: {ex.Message}", isError: true);
             }
             finally
             {
@@ -224,7 +224,7 @@ namespace cchay_optimicer_cs.Views
             {
                 if (SettingsService.Settings.AutoRestorePointEnabled)
                 {
-                    await BackupService.CreateRestorePointAsync("Cchay Disable Widgets");
+                    await BackupService.CreateRestorePointAsync("RETH Disable Widgets");
                 }
                 bool success = await BloatwareService.DisableWidgetsAsync();
                 if (success)
@@ -234,12 +234,12 @@ namespace cchay_optimicer_cs.Views
                 }
                 else
                 {
-                    ShowMessage("⚠️ Error al desactivar Widgets.", isError: true);
+                    ShowMessage("Error al desactivar Widgets.", isError: true);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage($"⚠️ Excepción al desactivar Widgets: {ex.Message}", isError: true);
+                ShowMessage($"Excepción al desactivar Widgets: {ex.Message}", isError: true);
             }
             finally
             {

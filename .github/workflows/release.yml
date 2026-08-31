@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Pack Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests
+        run: python3 -m unittest tests.test_modules
+        working-directory: linux
+      - name: Tarball
+        run: |
+          mkdir -p dist
+          tar --exclude='__pycache__' --exclude='*.pyc' -czf dist/RETH-Optimicer-Linux-${GITHUB_REF_NAME}.tar.gz linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: dist/*.tar.gz
+
+  windows:
+    name: Publish Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Publish
+        run: |
+          dotnet publish cchay-optimicer-cs/cchay-optimicer-cs.csproj -c Release -r win-x64 --self-contained true -o publish
+      - name: Zip portable
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path publish\* -DestinationPath "dist/RETH-Optimicer-Windows-portable-${env:GITHUB_REF_NAME}.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*.zip
+
+  website:
+    name: Pack website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip
+        run: |
+          mkdir -p dist
+          (cd website && zip -r ../dist/RETH-Optimicer-Website-${GITHUB_REF_NAME}.zip .)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: dist/*.zip
+
+  publish:
+    name: GitHub Release
+    needs: [linux, windows, website]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Checksums
+        run: |
+          mkdir -p dist
+          find artifacts -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec cp {} dist/ \;
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: RETH Optimicer ${{ github.ref_name }}
+          generate_release_notes: true
+          files: dist/*
+          body: |
+            Optimizador RETH Labs para Windows y Linux.
+
+            **Linux:** extrae `RETH-Optimicer-Linux-*.tar.gz`, entra en `linux` y ejecuta `./install.sh`.
+            **Windows:** descomprime el portable y ejecuta `RethOptimicer.exe` como administrador.
+            **Web:** landing estática en el zip del sitio.
+
+            Notas: [CHANGELOG.md](https://github.com/dzenwertz/Win-Optimicer-Cchay/blob/main/CHANGELOG.md)

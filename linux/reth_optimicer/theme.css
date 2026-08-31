@@ -1,0 +1,36 @@
+@define-color reth_accent #7ed4f5;
+@define-color reth_bg #07090b;
+@define-color reth_surface #101418;
+@define-color reth_elevated #161c22;
+@define-color reth_text #f0f7fb;
+@define-color reth_muted #9ab3c0;
+
+window {
+  background-color: @reth_bg;
+  color: @reth_text;
+}
+
+.sidebar {
+  background-color: @reth_surface;
+}
+
+.brand-title {
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: @reth_accent;
+}
+
+.muted {
+  color: @reth_muted;
+}
+
+.score {
+  font-size: 42px;
+  font-weight: 600;
+  color: @reth_accent;
+}
+
+button.suggested-action {
+  background: @reth_accent;
+  color: #041018;
+}

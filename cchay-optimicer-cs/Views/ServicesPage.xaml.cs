@@ -139,8 +139,8 @@ namespace cchay_optimicer_cs.Views
             string warningText = profileKey switch
             {
                 "recommended" => "Este perfil es seguro y no afectará la funcionalidad normal de tu PC.",
-                "gaming" => "⚠️ Este perfil desactiva Xbox, Bluetooth, búsqueda de Windows y Superfetch. No lo uses si necesitas esos servicios.",
-                "maximum" => "⚠️ ¡ADVERTENCIA! Este perfil es agresivo. Desactiva escritorio remoto, geolocalización, biometría, UPnP y más. Solo para usuarios avanzados.",
+                "gaming" => "Este perfil desactiva Xbox, Bluetooth, búsqueda de Windows y Superfetch. No lo uses si necesitas esos servicios.",
+                "maximum" => "¡ADVERTENCIA! Este perfil es agresivo. Desactiva escritorio remoto, geolocalización, biometría, UPnP y más. Solo para usuarios avanzados.",
                 _ => ""
             };
 
@@ -163,7 +163,7 @@ namespace cchay_optimicer_cs.Views
                     TxtResult.Text = "🔄 Creando punto de restauración antes de aplicar el perfil...";
                     TxtResult.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x86, 0x8E, 0x96));
                     TxtResult.Visibility = Visibility.Visible;
-                    await BackupService.CreateRestorePointAsync($"Cchay Services Profile: {profile.Name}");
+                    await BackupService.CreateRestorePointAsync($"RETH Services Profile: {profile.Name}");
                 }
                 catch { }
             }
@@ -198,7 +198,7 @@ namespace cchay_optimicer_cs.Views
             }
             catch (Exception ex)
             {
-                TxtResult.Text = $"⚠️ Error al aplicar el perfil: {ex.Message}";
+                TxtResult.Text = $"Error al aplicar el perfil: {ex.Message}";
                 TxtResult.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFA, 0x52, 0x52));
                 TxtResult.Visibility = Visibility.Visible;
             }

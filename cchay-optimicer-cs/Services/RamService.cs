@@ -1,5 +1,4 @@
-// Hecho con cariño por Joseph ICV y dzenwertz para ayudar a la comunidad.
-// Código libre bajo licencia GPL-3.0. ¡Siéntete libre de mejorarlo y colaborar!
+// RETH Optimicer — GPL-3.0
 
 using System;
 using System.Diagnostics;

@@ -57,7 +57,7 @@ namespace cchay_optimicer_cs.Views
             string name = TxtBackupName.Text.Trim();
             if (string.IsNullOrEmpty(name))
             {
-                ShowMessage("⚠️ Ingresa un nombre para el punto de restauración.", isError: true);
+                ShowMessage("Ingresa un nombre para el punto de restauración.", isError: true);
                 return;
             }
 
@@ -77,12 +77,12 @@ namespace cchay_optimicer_cs.Views
                 }
                 else
                 {
-                    ShowMessage("⚠️ Error al crear punto de restauración. Asegúrate de tener la protección del sistema activa en la unidad C:.", isError: true);
+                    ShowMessage("Error al crear punto de restauración. Asegúrate de tener la protección del sistema activa en la unidad C:.", isError: true);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage($"⚠️ Excepción al crear el punto: {ex.Message}", isError: true);
+                ShowMessage($"Excepción al crear el punto: {ex.Message}", isError: true);
             }
             finally
             {
@@ -132,12 +132,12 @@ namespace cchay_optimicer_cs.Views
                     }
                     else
                     {
-                        ShowMessage("⚠️ Error al eliminar los puntos de restauración.", isError: true);
+                        ShowMessage("Error al eliminar los puntos de restauración.", isError: true);
                     }
                 }
                 catch (Exception ex)
                 {
-                    ShowMessage($"⚠️ Excepción al eliminar: {ex.Message}", isError: true);
+                    ShowMessage($"Excepción al eliminar: {ex.Message}", isError: true);
                 }
                 finally
                 {

@@ -230,20 +230,22 @@ namespace cchay_optimicer_cs.Services
                             var dismPsi = new ProcessStartInfo
                             {
                                 FileName = "dism.exe",
-                                Arguments = "/Online /Cleanup-Image /StartComponentCleanup /ResetBase",
+                                Arguments = "/Online /Cleanup-Image /StartComponentCleanup",
                                 CreateNoWindow = true,
                                 UseShellExecute = false,
                                 WindowStyle = ProcessWindowStyle.Hidden
                             };
-                            var dismProc = Process.Start(dismPsi);
-                            while (dismProc != null && !dismProc.HasExited)
+                            using (var dismProc = Process.Start(dismPsi))
                             {
-                                if (ct.IsCancellationRequested)
+                                while (dismProc != null && !dismProc.HasExited)
                                 {
-                                    try { dismProc.Kill(); } catch { }
-                                    break;
+                                    if (ct.IsCancellationRequested)
+                                    {
+                                        try { dismProc.Kill(true); } catch { }
+                                        break;
+                                    }
+                                    dismProc.WaitForExit(1000);
                                 }
-                                dismProc.WaitForExit(1000);
                             }
                             target.Cleaned = !ct.IsCancellationRequested;
                         }
@@ -268,15 +270,17 @@ namespace cchay_optimicer_cs.Services
                                 UseShellExecute = false,
                                 WindowStyle = ProcessWindowStyle.Hidden
                             };
-                            var defragProc = Process.Start(defragPsi);
-                            while (defragProc != null && !defragProc.HasExited)
+                            using (var defragProc = Process.Start(defragPsi))
                             {
-                                if (ct.IsCancellationRequested)
+                                while (defragProc != null && !defragProc.HasExited)
                                 {
-                                    try { defragProc.Kill(); } catch { }
-                                    break;
+                                    if (ct.IsCancellationRequested)
+                                    {
+                                        try { defragProc.Kill(true); } catch { }
+                                        break;
+                                    }
+                                    defragProc.WaitForExit(1000);
                                 }
-                                defragProc.WaitForExit(1000);
                             }
                             target.Cleaned = !ct.IsCancellationRequested;
                         }

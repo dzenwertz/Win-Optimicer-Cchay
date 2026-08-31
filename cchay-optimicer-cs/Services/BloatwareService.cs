@@ -6,18 +6,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
 using Microsoft.Win32;
+using cchay_optimicer_cs.Models;
 
 namespace cchay_optimicer_cs.Services
 {
-    public class BloatwareApp
-    {
-        public string Key { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public List<string> Packages { get; set; } = new List<string>();
-        public bool Installed { get; set; }
-    }
-
     public class BloatwareService
     {
         private static readonly List<BloatwareApp> PredefinedBloatware = new List<BloatwareApp>

@@ -93,7 +93,7 @@ namespace cchay_optimicer_cs
             {
                 string logDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "CchayOptimicer");
+                    "RethOptimicer");
                 Directory.CreateDirectory(logDir);
                 string path = Path.Combine(logDir, "navigation_log.txt");
                 File.AppendAllText(path, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {msg}\r\n");
@@ -105,6 +105,15 @@ namespace cchay_optimicer_cs
         {
             Log("MainWindow Loaded");
             ApplyDarkTitleBar();
+            try
+            {
+                Wpf.Ui.Appearance.ApplicationAccentColorManager.Apply(
+                    System.Windows.Media.Color.FromRgb(0x7E, 0xD4, 0xF5));
+            }
+            catch (Exception ex)
+            {
+                Log($"Accent color apply skipped: {ex.Message}");
+            }
             
             // Check Admin Status and self-elevate if necessary
             if (!SystemService.IsRunningAsAdmin())
@@ -114,7 +123,7 @@ namespace cchay_optimicer_cs
                     Log("Not running as admin. Attempting self-elevation...");
                     var processInfo = new ProcessStartInfo
                     {
-                        FileName = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cchay-optimicer-cs.exe"),
+                        FileName = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RethOptimicer.exe"),
                         UseShellExecute = true,
                         Verb = "runas" // This triggers UAC elevation prompt
                     };
@@ -159,8 +168,7 @@ namespace cchay_optimicer_cs
             }
             catch (Exception ex)
             {
-                Log($"FATAL: Exception navigating to '{pageType.Name}':\r\n{ex.ToString()}");
-                throw;
+                Log($"Exception navigating to '{pageType.Name}':\r\n{ex}");
             }
         }
 
@@ -170,7 +178,7 @@ namespace cchay_optimicer_cs
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "https://github.com/dzenwertz",
+                    FileName = "https://github.com/dzenwertz/RETH-Optimicer",
                     UseShellExecute = true
                 };
                 Process.Start(psi);
@@ -184,11 +192,11 @@ namespace cchay_optimicer_cs
         private void InitializeTrayIcon()
         {
             _notifyIcon = new Forms.NotifyIcon();
-            _notifyIcon.Text = "Cchay Optimicer";
+            _notifyIcon.Text = "RETH Optimicer";
             
             try
             {
-                var iconUri = new Uri("pack://application:,,,/Assets/cchay_logo.ico");
+                var iconUri = new Uri("pack://application:,,,/Assets/reth.ico");
                 var streamInfo = Application.GetResourceStream(iconUri);
                 if (streamInfo != null)
                 {
@@ -202,12 +210,16 @@ namespace cchay_optimicer_cs
             {
                 Log($"Failed to load tray icon: {ex.Message}");
             }
+            if (_notifyIcon.Icon == null)
+            {
+                _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
+            }
 
             // Create context menu
             var menu = new Forms.ContextMenuStrip();
-            menu.Items.Add("Abrir Cchay Optimicer", null, (s, e) => RestoreWindow());
+            menu.Items.Add("Abrir RETH Optimicer", null, (s, e) => RestoreWindow());
             menu.Items.Add("Limpieza Rápida de RAM", null, async (s, e) => await QuickCleanRamAsync());
-            menu.Items.Add("Modo Técnico 🔥", null, async (s, e) => await TechOptimizeAsync());
+            menu.Items.Add("Optimización profunda", null, async (s, e) => await TechOptimizeAsync());
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add("Salir", null, (s, e) => ExitApplication());
 
@@ -235,12 +247,12 @@ namespace cchay_optimicer_cs
             {
                 var mem = RamService.GetMemoryUsage();
                 double freeGB = mem.FreeBytes / 1024.0 / 1024.0 / 1024.0;
-                string status = $"Cchay Optimicer — {mem.PercentUsed}% RAM Usada ({freeGB:F1} GB Libres)";
+                string status = $"RETH Optimicer — {mem.PercentUsed}% RAM Usada ({freeGB:F1} GB Libres)";
                 
                 if (_notifyIcon != null)
                 {
                     // NotifyIcon.Text max length is 63 chars
-                    string shortText = $"Cchay Optimicer: {mem.PercentUsed}% RAM ({freeGB:F1}GB libre)";
+                    string shortText = $"RETH Optimicer: {mem.PercentUsed}% RAM ({freeGB:F1}GB libre)";
                     _notifyIcon.Text = shortText.Length > 63 ? shortText.Substring(0, 63) : shortText;
                 }
 
@@ -273,7 +285,7 @@ namespace cchay_optimicer_cs
                 e.Cancel = true;
                 Hide();
                 RamService.TrimAppWorkingSet(); // Shrink RAM usage to ~5MB when minimized!
-                _notifyIcon?.ShowBalloonTip(3000, "Cchay Optimicer (Modo Ultra-Ligero)", "Ejecutándose en segundo plano con consumo mínimo de RAM.", Forms.ToolTipIcon.Info);
+                _notifyIcon?.ShowBalloonTip(3000, "RETH Optimicer", "Sigue en segundo plano con consumo mínimo de RAM.", Forms.ToolTipIcon.Info);
             }
             else
             {
@@ -311,7 +323,7 @@ namespace cchay_optimicer_cs
         {
             try
             {
-                _notifyIcon?.ShowBalloonTip(3000, "Modo Técnico", "Iniciando optimización completa del sistema en segundo plano...", Forms.ToolTipIcon.Info);
+                _notifyIcon?.ShowBalloonTip(3000, "Optimización profunda", "Iniciando optimización completa del sistema en segundo plano...", Forms.ToolTipIcon.Info);
                 
                 await QuickOptimizeService.RunQuickOptimizeAsync((status, percent) => {
                     // Log progress if needed
@@ -321,7 +333,7 @@ namespace cchay_optimicer_cs
                 SettingsService.Settings.TotalOptimizationsRun++;
                 SettingsService.SaveSettings();
 
-                _notifyIcon?.ShowBalloonTip(3000, "Modo Técnico", "¡Optimización técnica completada con éxito!", Forms.ToolTipIcon.Info);
+                _notifyIcon?.ShowBalloonTip(3000, "Optimización profunda", "¡Optimización técnica completada con éxito!", Forms.ToolTipIcon.Info);
             }
             catch { }
         }

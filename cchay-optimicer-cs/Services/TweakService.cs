@@ -14,7 +14,7 @@ namespace cchay_optimicer_cs.Services
     {
         private static readonly string StateFilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "CchayOptimicer",
+            "RethOptimicer",
             "tweakStates.json"
         );
 
@@ -47,22 +47,39 @@ namespace cchay_optimicer_cs.Services
             }
         }
 
-        private static void RunCmd(string filename, string arguments)
+        private static bool RunCmd(string filename, string arguments, int timeoutMs = 15000)
         {
             try
             {
-                var psi = new ProcessStartInfo
+                using var process = new Process();
+                process.StartInfo = new ProcessStartInfo
                 {
                     FileName = filename,
                     Arguments = arguments,
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    WindowStyle = ProcessWindowStyle.Hidden
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardError = true
                 };
-                var process = Process.Start(psi);
-                process?.WaitForExit(3000);
+                process.Start();
+                string stderr = process.StandardError.ReadToEnd();
+                if (!process.WaitForExit(timeoutMs))
+                {
+                    try { process.Kill(true); } catch { }
+                    Debug.WriteLine($"[TweakService] Command timed out after {timeoutMs}ms: {filename} {arguments}");
+                    return false;
+                }
+                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(stderr))
+                {
+                    Debug.WriteLine($"[TweakService] Command failed (exit {process.ExitCode}): {filename} {arguments} | stderr: {stderr.Trim()}");
+                }
+                return process.ExitCode == 0;
             }
-            catch { /* ignore */ }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[TweakService] Error executing: {filename} {arguments} | {ex.Message}");
+                return false;
+            }
         }
 
         public static Task<List<Tweak>> GetTweaksAsync()

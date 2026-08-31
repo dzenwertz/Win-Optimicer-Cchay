@@ -18,6 +18,11 @@ namespace cchay_optimicer_cs.Services
             "devenv", "code", "idea64", "androidstudio64", "rider64", "unity", "unrealeditor"
         };
 
+        /// <summary>
+        /// Checks if a heavy process is running and performs a safe memory purge.
+        /// Only cleans standby list memory (cached/unused pages), NOT active working sets.
+        /// This avoids causing page faults in foreground applications.
+        /// </summary>
         public static async Task<bool> CheckAndPurgeIfNeededAsync()
         {
             var settings = SettingsService.Settings;
@@ -52,10 +57,15 @@ namespace cchay_optimicer_cs.Services
             if (detectedHeavyProcess)
             {
                 _lastPurgeTime = DateTime.Now;
-                Debug.WriteLine("[AntiStutter] Heavy process detected. Executing proactive memory purge...");
+                Debug.WriteLine("[AntiStutter] Heavy process detected. Executing safe standby memory purge (not touching working sets)...");
                 try
                 {
-                    await RamService.CleanAll();
+                    // Only purge standby list and low-priority standby pages.
+                    // This frees cached/unused memory without disrupting active process working sets.
+                    long freed = 0;
+                    freed += await RamService.CleanStandbyListLowPriority();
+                    freed += await RamService.CleanStandbyList();
+                    Debug.WriteLine($"[AntiStutter] Safe purge completed. Freed {freed / 1024.0 / 1024.0:F1} MB of standby memory.");
                     return true;
                 }
                 catch (Exception ex)

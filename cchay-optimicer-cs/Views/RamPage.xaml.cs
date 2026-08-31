@@ -114,7 +114,7 @@ namespace cchay_optimicer_cs.Views
             }
             catch (Exception ex)
             {
-                TxtFreedToast.Text = "⚠️ Hubo un error al optimizar la memoria.";
+                TxtFreedToast.Text = "Hubo un error al optimizar la memoria.";
                 TxtFreedToast.Visibility = Visibility.Visible;
                 PanelRamCleanProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Error cleaning RAM: {ex.Message}");

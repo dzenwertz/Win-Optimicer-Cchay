@@ -38,9 +38,8 @@
                 </Grid>
             </ui:Card>
 
-            <!-- Progress Bar -->
+            <TextBlock x:Name="TxtStatus" Text="" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
             <StackPanel x:Name="ProgressSection" Visibility="Collapsed" Margin="0,0,0,20">
-                <TextBlock x:Name="TxtStatus" Text="Realizando pruebas de disco, RAM y CPU..." FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6" />
                 <ProgressBar x:Name="BenchProgressBar" Height="8" IsIndeterminate="False" Value="0" />
             </StackPanel>
 

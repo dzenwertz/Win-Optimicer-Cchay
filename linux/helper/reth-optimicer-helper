@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+"""Asistente privilegiado de RETH Optimicer. Solo acciones en lista blanca."""
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+SYSCTL_ALLOW = {
+    "vm.swappiness",
+    "vm.dirty_ratio",
+    "vm.dirty_background_ratio",
+    "vm.vfs_cache_pressure",
+}
+GOV_RE = re.compile(r"^[a-z0-9_\-]+$")
+UNIT_RE = re.compile(r"^[A-Za-z0-9:_.\\@-]+\.(service|socket|timer)$")
+PROTECTED = {"dbus.service", "systemd-logind.service", "NetworkManager.service", "sshd.service"}
+DNS = {
+    "dhcp": None,
+    "cloudflare": ("1.1.1.1", "1.0.0.1"),
+    "google": ("8.8.8.8", "8.8.4.4"),
+    "quad9": ("9.9.9.9", "149.112.112.112"),
+    "adguard": ("94.140.14.14", "94.140.15.15"),
+}
+
+
+def _run(cmd: list[str], timeout: int = 120) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
+
+
+def _ok(message: str = "", **extra) -> dict:
+    data = {"ok": True, "message": message}
+    data.update(extra)
+    return data
+
+
+def _err(message: str) -> dict:
+    return {"ok": False, "error": message}
+
+
+def drop_caches(_: dict) -> dict:
+    Path("/proc/sys/vm/drop_caches").write_text("3\n")
+    return _ok("Cachés de página liberadas.")
+
+
+def compact_memory(_: dict) -> dict:
+    path = Path("/proc/sys/vm/compact_memory")
+    if not path.exists():
+        return _err("compact_memory no está disponible.")
+    path.write_text("1\n")
+    return _ok("Memoria compactada.")
+
+
+def fstrim(_: dict) -> dict:
+    proc = _run(["fstrim", "-av"], timeout=180)
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout or "fstrim falló").strip())
+    return _ok((proc.stdout or "TRIM completado.").strip())
+
+
+def sysctl_set(req: dict) -> dict:
+    key = str(req.get("key", ""))
+    if key not in SYSCTL_ALLOW:
+        return _err("Clave sysctl no permitida.")
+    try:
+        value = int(req.get("value"))
+    except (TypeError, ValueError):
+        return _err("Valor inválido.")
+    proc = _run(["sysctl", "-w", f"{key}={value}"])
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip())
+    dropin = Path("/etc/sysctl.d/99-reth-optimicer.conf")
+    existing = ""
+    if dropin.exists():
+        existing = dropin.read_text()
+    lines = [ln for ln in existing.splitlines() if not ln.startswith(f"{key}=")]
+    lines.append(f"{key}={value}")
+    dropin.write_text("\n".join(lines) + "\n")
+    return _ok(f"{key}={value}")
+
+
+def set_governor(req: dict) -> dict:
+    name = str(req.get("governor", ""))
+    if not GOV_RE.fullmatch(name):
+        return _err("Gobernador no válido.")
+    cpus = Path("/sys/devices/system/cpu")
+    written = 0
+    for gov in cpus.glob("cpu*/cpufreq/scaling_governor"):
+        try:
+            gov.write_text(name + "\n")
+            written += 1
+        except OSError:
+            continue
+    if not written:
+        return _err("No se pudo aplicar el gobernador.")
+    return _ok(f"Gobernador {name} aplicado a {written} núcleos.")
+
+
+def journal_vacuum(_: dict) -> dict:
+    proc = _run(["journalctl", "--vacuum-time=7d"], timeout=60)
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip() or "journalctl falló")
+    return _ok((proc.stdout or "Diario compactado.").strip())
+
+
+def pkg_clean_cache(_: dict) -> dict:
+    if Path("/usr/bin/pacman").exists():
+        proc = _run(["pacman", "-Sc", "--noconfirm"], timeout=180)
+    elif Path("/usr/bin/apt-get").exists():
+        proc = _run(["apt-get", "clean"], timeout=180)
+    elif Path("/usr/bin/dnf").exists():
+        proc = _run(["dnf", "clean", "packages"], timeout=180)
+    else:
+        return _err("Gestor de paquetes no soportado.")
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip())
+    return _ok("Caché de paquetes limpiada.")
+
+
+def pkg_remove_orphans(_: dict) -> dict:
+    if Path("/usr/bin/pacman").exists():
+        listed = _run(["pacman", "-Qtdq"], timeout=60)
+        pkgs = [p for p in listed.stdout.split() if p]
+        if not pkgs:
+            return _ok("No hay paquetes huérfanos.")
+        proc = _run(["pacman", "-Rns", "--noconfirm", *pkgs], timeout=300)
+    elif Path("/usr/bin/apt-get").exists():
+        proc = _run(["apt-get", "autoremove", "-y"], timeout=300)
+    elif Path("/usr/bin/dnf").exists():
+        proc = _run(["dnf", "autoremove", "-y"], timeout=300)
+    else:
+        return _err("Gestor de paquetes no soportado.")
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip())
+    return _ok("Huérfanos eliminados.")
+
+
+def set_dns(req: dict) -> dict:
+    provider = str(req.get("provider", ""))
+    if provider not in DNS:
+        return _err("Proveedor DNS no válido.")
+    servers = DNS[provider]
+    if Path("/usr/bin/resolvectl").exists():
+        iface_out = _run(["resolvectl", "status"])
+        ifaces = []
+        for line in iface_out.stdout.splitlines():
+            line = line.strip()
+            if line.startswith("Link ") and "(" in line:
+                name = line.split("(")[-1].rstrip(")")
+                if name and name != "lo":
+                    ifaces.append(name)
+        if not ifaces:
+            ifaces = ["wlan0", "eth0"]
+        for iface in ifaces:
+            if servers is None:
+                _run(["resolvectl", "revert", iface])
+            else:
+                _run(["resolvectl", "dns", iface, *servers])
+        return _ok(f"DNS {provider} aplicado.")
+    resolv = Path("/etc/resolv.conf")
+    if servers is None:
+        return _err("Sin resolvectl no se puede restaurar DHCP de forma segura.")
+    resolv.write_text(f"nameserver {servers[0]}\nnameserver {servers[1]}\n")
+    return _ok(f"DNS {provider} escrito en resolv.conf.")
+
+
+def flush_dns(_: dict) -> dict:
+    if Path("/usr/bin/resolvectl").exists():
+        proc = _run(["resolvectl", "flush-caches"])
+        if proc.returncode != 0:
+            return _err((proc.stderr or proc.stdout).strip())
+        return _ok("Caché DNS vaciada.")
+    return _ok("No hay resolvectl; nada que vaciar.")
+
+
+def privacy_disable(req: dict) -> dict:
+    target = str(req.get("target", ""))
+    if target == "apport":
+        Path("/etc/default/apport").write_text("enabled=0\n")
+        _run(["systemctl", "disable", "--now", "apport.service"])
+        return _ok("Apport desactivado.")
+    if target == "popularity-contest":
+        conf = Path("/etc/popularity-contest.conf")
+        if conf.exists():
+            text = conf.read_text()
+            text = text.replace("PARTICIPATE=\"yes\"", "PARTICIPATE=\"no\"")
+            conf.write_text(text)
+        _run(["systemctl", "disable", "--now", "popularity-contest.timer"])
+        return _ok("popularity-contest desactivado.")
+    if target == "whoopsie":
+        _run(["systemctl", "disable", "--now", "whoopsie.service"])
+        return _ok("whoopsie desactivado.")
+    if target == "ubuntu-report":
+        _run(["chmod", "-x", "/usr/bin/ubuntu-report"])
+        return _ok("ubuntu-report desactivado.")
+    return _err("Objetivo de privacidad no válido.")
+
+
+def systemctl_op(req: dict) -> dict:
+    op = str(req.get("operation", ""))
+    unit = str(req.get("unit", ""))
+    if op not in {"enable", "disable"}:
+        return _err("Operación no permitida.")
+    if not UNIT_RE.fullmatch(unit):
+        return _err("Unidad no válida.")
+    if unit in PROTECTED and op == "disable":
+        return _err("Unidad protegida.")
+    proc = _run(["systemctl", op, "--now", unit], timeout=40)
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip() or "systemctl falló")
+    return _ok(f"{unit}: {op}")
+
+
+ACTIONS = {
+    "drop_caches": drop_caches,
+    "compact_memory": compact_memory,
+    "fstrim": fstrim,
+    "sysctl_set": sysctl_set,
+    "set_governor": set_governor,
+    "journal_vacuum": journal_vacuum,
+    "pkg_clean_cache": pkg_clean_cache,
+    "pkg_remove_orphans": pkg_remove_orphans,
+    "set_dns": set_dns,
+    "flush_dns": flush_dns,
+    "privacy_disable": privacy_disable,
+    "systemctl": systemctl_op,
+}
+
+
+def main() -> int:
+    if os.geteuid() != 0:
+        print(json.dumps(_err("El asistente debe ejecutarse como root.")), flush=True)
+        return 1
+    raw = sys.stdin.read()
+    try:
+        req = json.loads(raw or "{}")
+    except json.JSONDecodeError:
+        print(json.dumps(_err("JSON inválido.")), flush=True)
+        return 1
+    action = str(req.get("action", ""))
+    fn = ACTIONS.get(action)
+    if fn is None:
+        print(json.dumps(_err("Acción no permitida.")), flush=True)
+        return 1
+    try:
+        result = fn(req)
+    except Exception as exc:  # noqa: BLE001
+        result = _err(str(exc))
+    print(json.dumps(result, ensure_ascii=False), flush=True)
+    return 0 if result.get("ok") else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

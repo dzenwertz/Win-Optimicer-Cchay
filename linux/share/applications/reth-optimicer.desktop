@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=RETH Optimicer
+Comment=Optimizador de sistema para Linux
+Exec=reth-optimicer
+Icon=reth-optimicer
+Terminal=false
+Categories=System;Settings;
+StartupWMClass=com.reth.optimicer
+Keyword=optimize;performance;linux;

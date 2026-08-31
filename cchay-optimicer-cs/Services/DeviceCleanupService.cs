@@ -120,8 +120,13 @@ namespace cchay_optimicer_cs.Services
 
                     using (var process = Process.Start(psi))
                     {
-                        process?.WaitForExit(5000);
-                        return process?.ExitCode == 0;
+                        if (process == null) return false;
+                        if (!process.WaitForExit(10000))
+                        {
+                            try { process.Kill(true); } catch { }
+                            return false;
+                        }
+                        return process.ExitCode == 0;
                     }
                 }
                 catch

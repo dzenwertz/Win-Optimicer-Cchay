@@ -4,18 +4,25 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <RootNamespace>cchay_optimicer_cs</RootNamespace>
+    <AssemblyName>RethOptimicer</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\cchay_logo.ico</ApplicationIcon>
-    <Version>2.0.1</Version>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
-    <FileVersion>2.0.1.0</FileVersion>
+    <ApplicationIcon>Assets\reth.ico</ApplicationIcon>
+    <Version>3.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Product>RETH Optimicer</Product>
+    <Company>RETH</Company>
+    <Authors>RETH Labs</Authors>
+    <Copyright>© 2026 RETH</Copyright>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfContained>true</IncludeNativeLibrariesForSelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,8 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\cchay_logo.png" />
-    <Resource Include="Assets\cchay_logo.ico" />
+    <Resource Include="Assets\reth_logo.png" />
+    <Resource Include="Assets\reth.ico" />
+    <Resource Include="Assets\reth-bird.svg" />
+    <Resource Include="Assets\reth-lockup-dark.png" />
   </ItemGroup>
 
 </Project>

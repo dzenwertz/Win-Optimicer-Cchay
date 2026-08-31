@@ -8,15 +8,19 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <ApplicationIcon>..\cchay-optimicer-cs\Assets\cchay_logo.ico</ApplicationIcon>
-    <AssemblyName>Cchay_Optimicer_Setup_v2.0.1</AssemblyName>
-    <Version>2.0.1</Version>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
-    <FileVersion>2.0.1.0</FileVersion>
+    <IncludeNativeLibrariesForSelfContained>true</IncludeNativeLibrariesForSelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <ApplicationIcon>..\cchay-optimicer-cs\Assets\reth.ico</ApplicationIcon>
+    <AssemblyName>RETH_Optimicer_Setup_v3.0.0</AssemblyName>
+    <Version>3.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Product>RETH Optimicer Setup</Product>
+    <Company>RETH</Company>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\publish\cchay-optimicer-cs.exe">
+    <EmbeddedResource Include="..\publish\RethOptimicer.exe">
       <LogicalName>Payload.exe</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

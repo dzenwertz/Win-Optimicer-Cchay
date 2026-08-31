@@ -173,7 +173,8 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
-                    string ruleName = "CchayTelemetryBlock";
+                    RunCmd("netsh", "advfirewall firewall delete rule name=\"CchayTelemetryBlock\"");
+                    string ruleName = "RethTelemetryBlock";
                     RunCmd("netsh", $"advfirewall firewall delete rule name=\"{ruleName}\"");
                     string remoteIps = "184.86.0.0/16,191.232.0.0/13,13.107.4.0/22";
                     RunCmd("netsh", $"advfirewall firewall add rule name=\"{ruleName}\" dir=out action=block remoteip={remoteIps}");
@@ -188,8 +189,8 @@ namespace cchay_optimicer_cs.Services
             {
                 try
                 {
-                    string ruleName = "CchayTelemetryBlock";
-                    RunCmd("netsh", $"advfirewall firewall delete rule name=\"{ruleName}\"");
+                    RunCmd("netsh", "advfirewall firewall delete rule name=\"CchayTelemetryBlock\"");
+                    RunCmd("netsh", "advfirewall firewall delete rule name=\"RethTelemetryBlock\"");
                 }
                 catch { }
             });
@@ -199,8 +200,10 @@ namespace cchay_optimicer_cs.Services
         {
             try
             {
-                string output = RunCmdWithOutput("netsh", "advfirewall firewall show rule name=\"CchayTelemetryBlock\"");
-                return output.Contains("CchayTelemetryBlock");
+                string output = RunCmdWithOutput("netsh", "advfirewall firewall show rule name=\"RethTelemetryBlock\"");
+                if (output.Contains("RethTelemetryBlock")) return true;
+                string legacy = RunCmdWithOutput("netsh", "advfirewall firewall show rule name=\"CchayTelemetryBlock\"");
+                return legacy.Contains("CchayTelemetryBlock");
             }
             catch
             {
