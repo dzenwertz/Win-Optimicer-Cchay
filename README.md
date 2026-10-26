@@ -7,6 +7,12 @@ Proyecto personal de [Joseph Cachay](https://github.com/dzenwertz), orientado a 
 
 [Descargar v3.0.0](https://github.com/dzenwertz/Win-Optimicer-Cchay/releases/tag/v3.0.0) · [Código Windows](cchay-optimicer-cs) · [Código Linux](linux) · [Cambios](CHANGELOG.md) · [GPL-3.0](LICENSE)
 
+## Interfaz Windows
+
+![RETH Optimicer: módulo de memoria en Windows](docs/screenshots/windows-memory-local.png)
+
+Captura real de la instalación local de Joseph, tomada el 26 de octubre de 2026. No identifica un artefacto de release reproducido: la interfaz y los módulos del código publicado pueden diferir. Los valores de memoria son una lectura puntual, no un benchmark de rendimiento.
+
 ## Qué puedes revisar
 
 | Área | Implementación |
@@ -93,7 +99,7 @@ El workflow `CI` del repositorio ejecuta pruebas de módulos Linux y una restaur
 
 ## Estado y próximos pasos
 
-La release publicada y el código en desarrollo pueden diferir. Antes de ampliar funcionalidades, las prioridades son documentar resultados de diagnóstico, hacer visibles los errores y comprobar cada operación de mantenimiento en un entorno de pruebas. Las capturas de la interfaz se incorporarán cuando se verifique la versión y el arranque correspondientes.
+La release publicada y el código en desarrollo pueden diferir. Antes de ampliar funcionalidades, las prioridades son documentar resultados de diagnóstico, hacer visibles los errores y comprobar cada operación de mantenimiento en un entorno de pruebas.
 
 ## Autoría y licencia
 
