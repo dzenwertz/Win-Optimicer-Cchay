@@ -31,6 +31,10 @@ El código permite explicar la separación entre **observar un síntoma, diagnos
 
 Es un proyecto personal de portafolio; no representa un despliegue empresarial ni un producto auditado para producción.
 
+### Reportes para documentar una incidencia
+
+El código actual omite usuario e IP del reporte exportado y propone un nombre de archivo sin el nombre del equipo. Conserva los datos técnicos y explica los límites del puntaje. Consulta el [flujo de soporte y la verificación del reporte](docs/SUPPORT_REPORT.md). Este cambio de código no actualiza automáticamente el portable v3.0.0.
+
 ## Descargar y ejecutar
 
 La [release v3.0.0](https://github.com/dzenwertz/Win-Optimicer-Cchay/releases/tag/v3.0.0) incluye estos archivos:
@@ -95,7 +99,7 @@ cd linux
 python3 -m unittest tests.test_modules
 ```
 
-El workflow `CI` del repositorio ejecuta pruebas de módulos Linux y una restauración de dependencias Windows. Esa restauración no equivale a compilar, probar la interfaz ni validar todas las acciones del sistema. Revisa el resultado de cada ejecución en [Actions](https://github.com/dzenwertz/Win-Optimicer-Cchay/actions).
+El workflow `CI` ejecuta pruebas de módulos Linux y compila el proyecto Windows al ejecutar el grupo `SystemReportTests`. Estas pruebas usan datos ficticios y no ejecutan mantenimiento. No validan la interfaz ni todas las acciones del sistema. Revisa el resultado de cada ejecución en [Actions](https://github.com/dzenwertz/Win-Optimicer-Cchay/actions).
 
 ## Estado y próximos pasos
 

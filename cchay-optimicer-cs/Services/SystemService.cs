@@ -432,9 +432,10 @@ namespace cchay_optimicer_cs.Services
             sb.AppendLine("         CCHAY OPTIMICER - REPORTE DE PC          ");
             sb.AppendLine("==================================================");
             sb.AppendLine($"Fecha/Hora:       {DateTime.Now}");
-            sb.AppendLine($"Usuario:          {info.Username}");
+            sb.AppendLine("Exportar este reporte no modifica el sistema.");
+            sb.AppendLine("Este reporte no incluye usuario ni direcciones IP.");
             sb.AppendLine($"Ejecutando Admin: {info.IsAdmin}");
-            sb.AppendLine($"Puntaje de Salud: {info.HealthScore}/100");
+            sb.AppendLine($"Puntaje de Salud: {info.HealthScore}/100 (orientativo; no es un diagnóstico completo)");
             sb.AppendLine("--------------------------------------------------");
             sb.AppendLine("INFORMACIÓN DE HARDWARE & SISTEMA:");
             sb.AppendLine($"SO:               {info.OsName} {info.OsVersion} (Build {info.OsBuild})");
@@ -449,8 +450,6 @@ namespace cchay_optimicer_cs.Services
             sb.AppendLine($"Disco C: Usado:   {(info.DiskUsed / 1024.0 / 1024.0 / 1024.0):F1} GB ({info.DiskPercent}%)");
             sb.AppendLine($"Disco C: Libre:   {(info.DiskFree / 1024.0 / 1024.0 / 1024.0):F1} GB");
             sb.AppendLine($"Estado SMART:     {info.SmartStatus}");
-            sb.AppendLine($"IP Local:         {info.LocalIp}");
-            sb.AppendLine($"IP Pública:       {info.PublicIp}");
             sb.AppendLine($"Uptime:           {info.Uptime}");
             sb.AppendLine("==================================================");
             return sb.ToString();
