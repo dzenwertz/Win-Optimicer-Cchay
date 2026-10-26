@@ -127,7 +127,7 @@ namespace cchay_optimicer_cs.Views
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
                     Filter = "Archivo de texto (*.txt)|*.txt",
-                    FileName = $"Reporte_Sistema_{Environment.MachineName}.txt"
+                    FileName = $"Reporte_RETH_{DateTime.Now:yyyyMMdd}.txt"
                 };
 
                 if (sfd.ShowDialog() == true)
