@@ -141,14 +141,14 @@ namespace cchay_optimicer_cs.Views
         private async Task ToggleItemAsync(StartupItemViewModel vm, bool enabled)
         {
             bool success = false;
+            if (!await BackupService.EnsureRestorePointAsync($"RETH Startup {vm.Name}"))
+            {
+                vm.SetEnabledStateWithoutTrigger(!enabled);
+                ShowToast("Cambio cancelado. No se modificó nada.");
+                return;
+            }
             try
             {
-                // Create restore point before modifying startup entries
-                if (SettingsService.Settings.AutoRestorePointEnabled)
-                {
-                    await BackupService.CreateRestorePointAsync($"RETH Startup {vm.Name}");
-                }
-
                 success = await StartupService.ToggleStartupItemAsync(vm.Item, enabled);
             }
             catch (Exception ex)

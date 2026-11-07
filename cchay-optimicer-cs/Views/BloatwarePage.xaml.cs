@@ -150,10 +150,10 @@ namespace cchay_optimicer_cs.Views
 
             try
             {
-                // Create backup first
-                if (SettingsService.Settings.AutoRestorePointEnabled)
+                if (!await BackupService.EnsureRestorePointAsync("RETH Uninstall Bloatware"))
                 {
-                    await BackupService.CreateRestorePointAsync("RETH Uninstall Bloatware");
+                    ShowMessage("Cambio cancelado. No se modificó nada.", isError: false);
+                    return;
                 }
 
                 int successCount = 0;
@@ -187,9 +187,10 @@ namespace cchay_optimicer_cs.Views
 
             try
             {
-                if (SettingsService.Settings.AutoRestorePointEnabled)
+                if (!await BackupService.EnsureRestorePointAsync("RETH Disable OneDrive"))
                 {
-                    await BackupService.CreateRestorePointAsync("RETH Disable OneDrive");
+                    ShowMessage("Cambio cancelado. No se modificó nada.", isError: false);
+                    return;
                 }
                 bool success = await BloatwareService.DisableOneDriveAsync();
                 if (success)
@@ -222,9 +223,10 @@ namespace cchay_optimicer_cs.Views
 
             try
             {
-                if (SettingsService.Settings.AutoRestorePointEnabled)
+                if (!await BackupService.EnsureRestorePointAsync("RETH Disable Widgets"))
                 {
-                    await BackupService.CreateRestorePointAsync("RETH Disable Widgets");
+                    ShowMessage("Cambio cancelado. No se modificó nada.", isError: false);
+                    return;
                 }
                 bool success = await BloatwareService.DisableWidgetsAsync();
                 if (success)

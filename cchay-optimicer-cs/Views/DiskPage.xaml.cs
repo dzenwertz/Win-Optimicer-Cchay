@@ -268,11 +268,11 @@ namespace cchay_optimicer_cs.Views
 
             try
             {
-                // Create backup first
-                if (SettingsService.Settings.AutoRestorePointEnabled)
+                TxtDiskProgressStep.Text = "Creando punto de restauración...";
+                if (!await BackupService.EnsureRestorePointAsync("RETH Disk Cleanup"))
                 {
-                    TxtDiskProgressStep.Text = "Creando punto de restauración...";
-                    await BackupService.CreateRestorePointAsync("RETH Disk Cleanup");
+                    TxtDiskProgressStep.Text = "Limpieza cancelada. No se borró nada.";
+                    return;
                 }
 
                 double totalFreedMB = 0;

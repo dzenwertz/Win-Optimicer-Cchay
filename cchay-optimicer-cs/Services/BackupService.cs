@@ -43,24 +43,38 @@ namespace cchay_optimicer_cs.Services
         private const int DEVICE_DRIVER_INSTALL = 10;
         private const int MODIFY_SETTINGS = 12;
 
+        private const string SystemRestoreKey = @"Software\Microsoft\Windows NT\CurrentVersion\SystemRestore";
+        private const string FrequencyValue = "SystemRestorePointCreationFrequency";
+
+        /// <summary>
+        /// Crea un punto de restauración completo (BEGIN + END). Quita temporalmente el
+        /// límite de un punto cada 24 h y deja el registro como estaba.
+        /// </summary>
         public static Task<bool> CreateRestorePointAsync(string description)
         {
             return Task.Run(() =>
             {
+                object? previousFrequency = null;
+                bool frequencyChanged = false;
                 try
                 {
-                    // Disable 24-hour restore point cooldown interval by setting Registry key
-                    using (var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
-                        .OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\SystemRestore", true))
+                    using var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
+                        .OpenSubKey(SystemRestoreKey, true);
+                    if (key != null)
                     {
-                        key?.SetValue("SystemRestorePointCreationFrequency", 0, RegistryValueKind.DWord);
+                        previousFrequency = key.GetValue(FrequencyValue);
+                        key.SetValue(FrequencyValue, 0, RegistryValueKind.DWord);
+                        frequencyChanged = true;
                     }
                 }
-                catch { /* Ignore if permission fails, although we run as admin */ }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Could not lift restore point frequency limit: " + ex.Message);
+                }
 
                 try
                 {
-                    var info = new RESTOREPOINTINFO
+                    var begin = new RESTOREPOINTINFO
                     {
                         dwEventType = BEGIN_SYSTEM_CHANGE,
                         dwRestorePtType = MODIFY_SETTINGS,
@@ -68,16 +82,73 @@ namespace cchay_optimicer_cs.Services
                         szDescription = string.IsNullOrEmpty(description) ? "RethOptimicer_Backup" : $"RethOptimicer_{description}"
                     };
 
-                    var status = new STATEMGRSTATUS();
-                    bool success = SRSetRestorePoint(ref info, out status);
-                    return success && status.nStatus == 0;
+                    if (!SRSetRestorePoint(ref begin, out var status) || status.nStatus != 0)
+                        return false;
+
+                    // Sin END_SYSTEM_CHANGE el punto queda incompleto y Windows puede descartarlo.
+                    var end = new RESTOREPOINTINFO
+                    {
+                        dwEventType = END_SYSTEM_CHANGE,
+                        dwRestorePtType = MODIFY_SETTINGS,
+                        llSequenceNumber = status.llSequenceNumber,
+                        szDescription = string.Empty
+                    };
+                    return SRSetRestorePoint(ref end, out var endStatus) && endStatus.nStatus == 0;
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine("Failed to create restore point: " + ex.Message);
                     return false;
                 }
+                finally
+                {
+                    if (frequencyChanged)
+                        RestoreFrequencyValue(previousFrequency);
+                }
             });
+        }
+
+        private static void RestoreFrequencyValue(object? previous)
+        {
+            try
+            {
+                using var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
+                    .OpenSubKey(SystemRestoreKey, true);
+                if (key == null) return;
+                if (previous == null)
+                    key.DeleteValue(FrequencyValue, false);
+                else
+                    key.SetValue(FrequencyValue, previous, RegistryValueKind.DWord);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Could not restore frequency value: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Llamar antes de cualquier cambio en el sistema. Devuelve true si se puede seguir:
+        /// el punto se creó, el usuario desactivó los puntos automáticos, o aceptó continuar
+        /// sin respaldo. Debe llamarse desde el hilo de la interfaz.
+        /// </summary>
+        public static async Task<bool> EnsureRestorePointAsync(string description)
+        {
+            if (!SettingsService.Settings.AutoRestorePointEnabled)
+                return true;
+
+            if (await CreateRestorePointAsync(description))
+                return true;
+
+            var answer = System.Windows.MessageBox.Show(
+                "No se pudo crear un punto de restauración, así que este cambio no se podría deshacer desde Windows.\n\n" +
+                "Suele pasar cuando la Protección del sistema está desactivada en C: " +
+                "(Panel de control › Sistema › Protección del sistema).\n\n" +
+                "¿Aplicar el cambio de todas formas, sin respaldo?",
+                "RETH Optimicer · Sin punto de restauración",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning,
+                System.Windows.MessageBoxResult.No);
+            return answer == System.Windows.MessageBoxResult.Yes;
         }
 
         public static Task<List<RestorePoint>> GetRestorePointsAsync()

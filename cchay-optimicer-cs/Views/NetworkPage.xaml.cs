@@ -275,10 +275,10 @@ namespace cchay_optimicer_cs.Views
 
                 try
                 {
-                    // Create system restore point first for safety
-                    if (SettingsService.Settings.AutoRestorePointEnabled)
+                    if (!await BackupService.EnsureRestorePointAsync($"RETH DNS Config {vm.Name}"))
                     {
-                        await BackupService.CreateRestorePointAsync($"RETH DNS Config {vm.Name}");
+                        ShowToast("Cambio cancelado. El DNS no se modificó.");
+                        return;
                     }
 
                     bool success = await NetworkService.SetDnsAsync(new[] { vm.Primary, vm.Secondary });
