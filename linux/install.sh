@@ -21,7 +21,10 @@ mkdir -p "$BIN" "$LIBEXEC" "$SHARE/reth-optimicer" "$SHARE/applications" \
 
 cp -a "$ROOT/reth_optimicer" "$SHARE/reth-optimicer/"
 cp -a "$ROOT/assets" "$SHARE/reth-optimicer/"
-install -m 0755 "$ROOT/helper/reth-optimicer-helper" "$LIBEXEC/reth-optimicer-helper"
+if [ "$(id -u)" -eq 0 ]; then
+  # El helper se ejecuta como root vía pkexec: solo se instala en rutas del sistema.
+  install -o root -g root -m 0755 "$ROOT/helper/reth-optimicer-helper" "$LIBEXEC/reth-optimicer-helper"
+fi
 install -m 0755 /dev/stdin "$BIN/reth-optimicer" <<EOF
 #!/usr/bin/env python3
 import sys
@@ -57,5 +60,6 @@ echo "RETH Optimicer instalado en $PREFIX"
 echo "Ejecuta: reth-optimicer"
 if [ "$(id -u)" -ne 0 ]; then
   echo "Asegúrate de que $BIN esté en PATH."
-  echo "Las acciones de administrador usan pkexec."
+  echo "Instalación de usuario: las acciones de administrador (liberar RAM, sysctl,"
+  echo "servicios del sistema, DNS) quedan desactivadas. Para activarlas: sudo ./install.sh"
 fi

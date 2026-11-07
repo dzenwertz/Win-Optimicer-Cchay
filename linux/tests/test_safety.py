@@ -73,5 +73,26 @@ class SafetyTests(unittest.TestCase):
             write.assert_not_called()
 
 
+class HelperTrustTests(unittest.TestCase):
+    def test_user_owned_helper_is_rejected(self):
+        from reth_optimicer import paths
+
+        with tempfile.TemporaryDirectory() as folder:
+            fake = Path(folder) / "reth-optimicer-helper"
+            fake.write_text("#!/bin/sh\n")
+            fake.chmod(0o755)
+            self.assertFalse(paths.is_trusted_root_file(fake))
+
+    def test_system_binary_is_trusted(self):
+        from reth_optimicer import paths
+
+        self.assertTrue(paths.is_trusted_root_file(Path("/usr/bin/env").resolve()))
+
+    def test_find_helper_ignores_repository_copy(self):
+        from reth_optimicer import paths
+
+        self.assertNotIn(ROOT / "helper" / "reth-optimicer-helper", paths.helper_candidates())
+
+
 if __name__ == "__main__":
     unittest.main()

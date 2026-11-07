@@ -15,7 +15,7 @@ def run(action: str, timeout: int = 180, **params: Any) -> dict:
     if helper is None:
         return {
             "ok": False,
-            "error": "No se encontró el asistente privilegiado. Instale RETH Optimicer.",
+            "error": "Esta acción necesita la instalación del sistema: ejecuta «sudo ./install.sh».",
         }
     pkexec = shutil.which("pkexec")
     if pkexec is None:

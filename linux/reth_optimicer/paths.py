@@ -60,22 +60,34 @@ def asset(*parts: str) -> Path | None:
 
 
 def helper_candidates() -> list[Path]:
+    # Solo rutas del sistema: pkexec ejecuta el helper como root.
     return [
-        _ROOT / "helper" / "reth-optimicer-helper",
         Path("/usr/local/libexec/reth-optimicer-helper"),
         Path("/usr/libexec/reth-optimicer-helper"),
-        Path.home() / ".local" / "libexec" / "reth-optimicer-helper",
-        Path("/usr/local/lib/reth-optimicer/helper/reth-optimicer-helper"),
-        Path.home() / ".local/lib/reth-optimicer/helper/reth-optimicer-helper",
     ]
+
+
+def is_trusted_root_file(path: Path) -> bool:
+    """True si el archivo y sus carpetas son de root y nadie más puede escribirlos.
+
+    Evita que un proceso del usuario modifique el helper y luego lo ejecute
+    como root a través de pkexec.
+    """
+    try:
+        for item in (path, *path.parents):
+            st = item.lstat()
+            if item == path and not os.path.isfile(item):
+                return False
+            if st.st_uid != 0 or st.st_mode & 0o022:
+                return False
+    except OSError:
+        return False
+    return os.access(path, os.X_OK)
 
 
 def find_helper() -> Path | None:
     for path in helper_candidates():
-        if path.is_file() and os.access(path, os.X_OK):
-            return path
-    for path in helper_candidates():
-        if path.is_file():
+        if is_trusted_root_file(path):
             return path
     return None
 
