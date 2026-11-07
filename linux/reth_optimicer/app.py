@@ -482,24 +482,43 @@ class RethWindow(Adw.ApplicationWindow):
 
     def _fill_mem(self) -> bool:
         def done(groups, err):
-            group = self._mem_slot.reset()
             if err or not groups:
-                _placeholder(group, "No se pudo leer la lista de procesos.")
+                self._mem_rows = {}
+                _placeholder(self._mem_slot.reset(), "No se pudo leer la lista de procesos.")
                 return
+            names = [item["name"] for item in groups]
+            current = getattr(self, "_mem_rows", {})
+            if list(current) == names:
+                # Mismas apps en el mismo orden: solo se actualizan los números.
+                # Reconstruir la lista en cada refresco la hacía parpadear y perder el scroll.
+                for item in groups:
+                    row, size_lbl = current[item["name"]]
+                    size_lbl.set_text(item["rss_h"])
+                    row.set_subtitle(self._proc_count(item))
+                return
+            group = self._mem_slot.reset()
+            self._mem_rows = {}
             for item in groups:
-                suffix = [_value(item["rss_h"])]
+                size_lbl = _value(item["rss_h"])
+                suffix = [size_lbl]
                 if item.get("closable"):
-                    name, label, size = item["name"], item["label"], item["rss_h"]
+                    name, label = item["name"], item["label"]
                     btn = Gtk.Button(icon_name="window-close-symbolic", tooltip_text=f"Cerrar {label}")
                     btn.add_css_class("flat")
                     btn.add_css_class("circular")
-                    btn.connect("clicked", lambda _b, n=name, l=label, s=size: self._close_group(n, l, s))
+                    btn.connect("clicked", lambda _b, n=name, l=label, s=size_lbl: self._close_group(n, l, s.get_text()))
                     suffix.append(btn)
-                n = item.get("count") or 1
-                group.add(_row(item["label"], f"{n} proceso" + ("" if n == 1 else "s"), *suffix))
+                row = _row(item["label"], self._proc_count(item), *suffix)
+                self._mem_rows[item["name"]] = (row, size_lbl)
+                group.add(row)
 
         _bg(lambda: memory.grouped_processes(12), done)
         return False
+
+    @staticmethod
+    def _proc_count(item: dict) -> str:
+        n = item.get("count") or 1
+        return f"{n} proceso" + ("" if n == 1 else "s")
 
     def _close_group(self, name: str, label: str, size: str) -> None:
         def go():
