@@ -30,7 +30,7 @@ En el inicio verás **RAM disponible**, no “libre”. Linux llena la RAM vací
 
 - Python 3.10+
 - GTK 4
-- libadwaita
+- libadwaita 1.4 o superior (Ubuntu 24.04, Fedora 39, Debian 13 o más recientes)
 - `pkexec` para acciones privilegiadas
 
 En Arch/EndeavourOS:

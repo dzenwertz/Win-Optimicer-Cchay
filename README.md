@@ -57,7 +57,7 @@ Instalador Inno Setup: `installer/installer.iss` → `RETH_Optimicer_Setup_v3.0.
 
 ## Linux
 
-Requisitos: Python 3.10+, GTK 4, libadwaita, `pkexec` para acciones de root.
+Requisitos: Python 3.10+, GTK 4, libadwaita 1.4+, `pkexec` para acciones de root.
 
 ```bash
 git clone https://github.com/dzenwertz/Win-Optimicer-Cchay.git

@@ -1,47 +1,73 @@
-@define-color reth_accent #7ed4f5;
-@define-color reth_bg #07090b;
-@define-color reth_surface #101418;
-@define-color reth_elevated #161c22;
-@define-color reth_text #f0f7fb;
-@define-color reth_muted #9ab3c0;
+/* RETH Optimicer: estilo sobrio sobre libadwaita. Acento de marca #7ED4F5. */
 
-window {
-  background-color: @reth_bg;
-  color: @reth_text;
+/* libadwaita < 1.6 */
+@define-color accent_color #7ed4f5;
+@define-color accent_bg_color #7ed4f5;
+@define-color accent_fg_color #06212c;
+
+/* libadwaita ≥ 1.6 */
+:root {
+  --accent-color: #7ed4f5;
+  --accent-bg-color: #7ed4f5;
+  --accent-fg-color: #06212c;
 }
 
-.sidebar {
-  background-color: @reth_surface;
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.brand-title {
+.tile {
+  padding: 16px 18px;
+  border-radius: 14px;
+}
+
+.tile-value {
+  font-size: 28px;
   font-weight: 600;
-  letter-spacing: 0.18em;
-  color: @reth_accent;
+  letter-spacing: -0.02em;
 }
 
-.muted {
-  color: @reth_muted;
+levelbar.tile-level block {
+  min-height: 4px;
+  border-radius: 2px;
 }
 
-.score {
-  font-size: 42px;
-  font-weight: 600;
-  color: @reth_accent;
+levelbar.tile-level block.filled {
+  background-color: #7ed4f5;
 }
 
-.ram-hero {
-  font-size: 40px;
-  font-weight: 600;
-  color: @reth_accent;
+levelbar.tile-level block.empty {
+  background-color: alpha(currentColor, 0.1);
 }
 
-.hint {
-  color: @reth_muted;
-  font-size: 13px;
+button.pill-button {
+  padding: 4px 14px;
+  min-height: 28px;
+  border-radius: 999px;
+  font-weight: 500;
 }
 
-button.suggested-action {
-  background: @reth_accent;
-  color: #041018;
+.badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.badge-ok {
+  color: #8fe0a8;
+  background-color: alpha(#8fe0a8, 0.12);
+}
+
+.badge-muted {
+  color: alpha(currentColor, 0.55);
+  background-color: alpha(currentColor, 0.07);
+}
+
+.navigation-sidebar row {
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
 }
