@@ -23,19 +23,18 @@ Windows: C# · .NET 8 · WPF (WPF-UI) — Linux: Python 3 · GTK 4 · libadwaita
 
 ## Capturas (`capturas/`)
 
-Capturas reales de la app de Linux con **datos de demostración** (procesos, servicios, DNS y equipo ficticios). Tamaño 1100×720.
+Capturas reales de la app de Linux con **datos de demostración** (procesos, servicios, DNS, autostart y equipo ficticios; los valores de Rendimiento son del kernel de pruebas y no contienen datos personales). Tamaño 1100×720.
 
 | Archivo | Pantalla |
 | --- | --- |
 | `01-inicio.png` | Inicio: estado, indicadores y mantenimiento |
-| `02-rendimiento-restaurar.png` | Rendimiento con "Óptimo" y "Restaurar" |
-| `03-servicios.png` | Servicios con interruptores |
-| `04-red-dns.png` | DNS con latencia |
-| `05-privacidad.png` | Privacidad con "Restaurar" |
+| `02-memoria.png` | Memoria: qué aplicaciones usan la RAM |
+| `03-rendimiento-restaurar.png` | Rendimiento con "Óptimo", "Aplicar" y "Restaurar" |
+| `04-servicios.png` | Servicios con interruptores |
+| `05-red-dns.png` | DNS con latencia medida |
 
 ## Pendiente (no verificado)
 
 - Capturas de Windows: no hay VM disponible; la interfaz de Windows no se revisó visualmente.
 - El código Windows de `pulido-reth` no se compiló (falta de RAM en el equipo de desarrollo); revisado a mano.
-- Captura de la pantalla Memoria: no se pudo generar (en investigación).
 - Versión inconsistente: Windows y README dicen 3.0.0; Linux (`__init__.py`) dice 3.0.1. Definir el número de la próxima versión.
