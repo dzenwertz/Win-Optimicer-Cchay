@@ -552,7 +552,7 @@ class RethWindow(Adw.ApplicationWindow):
     # ── Rendimiento (sysctl, gobernador, TRIM) ────────────────────────────
 
     def _page_tweaks(self) -> Gtk.Widget:
-        self._tweak_slot = _GroupSlot("Memoria virtual", "Cada valor se puede volver a cambiar desde aquí.")
+        self._tweak_slot = _GroupSlot("Memoria virtual", "RETH guarda el valor original de cada cambio para poder restaurarlo.")
         _placeholder(self._tweak_slot.group)
         self._cpu_slot = _GroupSlot("Procesador y almacenamiento")
         _placeholder(self._cpu_slot.group)
@@ -576,7 +576,13 @@ class RethWindow(Adw.ApplicationWindow):
                     cur, rec = spec.get("current"), spec.get("recommended")
                     if cur is None:
                         continue
-                    if cur == rec:
+                    orig = spec.get("original")
+                    if orig is not None and orig != cur:
+                        key = spec["id"]
+                        btn = _button("Restaurar", lambda _b, k=key: self._run_action(
+                            lambda: tweaks.restore_sysctl(k), f"{k} restaurado", after=self._fill_tweaks))
+                        vm.add(_row(spec["title"], f"Cambiado por RETH: {cur}. Valor original: {orig}.", btn))
+                    elif cur == rec:
                         sub = spec.get("note") or spec["subtitle"]
                         vm.add(_row(spec["title"], f"{sub} Valor actual: {cur}.", _badge("Óptimo")))
                     else:
@@ -596,6 +602,11 @@ class RethWindow(Adw.ApplicationWindow):
                         combo.set_selected(options.index(current))
                     combo.connect("notify::selected", self._on_governor, options, current)
                     cpu.add(combo)
+                    orig = spec.get("original")
+                    if orig and orig != current:
+                        cpu.add(_row("Gobernador original", f"Antes de RETH: {orig}.", _button(
+                            "Restaurar", lambda *_: self._run_action(
+                                tweaks.restore_governor, "Gobernador restaurado", after=self._fill_tweaks))))
                 elif kind == "fstrim" and spec.get("available"):
                     btn = _button("Ejecutar", lambda *_: self._run_action(tweaks.run_fstrim, "TRIM finalizado"))
                     cpu.add(_row(spec["title"], spec["subtitle"], btn))
@@ -791,7 +802,12 @@ class RethWindow(Adw.ApplicationWindow):
             if not any(i["present"] for i in items):
                 group.set_description("Ninguno está instalado en este sistema.")
             for item in items:
-                if not item["present"]:
+                iid = item["id"]
+                if item.get("disabled_by_reth"):
+                    row = _row(item["title"], "Desactivado por RETH.", _button(
+                        "Restaurar", lambda _b, i=iid: self._run_action(
+                            lambda: privacy.restore(i), "Reactivado", after=self._fill_privacy)))
+                elif not item["present"]:
                     row = _row(item["title"], item["subtitle"], _badge("No instalado", ok=False))
                 elif item.get("enabled"):
                     iid = item["id"]

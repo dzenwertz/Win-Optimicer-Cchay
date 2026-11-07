@@ -5,7 +5,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from .. import privileged
+from .. import privileged, reverts
 
 ITEMS = [
     {
@@ -101,6 +101,7 @@ def scan() -> list[dict]:
                 "subtitle": item["subtitle"],
                 "present": present,
                 "enabled": enabled,
+                "disabled_by_reth": reverts.has("privacy", item["id"]),
             }
         )
     return rows
@@ -110,7 +111,20 @@ def disable(item_id: str) -> dict:
     ids = {i["id"] for i in ITEMS}
     if item_id not in ids:
         return {"ok": False, "error": "Elemento no válido."}
-    return privileged.run("privacy_disable", target=item_id)
+    result = privileged.run("privacy_disable", target=item_id)
+    if result.get("ok"):
+        reverts.remember("privacy", item_id, True)
+    return result
+
+
+def restore(item_id: str) -> dict:
+    """Reactiva un recolector que RETH desactivó."""
+    if not reverts.has("privacy", item_id):
+        return {"ok": False, "error": "RETH no desactivó este elemento."}
+    result = privileged.run("privacy_restore", target=item_id)
+    if result.get("ok"):
+        reverts.forget("privacy", item_id)
+    return result
 
 
 def disable_all_present() -> dict:

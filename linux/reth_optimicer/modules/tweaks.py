@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .. import privileged
+from .. import privileged, reverts
 
 SYSCTL_KEYS = [
     {
@@ -101,6 +101,7 @@ def list_tweaks() -> list[dict]:
                 "max": maximum,
                 "recommended": recommended,
                 "note": note,
+                "original": reverts.original("sysctl", spec["key"]),
                 "current": current,
                 "available": True,
             }
@@ -113,6 +114,7 @@ def list_tweaks() -> list[dict]:
             "title": "Gobernador de CPU",
             "subtitle": "Política de frecuencia. «performance» maximiza rendimiento.",
             "current": current_governor(),
+            "original": reverts.original("governor", "cpu"),
             "options": govs,
             "available": bool(govs or current_governor()),
             "recommended": "schedutil" if "schedutil" in govs else (
@@ -137,11 +139,40 @@ def list_tweaks() -> list[dict]:
 
 
 def apply_sysctl(key: str, value: int) -> dict:
-    return privileged.run("sysctl_set", key=key, value=int(value))
+    before = read_sysctl(key)
+    result = privileged.run("sysctl_set", key=key, value=int(value))
+    if result.get("ok") and before is not None and before != int(value):
+        reverts.remember("sysctl", key, before)
+    return result
+
+
+def restore_sysctl(key: str) -> dict:
+    """Vuelve al valor que había antes de RETH y quita la línea persistente."""
+    before = reverts.original("sysctl", key)
+    if before is None:
+        return {"ok": False, "error": "No hay un valor original guardado."}
+    result = privileged.run("sysctl_restore", key=key, value=int(before))
+    if result.get("ok"):
+        reverts.forget("sysctl", key)
+    return result
 
 
 def apply_governor(name: str) -> dict:
-    return privileged.run("set_governor", governor=name)
+    before = current_governor()
+    result = privileged.run("set_governor", governor=name)
+    if result.get("ok") and before and before != name:
+        reverts.remember("governor", "cpu", before)
+    return result
+
+
+def restore_governor() -> dict:
+    before = reverts.original("governor", "cpu")
+    if not before:
+        return {"ok": False, "error": "No hay un gobernador original guardado."}
+    result = privileged.run("set_governor", governor=before)
+    if result.get("ok"):
+        reverts.forget("governor", "cpu")
+    return result
 
 
 def run_fstrim() -> dict:

@@ -9,12 +9,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+# clave → (mínimo, máximo) aceptados
 SYSCTL_ALLOW = {
-    "vm.swappiness",
-    "vm.dirty_ratio",
-    "vm.dirty_background_ratio",
-    "vm.vfs_cache_pressure",
+    "vm.swappiness": (0, 200),
+    "vm.dirty_ratio": (1, 100),
+    "vm.dirty_background_ratio": (1, 100),
+    "vm.vfs_cache_pressure": (1, 1000),
 }
+SYSCTL_DROPIN = Path("/etc/sysctl.d/99-reth-optimicer.conf")
 GOV_RE = re.compile(r"^[a-z0-9_\-]+$")
 UNIT_RE = re.compile(r"^[A-Za-z0-9:_.\\@-]+\.(service|socket|timer)$")
 PROTECTED = {"dbus.service", "systemd-logind.service", "NetworkManager.service", "sshd.service"}
@@ -97,7 +99,7 @@ def fstrim(_: dict) -> dict:
     return _ok((proc.stdout or "TRIM completado.").strip())
 
 
-def sysctl_set(req: dict) -> dict:
+def _sysctl_value(req: dict) -> tuple[str, int] | dict:
     key = str(req.get("key", ""))
     if key not in SYSCTL_ALLOW:
         return _err("Clave sysctl no permitida.")
@@ -105,20 +107,48 @@ def sysctl_set(req: dict) -> dict:
         value = int(req.get("value"))
     except (TypeError, ValueError):
         return _err("Valor inválido.")
-    upper = 200 if key == "vm.swappiness" else 100
-    if not 0 <= value <= upper:
-        return _err(f"Valor fuera de rango (0–{upper}).")
+    low, high = SYSCTL_ALLOW[key]
+    if not low <= value <= high:
+        return _err(f"Valor fuera de rango ({low}–{high}).")
+    return key, value
+
+
+def _dropin_lines(key: str) -> list[str]:
+    """Líneas del drop-in de RETH sin la clave indicada."""
+    if not SYSCTL_DROPIN.exists():
+        return []
+    return [ln for ln in SYSCTL_DROPIN.read_text().splitlines() if not ln.startswith(f"{key}=")]
+
+
+def sysctl_set(req: dict) -> dict:
+    parsed = _sysctl_value(req)
+    if isinstance(parsed, dict):
+        return parsed
+    key, value = parsed
     proc = _run(["sysctl", "-w", f"{key}={value}"])
     if proc.returncode != 0:
         return _err((proc.stderr or proc.stdout).strip())
-    dropin = Path("/etc/sysctl.d/99-reth-optimicer.conf")
-    existing = ""
-    if dropin.exists():
-        existing = dropin.read_text()
-    lines = [ln for ln in existing.splitlines() if not ln.startswith(f"{key}=")]
+    lines = _dropin_lines(key)
     lines.append(f"{key}={value}")
-    dropin.write_text("\n".join(lines) + "\n")
+    SYSCTL_DROPIN.write_text("\n".join(lines) + "\n")
     return _ok(f"{key}={value}")
+
+
+def sysctl_restore(req: dict) -> dict:
+    """Aplica el valor original y quita la clave del drop-in (borra el archivo si queda vacío)."""
+    parsed = _sysctl_value(req)
+    if isinstance(parsed, dict):
+        return parsed
+    key, value = parsed
+    proc = _run(["sysctl", "-w", f"{key}={value}"])
+    if proc.returncode != 0:
+        return _err((proc.stderr or proc.stdout).strip())
+    lines = [ln for ln in _dropin_lines(key) if ln.strip()]
+    if lines:
+        SYSCTL_DROPIN.write_text("\n".join(lines) + "\n")
+    elif SYSCTL_DROPIN.exists():
+        SYSCTL_DROPIN.unlink()
+    return _ok(f"{key} restaurado a {value}")
 
 
 def set_governor(req: dict) -> dict:
@@ -216,27 +246,53 @@ def flush_dns(_: dict) -> dict:
     return _ok("No hay resolvectl; nada que vaciar.")
 
 
-def privacy_disable(req: dict) -> dict:
-    target = str(req.get("target", ""))
+def _set_conf_line(path: Path, key: str, line: str) -> None:
+    """Sustituye la línea «key=...» conservando el resto del archivo."""
+    lines = path.read_text().splitlines() if path.exists() else []
+    out, found = [], False
+    for ln in lines:
+        if ln.strip().startswith(f"{key}="):
+            out.append(line)
+            found = True
+        else:
+            out.append(ln)
+    if not found:
+        out.append(line)
+    path.write_text("\n".join(out) + "\n")
+
+
+def _privacy_toggle(target: str, enable: bool) -> dict:
+    verb = "enable" if enable else "disable"
+    state = "reactivado" if enable else "desactivado"
     if target == "apport":
-        Path("/etc/default/apport").write_text("enabled=0\n")
-        _run(["systemctl", "disable", "--now", "apport.service"])
-        return _ok("Apport desactivado.")
+        _set_conf_line(Path("/etc/default/apport"), "enabled", f"enabled={1 if enable else 0}")
+        _run(["systemctl", verb, "--now", "apport.service"])
+        return _ok(f"Apport {state}.")
     if target == "popularity-contest":
         conf = Path("/etc/popularity-contest.conf")
         if conf.exists():
-            text = conf.read_text()
-            text = text.replace("PARTICIPATE=\"yes\"", "PARTICIPATE=\"no\"")
-            conf.write_text(text)
-        _run(["systemctl", "disable", "--now", "popularity-contest.timer"])
-        return _ok("popularity-contest desactivado.")
+            _set_conf_line(conf, "PARTICIPATE", f'PARTICIPATE="{"yes" if enable else "no"}"')
+        _run(["systemctl", verb, "--now", "popularity-contest.timer"])
+        return _ok(f"popularity-contest {state}.")
     if target == "whoopsie":
-        _run(["systemctl", "disable", "--now", "whoopsie.service"])
-        return _ok("whoopsie desactivado.")
+        proc = _run(["systemctl", verb, "--now", "whoopsie.service"])
+        if proc.returncode != 0:
+            return _err((proc.stderr or proc.stdout).strip() or "systemctl falló")
+        return _ok(f"whoopsie {state}.")
     if target == "ubuntu-report":
-        _run(["chmod", "-x", "/usr/bin/ubuntu-report"])
-        return _ok("ubuntu-report desactivado.")
+        proc = _run(["chmod", "+x" if enable else "-x", "/usr/bin/ubuntu-report"])
+        if proc.returncode != 0:
+            return _err((proc.stderr or proc.stdout).strip() or "chmod falló")
+        return _ok(f"ubuntu-report {state}.")
     return _err("Objetivo de privacidad no válido.")
+
+
+def privacy_disable(req: dict) -> dict:
+    return _privacy_toggle(str(req.get("target", "")), enable=False)
+
+
+def privacy_restore(req: dict) -> dict:
+    return _privacy_toggle(str(req.get("target", "")), enable=True)
 
 
 def systemctl_op(req: dict) -> dict:
@@ -261,6 +317,7 @@ ACTIONS = {
     "zram_compact": zram_compact,
     "fstrim": fstrim,
     "sysctl_set": sysctl_set,
+    "sysctl_restore": sysctl_restore,
     "set_governor": set_governor,
     "journal_vacuum": journal_vacuum,
     "pkg_clean_cache": pkg_clean_cache,
@@ -268,6 +325,7 @@ ACTIONS = {
     "set_dns": set_dns,
     "flush_dns": flush_dns,
     "privacy_disable": privacy_disable,
+    "privacy_restore": privacy_restore,
     "systemctl": systemctl_op,
 }
 
