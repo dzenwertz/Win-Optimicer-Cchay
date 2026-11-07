@@ -47,10 +47,39 @@ namespace cchay_optimicer_cs.Services
             }
         }
 
+        // Comandos de este hilo que fallaron y sí cambian la configuración (netsh, powercfg).
+        // «sc stop/start» es complementario: el cambio real es el tipo de inicio en el registro,
+        // y falla de forma normal si el servicio ya estaba detenido o no existe.
+        [ThreadStatic] private static List<string>? _failedCommands;
+
+        private static readonly HashSet<string> RequiredCommands =
+            new(StringComparer.OrdinalIgnoreCase) { "netsh", "powercfg" };
+
         private static bool RunCmd(string filename, string arguments, int timeoutMs = 15000)
         {
             var result = ProcessRunner.Run(filename, arguments, timeoutMs);
+            if (!result.Success && RequiredCommands.Contains(filename))
+                _failedCommands?.Add($"{filename} {arguments} (código {result.ExitCode})");
             return result.Success;
+        }
+
+        /// <summary>Último error de ApplyTweakAsync/UnapplyTweakAsync, para mostrarlo al usuario.</summary>
+        public static string? LastError { get; private set; }
+
+        private static bool FinishTweak(string key, bool applied)
+        {
+            var failed = _failedCommands;
+            _failedCommands = null;
+            if (failed is { Count: > 0 })
+            {
+                LastError = "Estos comandos fallaron:\n" + string.Join("\n", failed);
+                Debug.WriteLine($"Tweak {key} not marked as {(applied ? "applied" : "reverted")}: {LastError}");
+                return false;
+            }
+            var states = LoadTweakStates();
+            states[key] = applied;
+            SaveTweakStates(states);
+            return true;
         }
 
         public static Task<List<Tweak>> GetTweaksAsync()
@@ -336,6 +365,8 @@ namespace cchay_optimicer_cs.Services
         {
             return Task.Run(() =>
             {
+                LastError = null;
+                _failedCommands = new List<string>();
                 try
                 {
                     switch (key)
@@ -587,10 +618,7 @@ namespace cchay_optimicer_cs.Services
                             return false;
                     }
 
-                    var states = LoadTweakStates();
-                    states[key] = true;
-                    SaveTweakStates(states);
-                    return true;
+                    return FinishTweak(key, applied: true);
                 }
                 catch (Exception ex)
                 {
@@ -604,6 +632,8 @@ namespace cchay_optimicer_cs.Services
         {
             return Task.Run(() =>
             {
+                LastError = null;
+                _failedCommands = new List<string>();
                 try
                 {
                     switch (key)
@@ -954,10 +984,7 @@ namespace cchay_optimicer_cs.Services
                             return false;
                     }
 
-                    var states = LoadTweakStates();
-                    states[key] = false;
-                    SaveTweakStates(states);
-                    return true;
+                    return FinishTweak(key, applied: false);
                 }
                 catch (Exception ex)
                 {

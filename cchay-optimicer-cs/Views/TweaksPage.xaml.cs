@@ -56,12 +56,14 @@ namespace cchay_optimicer_cs.Views
         {
             _isToggling = true;
             bool success = false;
+            bool cancelled = false;
             try
             {
-                // Create backup restore point automatically before applying tweaks for safety (only if admin)
-                if (SystemService.IsRunningAsAdmin() && SettingsService.Settings.AutoRestorePointEnabled)
+                // Punto de restauración antes del cambio; si falla, el usuario decide.
+                if (SystemService.IsRunningAsAdmin() && !await BackupService.EnsureRestorePointAsync($"RETH Tweak {Name}"))
                 {
-                    await BackupService.CreateRestorePointAsync($"RETH Tweak {Name}");
+                    cancelled = true;
+                    return;
                 }
 
                 if (enable)
@@ -86,14 +88,18 @@ namespace cchay_optimicer_cs.Views
                     // Revert the toggle check status if applying fails
                     _enabled = !enable;
                     OnPropertyChanged(nameof(Enabled));
-
+                }
+                if (!success && !cancelled)
+                {
                     string errorMsg = SystemService.IsRunningAsAdmin()
-                        ? "No se pudo modificar el ajuste. Hubo un error al acceder o escribir en el registro del sistema."
-                        : "No se pudo modificar el ajuste debido a la falta de privilegios.\n\nPor favor, ejecuta el programa como Administrador para poder aplicar esta configuración.";
+                        ? "No se pudo completar el ajuste, así que no se marcó como aplicado."
+                        : "Este ajuste necesita permisos de administrador. Abre RETH Optimicer como administrador para aplicarlo.";
+                    if (!string.IsNullOrEmpty(TweakService.LastError))
+                        errorMsg += "\n\n" + TweakService.LastError;
 
                     MessageBox.Show(
                         errorMsg,
-                        "Error al Modificar Ajuste",
+                        "No se aplicó el ajuste",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning
                     );
