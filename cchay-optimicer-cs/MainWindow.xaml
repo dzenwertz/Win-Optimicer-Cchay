@@ -23,7 +23,7 @@
             <Border x:Name="AdminWarningBar" Background="#7F1D1D" BorderThickness="0,0,0,1" BorderBrush="#F87171" Padding="14,10,14,10" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <ui:SymbolIcon Symbol="Warning24" Foreground="#F87171" Margin="0,0,8,0" />
-                    <TextBlock Text="Modo limitado: RETH Optimicer no se está ejecutando como Administrador. Ejecútalo como Administrador para habilitar todas las funciones." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
+                    <TextBlock Text="Modo limitado: puedes ver el diagnóstico, pero aplicar cambios requiere abrir RETH Optimicer como administrador." FontSize="13" Foreground="White" FontWeight="Medium" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
 

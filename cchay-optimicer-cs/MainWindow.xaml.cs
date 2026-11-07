@@ -115,31 +115,13 @@ namespace cchay_optimicer_cs
                 Log($"Accent color apply skipped: {ex.Message}");
             }
             
-            // Check Admin Status and self-elevate if necessary
+            // La app arranca sin privilegios (asInvoker). Antes de pedir administrador
+            // explicamos para qué se usa; si el usuario no acepta, sigue en modo limitado.
             if (!SystemService.IsRunningAsAdmin())
             {
-                try
-                {
-                    Log("Not running as admin. Attempting self-elevation...");
-                    var processInfo = new ProcessStartInfo
-                    {
-                        FileName = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RethOptimicer.exe"),
-                        UseShellExecute = true,
-                        Verb = "runas" // This triggers UAC elevation prompt
-                    };
-                    
-                    _notifyIcon?.Dispose();
-                    App.ReleaseSingleInstanceMutex();
-                    Process.Start(processInfo);
-                    Application.Current.Shutdown();
+                if (AskForElevation() && TryRelaunchElevated())
                     return;
-                }
-                catch (Exception ex)
-                {
-                    Log($"Self-elevation failed/cancelled: {ex.Message}");
-                    // User rejected UAC prompt; run in limited mode and show warning bar
-                    AdminWarningBar.Visibility = Visibility.Visible;
-                }
+                AdminWarningBar.Visibility = Visibility.Visible;
             }
             else
             {
@@ -171,6 +153,49 @@ namespace cchay_optimicer_cs
             catch (Exception ex)
             {
                 Log($"Exception navigating to '{pageType.Name}':\r\n{ex}");
+            }
+        }
+
+        private static bool AskForElevation()
+        {
+            var answer = MessageBox.Show(
+                "RETH Optimicer necesita permisos de administrador para:\n\n" +
+                "  • Crear puntos de restauración antes de cada cambio\n" +
+                "  • Cambiar servicios, el registro del sistema y el plan de energía\n" +
+                "  • Limpiar archivos temporales de Windows y reparar el sistema\n\n" +
+                "Sin ellos puedes ver el diagnóstico (CPU, memoria, disco y red), " +
+                "pero no aplicar cambios.\n\n" +
+                "¿Reiniciar RETH Optimicer como administrador? Windows te pedirá confirmación.",
+                "RETH Optimicer · Permisos de administrador",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information,
+                MessageBoxResult.Yes);
+            return answer == MessageBoxResult.Yes;
+        }
+
+        private bool TryRelaunchElevated()
+        {
+            try
+            {
+                Log("Relaunching elevated after user consent");
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RethOptimicer.exe"),
+                    UseShellExecute = true,
+                    Verb = "runas"
+                };
+                App.ReleaseSingleInstanceMutex();
+                Process.Start(processInfo);
+                _notifyIcon?.Dispose();
+                Application.Current.Shutdown();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // UAC cancelado: seguimos en modo limitado.
+                Log($"Elevation cancelled: {ex.Message}");
+                App.ReacquireSingleInstanceMutex();
+                return false;
             }
         }
 

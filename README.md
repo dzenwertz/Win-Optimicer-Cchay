@@ -40,7 +40,7 @@ website/                   Landing RETH Optimicer
 
 ## Windows
 
-Requisitos: Windows 10 (build 19041+) o 11, administrador.
+Requisitos: Windows 10 (build 19041+) o 11. Al abrirse, la app explica para qué necesita permisos de administrador y los pide; sin ellos funciona en modo diagnóstico (solo lectura).
 
 Portable (Release):
 

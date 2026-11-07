@@ -87,6 +87,13 @@ public partial class App : Application
         }
     }
 
+    /// <summary>Vuelve a tomar el mutex si la elevación se canceló tras liberarlo.</summary>
+    public static void ReacquireSingleInstanceMutex()
+    {
+        if (_singleInstanceMutex != null) return;
+        try { _singleInstanceMutex = new System.Threading.Mutex(true, "Global\\RethOptimicer_SingleInstance_Mutex", out _); } catch { }
+    }
+
     public static void ReleaseSingleInstanceMutex()
     {
         try { _singleInstanceMutex?.ReleaseMutex(); } catch { }
