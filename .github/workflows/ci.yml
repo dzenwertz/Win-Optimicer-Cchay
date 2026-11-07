@@ -16,7 +16,7 @@ jobs:
         working-directory: linux
 
   windows:
-    name: Windows restore
+    name: Windows build and report tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,3 +25,5 @@ jobs:
           dotnet-version: "8.0.x"
       - name: Restore
         run: dotnet restore cchay-optimicer-cs/cchay-optimicer-cs.sln
+      - name: Verify report export without system maintenance
+        run: dotnet test cchay-optimicer-cs-tests/cchay-optimicer-cs-tests.csproj --filter FullyQualifiedName~SystemReportTests --logger "trx;LogFileName=system-report.trx"
