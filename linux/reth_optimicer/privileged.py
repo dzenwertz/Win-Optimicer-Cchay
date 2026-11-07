@@ -44,6 +44,9 @@ def run(action: str, timeout: int = 180, **params: Any) -> dict:
         try:
             data = json.loads(stdout.splitlines()[-1])
             if isinstance(data, dict):
+                if proc.returncode != 0:
+                    data["ok"] = False
+                    data.setdefault("error", stderr or f"Código {proc.returncode}")
                 return data
         except json.JSONDecodeError:
             pass

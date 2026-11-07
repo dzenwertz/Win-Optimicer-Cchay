@@ -26,15 +26,19 @@ namespace cchay_optimicer_cs.Services
         {
             try
             {
-                if (!Directory.Exists(LegacyAppDataDir) || Directory.Exists(AppDataDir))
+                if (!Directory.Exists(LegacyAppDataDir))
                     return;
 
-                Directory.CreateDirectory(AppDataDir);
+                if (!Directory.Exists(AppDataDir))
+                    Directory.CreateDirectory(AppDataDir);
+
                 foreach (var file in Directory.GetFiles(LegacyAppDataDir))
                 {
                     string dest = Path.Combine(AppDataDir, Path.GetFileName(file));
                     if (!File.Exists(dest))
-                        File.Copy(file, dest);
+                    {
+                        try { File.Copy(file, dest); } catch { }
+                    }
                 }
             }
             catch (Exception ex)

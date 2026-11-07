@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:cchay_optimicer_cs"
         xmlns:views="clr-namespace:cchay_optimicer_cs.Views"
         mc:Ignorable="d"
-        Title="RETH Optimicer" Height="750" Width="1100" Icon="pack://application:,,,/Assets/reth_logo.png"
+        Title="RETH Optimicer" Height="720" Width="1040" MinHeight="560" MinWidth="820" Icon="pack://application:,,,/Assets/reth_logo.png"
         Background="{DynamicResource ApplicationBackgroundBrush}"
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         WindowStartupLocation="CenterScreen">
@@ -53,7 +53,7 @@
                                 PaneDisplayMode="Left"
                                 IsBackButtonVisible="Collapsed"
                                 IsPaneToggleVisible="True"
-                                OpenPaneLength="248">
+                                OpenPaneLength="218">
                 <ui:NavigationView.PaneHeader>
                     <StackPanel Orientation="Horizontal" Margin="16,12,12,8">
                         <Image Source="pack://application:,,,/Assets/reth_logo.png"
@@ -66,7 +66,8 @@
                     </StackPanel>
                 </ui:NavigationView.PaneHeader>
                 <ui:NavigationView.MenuItems>
-                    <ui:NavigationViewItem Content="Dashboard" Tag="dashboard" TargetPageType="{x:Type views:DashboardPage}" Icon="{ui:SymbolIcon Symbol=Home24}" />
+                    <ui:NavigationViewItem Content="Inicio" Tag="dashboard" TargetPageType="{x:Type views:DashboardPage}" Icon="{ui:SymbolIcon Symbol=Home24}" />
+                    <ui:NavigationViewItem Content="Modo Game" Tag="gamemode" TargetPageType="{x:Type views:GameModePage}" Icon="{ui:SymbolIcon Symbol=Games24}" />
                     <ui:NavigationViewItemSeparator />
                     <ui:NavigationViewItem Content="Optimizar RAM" Tag="ram" TargetPageType="{x:Type views:RamPage}" Icon="{ui:SymbolIcon Symbol=DeveloperBoard24}" />
                     <ui:NavigationViewItem Content="Limpiar Disco" Tag="disk" TargetPageType="{x:Type views:DiskPage}" Icon="{ui:SymbolIcon Symbol=HardDrive24}" />

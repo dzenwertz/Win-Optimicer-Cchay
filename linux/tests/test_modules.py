@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from reth_optimicer.modules import benchmark, disk, system_info, tweaks  # noqa: E402
+from reth_optimicer.modules import benchmark, disk, memory, system_info, tweaks  # noqa: E402
 from reth_optimicer.paths import fmt_bytes  # noqa: E402
 
 
@@ -40,6 +40,21 @@ class BenchTests(unittest.TestCase):
         self.assertIn("score", res)
         self.assertGreaterEqual(res["score"], 0)
         self.assertLessEqual(res["score"], 100000)
+
+
+class MemoryTests(unittest.TestCase):
+    def test_snapshot(self):
+        snap = memory.snapshot()
+        self.assertGreater(snap["ram_total"], 0)
+        self.assertIn("ram_available_h", snap)
+        self.assertIn("reclaimable_h", snap)
+        self.assertIn(snap["pressure"], {"baja", "media", "alta"})
+
+    def test_grouped_processes(self):
+        groups = memory.grouped_processes(5)
+        self.assertTrue(groups)
+        self.assertIn("rss_h", groups[0])
+        self.assertTrue(groups[0]["label"])
 
 
 class PathTests(unittest.TestCase):

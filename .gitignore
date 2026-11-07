@@ -1,4 +1,5 @@
 # Carpetas de compilacion de .NET / VS
+.tools/
 bin/
 obj/
 

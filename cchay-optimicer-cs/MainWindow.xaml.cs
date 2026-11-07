@@ -129,6 +129,7 @@ namespace cchay_optimicer_cs
                     };
                     
                     _notifyIcon?.Dispose();
+                    App.ReleaseSingleInstanceMutex();
                     Process.Start(processInfo);
                     Application.Current.Shutdown();
                     return;
@@ -149,6 +150,7 @@ namespace cchay_optimicer_cs
 
             // Start background smart RAM & maintenance service
             BackgroundMaintenanceService.Initialize();
+            GameModeService.Initialize();
 
             if (SettingsService.Settings.WidgetEnabled)
             {
@@ -220,6 +222,16 @@ namespace cchay_optimicer_cs
             menu.Items.Add("Abrir RETH Optimicer", null, (s, e) => RestoreWindow());
             menu.Items.Add("Limpieza Rápida de RAM", null, async (s, e) => await QuickCleanRamAsync());
             menu.Items.Add("Optimización profunda", null, async (s, e) => await TechOptimizeAsync());
+            
+            var gameModeItem = new Forms.ToolStripMenuItem("Activar Modo Game", null, async (s, e) =>
+            {
+                if (GameModeService.IsActive)
+                    await GameModeService.DeactivateAsync();
+                else
+                    await GameModeService.ActivateAsync();
+                UpdateTrayStatus(menu);
+            });
+            menu.Items.Add(gameModeItem);
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add("Salir", null, (s, e) => ExitApplication());
 
@@ -247,18 +259,24 @@ namespace cchay_optimicer_cs
             {
                 var mem = RamService.GetMemoryUsage();
                 double freeGB = mem.FreeBytes / 1024.0 / 1024.0 / 1024.0;
-                string status = $"RETH Optimicer — {mem.PercentUsed}% RAM Usada ({freeGB:F1} GB Libres)";
+                bool isGameMode = GameModeService.IsActive;
                 
                 if (_notifyIcon != null)
                 {
                     // NotifyIcon.Text max length is 63 chars
-                    string shortText = $"RETH Optimicer: {mem.PercentUsed}% RAM ({freeGB:F1}GB libre)";
+                    string prefix = isGameMode ? "[GAME] " : "";
+                    string shortText = $"{prefix}RETH: {mem.PercentUsed}% RAM ({freeGB:F1}GB libre)";
                     _notifyIcon.Text = shortText.Length > 63 ? shortText.Substring(0, 63) : shortText;
                 }
 
                 if (menu.Items.Count > 0 && menu.Items[0] is Forms.ToolStripMenuItem item)
                 {
                     item.Text = $"Abrir ({mem.PercentUsed}% RAM Usada)";
+                }
+
+                if (menu.Items.Count > 3 && menu.Items[3] is Forms.ToolStripMenuItem gmItem)
+                {
+                    gmItem.Text = isGameMode ? "Desactivar Modo Game (ACTIVO)" : "Activar Modo Game";
                 }
             }
             catch { }

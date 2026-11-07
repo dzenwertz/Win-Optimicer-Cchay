@@ -30,6 +30,9 @@ namespace cchay_optimicer_cs.Views
         {
             await LoadSystemDataAsync();
 
+            GameModeService.StateChanged += OnGameModeStateChanged;
+            UpdateDashboardGameModeUI();
+
             _timer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(5)
@@ -41,6 +44,7 @@ namespace cchay_optimicer_cs.Views
         private void DashboardPage_Unloaded(object sender, RoutedEventArgs e)
         {
             _timer?.Stop();
+            GameModeService.StateChanged -= OnGameModeStateChanged;
         }
 
         private async void Timer_Tick(object? sender, EventArgs e)
@@ -215,53 +219,14 @@ namespace cchay_optimicer_cs.Views
 
             try
             {
-                // Create backup first
-                if (SettingsService.Settings.AutoRestorePointEnabled)
+                await QuickOptimizeService.RunQuickOptimizeAsync((message, percent) =>
                 {
-                    TxtQuickProgress.Text = "Creando punto de restauración...";
-                    ProgQuickClean.Value = 5;
-                    await BackupService.CreateRestorePointAsync("RETH Optimicer");
-                }
-
-                // Clean RAM with progress
-                long ramFreed = await RamService.CleanAllWithProgressAsync((stepText, percent, bytesSoFar) =>
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        TxtQuickProgress.Text = stepText;
-                        ProgQuickClean.Value = 5 + (percent * 0.7); // 5% to 75%
-                        double liveMB = bytesSoFar / 1024.0 / 1024.0;
-                        TxtQuickFreedLive.Text = $"{liveMB:F0} MB liberados";
-                    });
+                    TxtQuickProgress.Text = message;
+                    ProgQuickClean.Value = percent;
                 });
-                double ramFreedMB = ramFreed / 1024.0 / 1024.0;
-
-                // Clean select temp disk files
-                TxtQuickProgress.Text = "Limpiando archivos temporales y papelera...";
-                ProgQuickClean.Value = 85;
-                double diskFreedMB = 0;
-                var targets = DiskService.GetTargets().Where(t => t.Key == "temp" || t.Key == "windowsTemp" || t.Key == "recycleBin" || t.Key == "thumbnails");
-                foreach (var t in targets)
-                {
-                    var processed = await DiskService.ProcessTargetAsync(t, delete: true);
-                    diskFreedMB += processed.SizeMB;
-                    double liveMB = ramFreedMB + diskFreedMB;
-                    TxtQuickFreedLive.Text = $"{liveMB:F0} MB liberados";
-                    await Task.Delay(150);
-                }
-
-                ProgQuickClean.Value = 100;
-                TxtQuickProgress.Text = "¡Limpieza completada!";
-                await Task.Delay(400);
-
-                // Update cumulative stats
-                SettingsService.Settings.TotalBytesRamFreed += (ulong)ramFreed;
-                SettingsService.Settings.TotalMbDiskFreed += diskFreedMB;
                 SettingsService.Settings.TotalOptimizationsRun++;
                 SettingsService.SaveSettings();
-
-                double totalFreed = ramFreedMB + diskFreedMB;
-                TxtResult.Text = $"✨ ¡Limpieza rápida completada! Se liberaron {totalFreed:F0} MB de RAM y disco.";
+                TxtResult.Text = TxtQuickProgress.Text;
                 TxtResult.Visibility = Visibility.Visible;
                 PanelQuickProgress.Visibility = Visibility.Collapsed;
 
@@ -287,7 +252,7 @@ namespace cchay_optimicer_cs.Views
 
         private async void BtnTechOptimize_Click(object sender, RoutedEventArgs e)
         {
-            var confirm = MessageBox.Show("Vas a iniciar la optimización profunda de RETH Optimicer. Se aplicarán ajustes de registro, se deshabilitará bloatware, se optimizará la red y se liberará espacio. ¿Deseas continuar?", "Optimización profunda", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var confirm = MessageBox.Show("Se eliminarán temporales, miniaturas y reportes de error. Los archivos en uso se conservarán. ¿Deseas continuar?", "Mantenimiento seguro", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (confirm != MessageBoxResult.Yes) return;
 
             BtnOptimize.IsEnabled = false;
@@ -312,9 +277,9 @@ namespace cchay_optimicer_cs.Views
                 SettingsService.Settings.TotalOptimizationsRun++;
                 SettingsService.SaveSettings();
 
-                MainWindow.Instance?.ShowRebootRequired();
 
-                TxtResult.Text = "Optimización profunda completada.";
+
+                TxtResult.Text = "Mantenimiento terminado. Los archivos en uso se conservaron.";
                 TxtResult.Visibility = Visibility.Visible;
                 PanelTechProgress.Visibility = Visibility.Collapsed;
 
@@ -333,7 +298,7 @@ namespace cchay_optimicer_cs.Views
             {
                 BtnOptimize.IsEnabled = true;
                 BtnTechOptimize.IsEnabled = true;
-                TxtTechOptimizeBtn.Text = "Optimización profunda";
+                TxtTechOptimizeBtn.Text = "Mantenimiento seguro";
                 _timer?.Start();
             }
         }
@@ -416,6 +381,7 @@ namespace cchay_optimicer_cs.Views
                         "software" => typeof(SoftwarePage),
                         "scanner" => typeof(ScannerPage),
                         "repair" => typeof(RepairPage),
+                        "gamemode" => typeof(GameModePage),
                         "settings" => typeof(SettingsPage),
                         _ => null
                     };
@@ -426,6 +392,79 @@ namespace cchay_optimicer_cs.Views
                     }
                 }
             }
+        }
+
+        private void OnGameModeStateChanged(bool isActive)
+        {
+            Dispatcher.Invoke(UpdateDashboardGameModeUI);
+        }
+
+        private void UpdateDashboardGameModeUI()
+        {
+            bool active = GameModeService.IsActive;
+            if (active)
+            {
+                CardGameModeQuick.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x40, 0xC0, 0x57));
+                BadgeDashboardGameMode.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x33, 0x40, 0xC0, 0x57));
+                TxtDashboardGameModeBadge.Text = "ACTIVO";
+                TxtDashboardGameModeBadge.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x40, 0xC0, 0x57));
+                TxtDashboardGameModeDesc.Text = "Optimizaciones de baja latencia aplicadas. Supervisando procesos de juegos.";
+                TxtDashboardGameModeBtn.Text = "Desactivar";
+                IconDashboardGameModeBtn.Symbol = Wpf.Ui.Controls.SymbolRegular.Stop24;
+                BtnDashboardToggleGameMode.Appearance = Wpf.Ui.Controls.ControlAppearance.Danger;
+            }
+            else
+            {
+                CardGameModeQuick.SetResourceReference(Border.BorderBrushProperty, "AccentBorderThemeBrush");
+                BadgeDashboardGameMode.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x14, 0x7E, 0xD4, 0xF5));
+                TxtDashboardGameModeBadge.Text = "INACTIVO";
+                TxtDashboardGameModeBadge.SetResourceReference(TextBlock.ForegroundProperty, "RethAccentBrush");
+                TxtDashboardGameModeDesc.Text = "Reduce la latencia de entrada y los tirones en juegos aplicando prioridad al juego y suspendiendo servicios secundarios.";
+                TxtDashboardGameModeBtn.Text = "Activar";
+                IconDashboardGameModeBtn.Symbol = Wpf.Ui.Controls.SymbolRegular.Play24;
+                BtnDashboardToggleGameMode.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
+            }
+        }
+
+        private async void BtnDashboardToggleGameMode_Click(object sender, RoutedEventArgs e)
+        {
+            BtnDashboardToggleGameMode.IsEnabled = false;
+            try
+            {
+                if (GameModeService.IsActive)
+                {
+                    var result = await GameModeService.DeactivateAsync();
+                    ShowResult(result.Message, isSuccess: result.Success);
+                }
+                else
+                {
+                    var result = await GameModeService.ActivateAsync();
+                    ShowResult(result.Message, isSuccess: result.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowResult($"Error en Modo Game: {ex.Message}", isSuccess: false);
+            }
+            finally
+            {
+                BtnDashboardToggleGameMode.IsEnabled = true;
+                UpdateDashboardGameModeUI();
+            }
+        }
+
+        private void ShowResult(string message, bool isSuccess = true)
+        {
+            TxtResult.Text = message;
+            TxtResult.Background = isSuccess ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1A, 0x10, 0x7C, 0x41)) : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x2A, 0xEF, 0x44, 0x44));
+            TxtResult.Foreground = isSuccess ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x40, 0xC0, 0x57)) : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xEF, 0x44, 0x44));
+            TxtResult.Visibility = Visibility.Visible;
+        }
+
+        private void BtnDashboardOpenGameMode_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            mainWindow?.Navigate(typeof(GameModePage));
         }
     }
 }

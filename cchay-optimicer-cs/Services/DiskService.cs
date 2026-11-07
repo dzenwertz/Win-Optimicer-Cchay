@@ -148,6 +148,8 @@ namespace cchay_optimicer_cs.Services
         private static void CleanDirectory(string path, ref double freedMB, ref int itemsCount, bool delete, string filter = "*", System.Threading.CancellationToken ct = default)
         {
             if (ct.IsCancellationRequested || !Directory.Exists(path)) return;
+            for (var parent = new DirectoryInfo(path); parent != null; parent = parent.Parent)
+                if ((parent.Attributes & FileAttributes.ReparsePoint) != 0) return;
 
             // Clean files in current directory
             try
@@ -158,12 +160,14 @@ namespace cchay_optimicer_cs.Services
                     if (ct.IsCancellationRequested) break;
                     try
                     {
-                        freedMB += file.Length / 1024.0 / 1024.0;
-                        itemsCount++;
+                        if ((file.Attributes & FileAttributes.ReparsePoint) != 0) continue;
+                        var sizeMB = file.Length / 1024.0 / 1024.0;
                         if (delete)
                         {
                             file.Delete();
                         }
+                        freedMB += sizeMB;
+                        itemsCount++;
                     }
                     catch { /* Locked, ignore */ }
                 }
@@ -177,6 +181,7 @@ namespace cchay_optimicer_cs.Services
                 foreach (var subDir in dirInfo.GetDirectories())
                 {
                     if (ct.IsCancellationRequested) break;
+                    if ((subDir.Attributes & FileAttributes.ReparsePoint) != 0) continue;
                     CleanDirectory(subDir.FullName, ref freedMB, ref itemsCount, delete, filter, ct);
                     if (delete && !ct.IsCancellationRequested)
                     {
@@ -211,8 +216,7 @@ namespace cchay_optimicer_cs.Services
                     {
                         try
                         {
-                            SHEmptyRecycleBin(IntPtr.Zero, null, SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
-                            target.Cleaned = true;
+                            target.Cleaned = SHEmptyRecycleBin(IntPtr.Zero, null, SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND) == 0;
                         }
                         catch { }
                     }
@@ -246,8 +250,8 @@ namespace cchay_optimicer_cs.Services
                                     }
                                     dismProc.WaitForExit(1000);
                                 }
+                                target.Cleaned = !ct.IsCancellationRequested && dismProc != null && dismProc.ExitCode == 0;
                             }
-                            target.Cleaned = !ct.IsCancellationRequested;
                         }
                         catch { }
                     }
@@ -281,8 +285,8 @@ namespace cchay_optimicer_cs.Services
                                     }
                                     defragProc.WaitForExit(1000);
                                 }
+                                target.Cleaned = !ct.IsCancellationRequested && defragProc != null && defragProc.ExitCode == 0;
                             }
-                            target.Cleaned = !ct.IsCancellationRequested;
                         }
                         catch { }
                     }

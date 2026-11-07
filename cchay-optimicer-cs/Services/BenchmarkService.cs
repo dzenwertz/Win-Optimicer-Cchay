@@ -69,7 +69,7 @@ namespace cchay_optimicer_cs.Services
         {
             try
             {
-                string tempFile = Path.Combine(Path.GetTempPath(), $"cchay_bench_{Guid.NewGuid():N}.tmp");
+                string tempFile = Path.Combine(Path.GetTempPath(), $"reth_bench_{Guid.NewGuid():N}.tmp");
                 byte[] data = new byte[10 * 1024 * 1024]; // 10MB test file
                 new Random().NextBytes(data);
 

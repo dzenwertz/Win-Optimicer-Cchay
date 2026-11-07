@@ -64,9 +64,13 @@ namespace cchay_optimicer_cs.Services
                 {
                     if (profile.TweakStates.TryGetValue(tweak.Key, out bool targetState))
                     {
-                        if (targetState)
+                        if (targetState && !tweak.Enabled)
                         {
                             await TweakService.ApplyTweakAsync(tweak.Key);
+                        }
+                        else if (!targetState && tweak.Enabled)
+                        {
+                            await TweakService.UnapplyTweakAsync(tweak.Key);
                         }
                     }
                 }

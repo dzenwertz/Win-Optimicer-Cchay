@@ -219,9 +219,36 @@ class RethWindow(Adw.ApplicationWindow):
         return root
 
     def _page_home(self) -> Gtk.Widget:
-        self._opt_btn = Gtk.Button(label="Optimizar")
-        self._opt_btn.add_css_class("suggested-action")
+        self._ram_available = Gtk.Label(label="—")
+        self._ram_available.add_css_class("ram-hero")
+        self._ram_available.set_xalign(0)
+        self._ram_detail = Gtk.Label(label="Cargando memoria…", wrap=True, xalign=0)
+        self._ram_detail.add_css_class("muted")
+        self._ram_advice = Gtk.Label(label="", wrap=True, xalign=0)
+        self._ram_bar = Gtk.ProgressBar()
+        self._disk_bar = Gtk.ProgressBar()
+        how = Gtk.Label(
+            label=(
+                "Cómo usarlo: 1) Mira la RAM disponible. "
+                "2) Pulsa Liberar RAM (pide contraseña una vez). "
+                "3) Si sigue justa, ve a Memoria y cierra las apps pesadas. "
+                "En Linux el kernel usa la RAM vacía como caché: eso no es un fallo."
+            ),
+            wrap=True,
+            xalign=0,
+        )
+        how.add_css_class("hint")
+        self._ram_btn = Gtk.Button(label="Liberar RAM")
+        self._ram_btn.add_css_class("suggested-action")
+        self._ram_btn.connect("clicked", self._on_reclaim)
+        to_mem = Gtk.Button(label="Qué está usando la RAM")
+        to_mem.connect("clicked", self._goto_memory)
+        self._opt_btn = Gtk.Button(label="Mantenimiento completo")
         self._opt_btn.connect("clicked", self._on_optimize)
+        actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        actions.append(self._ram_btn)
+        actions.append(to_mem)
+        actions.append(self._opt_btn)
         info_grid = Gtk.Grid(column_spacing=18, row_spacing=8)
         for i, key in enumerate(("distro", "kernel", "cpu", "uptime")):
             cap = Gtk.Label(label=key.capitalize(), xalign=0)
@@ -232,32 +259,61 @@ class RethWindow(Adw.ApplicationWindow):
             info_grid.attach(cap, 0, i, 1, 1)
             info_grid.attach(val, 1, i, 1, 1)
         return self._wrap(
-            self._card("Estado del sistema", self._health_label, self._status),
-            self._card("Recursos", Gtk.Label(label="RAM", xalign=0), self._ram_bar, Gtk.Label(label="Disco", xalign=0), self._disk_bar),
+            self._card("RAM disponible", self._ram_available, self._ram_bar, self._ram_detail, self._ram_advice, actions, how),
+            self._card("Disco", self._disk_bar),
             self._card("Equipo", info_grid),
-            self._card("Mantenimiento seguro", Gtk.Label(label="Limpia cachés de usuario, compacta el diario y, con tu autorización, libera cachés del kernel y ejecuta TRIM.", wrap=True, xalign=0), self._opt_btn),
         )
 
+    def _goto_memory(self, *_args) -> None:
+        row = self._list.get_row_at_index(1)
+        if row:
+            self._list.select_row(row)
+
     def _refresh_dashboard(self) -> bool:
-        info = system_info.collect()
-        self._health_label.set_text(str(info["health"]))
-        self._status.set_text(
-            f"{info['distro']} · {info['ram_used_h']} / {info['ram_total_h']} RAM · CPU {info['cpu_percent']:.0f}%"
+        snap = memory.snapshot()
+        groups = memory.grouped_processes(6)
+        self._ram_available.set_text(f"{snap['ram_available_h']} de {snap['ram_total_h']}")
+        used_frac = 1.0 - (snap["ram_available"] / snap["ram_total"]) if snap["ram_total"] else 0
+        self._ram_bar.set_fraction(min(1.0, max(0.0, used_frac)))
+        zram = snap.get("zram_used_h") or "0 B"
+        self._ram_detail.set_text(
+            f"Apps {snap['apps_h']}  ·  Caché recuperable {snap['reclaimable_h']}  ·  "
+            f"zram {zram}  ·  Presión {snap['pressure']}"
         )
-        self._ram_bar.set_fraction(min(1.0, info["ram_percent"] / 100))
-        disks = info.get("disks") or []
+        self._ram_advice.set_text(memory.advice(snap, groups))
+        self._status.set_text(
+            f"{snap['distro']} · disponible {snap['ram_available_h']} · CPU {snap['cpu_percent']:.0f}%"
+        )
+        disks = snap.get("disks") or []
         if disks:
-            used = disks[0].get("percent", 0) / 100
-            self._disk_bar.set_fraction(min(1.0, used))
-        self._info_labels["distro"].set_text(info["distro"])
-        self._info_labels["kernel"].set_text(info["kernel"])
-        self._info_labels["cpu"].set_text(info["cpu"])
-        self._info_labels["uptime"].set_text(info["uptime"])
+            self._disk_bar.set_fraction(min(1.0, disks[0].get("percent", 0) / 100))
+        self._info_labels["distro"].set_text(snap["distro"])
+        self._info_labels["kernel"].set_text(snap["kernel"])
+        self._info_labels["cpu"].set_text(snap["cpu"])
+        self._info_labels["uptime"].set_text(snap["uptime"])
+        if getattr(self, "_proc_box", None) is not None:
+            self._fill_mem()
         return True
+
+    def _on_reclaim(self, button: Gtk.Button) -> None:
+        _busy(button, True)
+        self._ram_advice.set_text("Liberando caché del sistema. Si pide contraseña, acéptala.")
+
+        def done(result, err):
+            _busy(button, False)
+            if err:
+                _toast(self, str(err))
+                return
+            msg = (result or {}).get("message") or "Listo."
+            self._ram_advice.set_text(msg)
+            _toast(self, msg)
+            self._refresh_dashboard()
+
+        _bg(memory.reclaim_ram, done)
 
     def _on_optimize(self, button: Gtk.Button) -> None:
         _busy(button, True)
-        self._status.set_text("Optimizando…")
+        self._ram_advice.set_text("Mantenimiento en curso…")
 
         def work():
             return optimize.run_safe(settings=self.settings)
@@ -267,32 +323,83 @@ class RethWindow(Adw.ApplicationWindow):
             if err:
                 _toast(self, str(err))
                 return
-            freed = fmt_bytes(result.get("freed") or 0)
-            _toast(self, f"Optimización lista. Liberado {freed}.")
+            msg = (result or {}).get("message") or f"Listo. Liberado {fmt_bytes(result.get('freed') or 0)}."
+            if result and result.get("ok") is False:
+                msg = (result.get("steps") or [{}])[-1].get("message") or msg
+            _toast(self, f"Mantenimiento listo. {fmt_bytes((result or {}).get('freed') or 0)}.")
             self._refresh_dashboard()
 
         _bg(work, done)
 
     def _page_memory(self) -> Gtk.Widget:
-        self._mem_list = Gtk.Label(label="", xalign=0)
-        self._mem_list.set_selectable(True)
-        drop = Gtk.Button(label="Liberar cachés de página")
-        drop.connect("clicked", lambda *_: self._run_action(memory.drop_caches, "Cachés liberadas."))
-        compact = Gtk.Button(label="Compactar memoria")
-        compact.connect("clicked", lambda *_: self._run_action(memory.compact_memory, "Memoria compactada."))
-        refresh = Gtk.Button(label="Actualizar procesos")
+        help_lbl = Gtk.Label(
+            label="Agrupamos por aplicación (Brave suma todas las pestañas). Cerrar una app tuya no pide root. Liberar RAM sí, porque toca el kernel.",
+            wrap=True,
+            xalign=0,
+        )
+        help_lbl.add_css_class("hint")
+        self._ram_btn2 = Gtk.Button(label="Liberar RAM ahora")
+        self._ram_btn2.add_css_class("suggested-action")
+        self._ram_btn2.connect("clicked", self._on_reclaim)
+        refresh = Gtk.Button(label="Actualizar lista")
         refresh.connect("clicked", lambda *_: self._fill_mem())
+        btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        btns.append(self._ram_btn2)
+        btns.append(refresh)
+        self._proc_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         GLib.idle_add(self._fill_mem)
         return self._wrap(
-            self._card("Memoria", drop, compact),
-            self._card("Procesos con más RAM", refresh, self._mem_list),
+            self._card("RAM", help_lbl, btns),
+            self._card("Quién está usando la memoria", self._proc_box),
         )
 
     def _fill_mem(self) -> bool:
-        rows = memory.top_processes(12)
-        lines = [f"{p['rss_h']:>10}  {p['name']}  pid {p['pid']}" for p in rows]
-        self._mem_list.set_text("\n".join(lines) or "Sin datos")
+        box = getattr(self, "_proc_box", None)
+        if box is None:
+            return False
+        child = box.get_first_child()
+        while child:
+            nxt = child.get_next_sibling()
+            box.remove(child)
+            child = nxt
+        for group in memory.grouped_processes(10):
+            row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            text = Gtk.Label(
+                label=f"{group['rss_h']}   {group['label']}   ({group['count']} procesos)",
+                xalign=0,
+                hexpand=True,
+            )
+            row.append(text)
+            if group["closable"]:
+                btn = Gtk.Button(label="Cerrar")
+                name = group["name"]
+                label = group["label"]
+                size = group["rss_h"]
+                btn.connect("clicked", lambda _b, n=name, l=label, s=size: self._close_group(n, l, s))
+                row.append(btn)
+            box.append(row)
         return False
+
+    def _close_group(self, name: str, label: str, size: str) -> None:
+        def go():
+            def done(result, err):
+                if err:
+                    _toast(self, str(err))
+                    return
+                if result and not result.get("ok"):
+                    _toast(self, result.get("error") or "No se pudo cerrar.")
+                    return
+                _toast(self, (result or {}).get("message") or f"{label} cerrado.")
+                self._refresh_dashboard()
+
+            _bg(lambda: memory.terminate_group(name), done)
+
+        _confirm(
+            self,
+            f"Cerrar {label}",
+            f"{label} usa {size}. Guarda tu trabajo en esa app antes de cerrarla.",
+            go,
+        )
 
     def _page_disk(self) -> Gtk.Widget:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)

@@ -42,8 +42,31 @@ def _err(message: str) -> dict:
 
 
 def drop_caches(_: dict) -> dict:
+    try:
+        os.sync()
+    except OSError:
+        pass
     Path("/proc/sys/vm/drop_caches").write_text("3\n")
     return _ok("Cachés de página liberadas.")
+
+
+def cgroup_reclaim(req: dict) -> dict:
+    target = str(req.get("target", "512M"))
+    reclaimed_paths = []
+    candidates = [
+        Path("/sys/fs/cgroup/memory.reclaim"),
+        *Path("/sys/fs/cgroup/user.slice").glob("user-*.slice/memory.reclaim"),
+    ]
+    for path in candidates:
+        if path.is_file():
+            try:
+                path.write_text(f"{target}\n")
+                reclaimed_paths.append(str(path))
+            except OSError:
+                continue
+    if not reclaimed_paths:
+        return _err("cgroup v2 memory.reclaim no disponible.")
+    return _ok(f"Memoria inactiva reclamada ({len(reclaimed_paths)} slices).")
 
 
 def compact_memory(_: dict) -> dict:
@@ -52,6 +75,19 @@ def compact_memory(_: dict) -> dict:
         return _err("compact_memory no está disponible.")
     path.write_text("1\n")
     return _ok("Memoria compactada.")
+
+
+def zram_compact(_: dict) -> dict:
+    compacted = 0
+    for path in Path("/sys/block").glob("zram*/compact"):
+        try:
+            path.write_text("1\n")
+            compacted += 1
+        except OSError:
+            continue
+    if not compacted:
+        return _ok("No hay zram que compactar.")
+    return _ok(f"zram compactado ({compacted}).")
 
 
 def fstrim(_: dict) -> dict:
@@ -69,6 +105,9 @@ def sysctl_set(req: dict) -> dict:
         value = int(req.get("value"))
     except (TypeError, ValueError):
         return _err("Valor inválido.")
+    upper = 200 if key == "vm.swappiness" else 100
+    if not 0 <= value <= upper:
+        return _err(f"Valor fuera de rango (0–{upper}).")
     proc = _run(["sysctl", "-w", f"{key}={value}"])
     if proc.returncode != 0:
         return _err((proc.stderr or proc.stdout).strip())
@@ -152,19 +191,20 @@ def set_dns(req: dict) -> dict:
                 name = line.split("(")[-1].rstrip(")")
                 if name and name != "lo":
                     ifaces.append(name)
-        if not ifaces:
-            ifaces = ["wlan0", "eth0"]
+        if iface_out.returncode != 0 or not ifaces:
+            return _err("No se detectaron interfaces DNS disponibles.")
+        errors = []
         for iface in ifaces:
             if servers is None:
-                _run(["resolvectl", "revert", iface])
+                result = _run(["resolvectl", "revert", iface])
             else:
-                _run(["resolvectl", "dns", iface, *servers])
+                result = _run(["resolvectl", "dns", iface, *servers])
+            if result.returncode != 0:
+                errors.append(f"{iface}: {result.stderr or result.stdout}")
+        if errors:
+            return _err("No se completó el cambio DNS: " + "; ".join(errors))
         return _ok(f"DNS {provider} aplicado.")
-    resolv = Path("/etc/resolv.conf")
-    if servers is None:
-        return _err("Sin resolvectl no se puede restaurar DHCP de forma segura.")
-    resolv.write_text(f"nameserver {servers[0]}\nnameserver {servers[1]}\n")
-    return _ok(f"DNS {provider} escrito en resolv.conf.")
+    return _err("Se requiere resolvectl para cambiar DNS de forma reversible.")
 
 
 def flush_dns(_: dict) -> dict:
@@ -216,7 +256,9 @@ def systemctl_op(req: dict) -> dict:
 
 ACTIONS = {
     "drop_caches": drop_caches,
+    "cgroup_reclaim": cgroup_reclaim,
     "compact_memory": compact_memory,
+    "zram_compact": zram_compact,
     "fstrim": fstrim,
     "sysctl_set": sysctl_set,
     "set_governor": set_governor,
@@ -239,6 +281,9 @@ def main() -> int:
         req = json.loads(raw or "{}")
     except json.JSONDecodeError:
         print(json.dumps(_err("JSON inválido.")), flush=True)
+        return 1
+    if not isinstance(req, dict):
+        print(json.dumps(_err("Se requiere un objeto JSON.")), flush=True)
         return 1
     action = str(req.get("action", ""))
     fn = ACTIONS.get(action)

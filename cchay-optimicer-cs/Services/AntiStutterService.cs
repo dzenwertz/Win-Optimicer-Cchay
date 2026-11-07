@@ -25,6 +25,7 @@ namespace cchay_optimicer_cs.Services
         /// </summary>
         public static async Task<bool> CheckAndPurgeIfNeededAsync()
         {
+            if (GameModeService.IsActive || GameModeService.GetActiveGameStatus().IsRunning) return false;
             var settings = SettingsService.Settings;
             if (!settings.AntiStutterEnabled) return false;
 

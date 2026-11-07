@@ -30,6 +30,17 @@ window {
   color: @reth_accent;
 }
 
+.ram-hero {
+  font-size: 40px;
+  font-weight: 600;
+  color: @reth_accent;
+}
+
+.hint {
+  color: @reth_muted;
+  font-size: 13px;
+}
+
 button.suggested-action {
   background: @reth_accent;
   color: #041018;

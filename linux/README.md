@@ -18,6 +18,14 @@ O desde un Release: extrae `RETH-Optimicer-Linux-*.tar.gz` y ejecuta `linux/inst
 
 Sin root instala en `~/.local`. Con root, en `/usr/local` (incluye política polkit).
 
+## RAM (lo más útil)
+
+En el inicio verás **RAM disponible**, no “libre”. Linux llena la RAM vacía con caché; eso es normal.
+
+1. **Liberar RAM** — reclama caché del kernel (pide contraseña).
+2. **Qué está usando la RAM** — lista agrupada. Cerrar Brave/Chrome suele devolver más que cualquier tweak.
+3. Si sigue justa, cierra pestañas. En 8 GB un navegador con muchas pestañas se come el equipo.
+
 ## Requisitos
 
 - Python 3.10+

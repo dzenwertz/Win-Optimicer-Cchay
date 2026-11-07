@@ -228,6 +228,34 @@ def _health(ram_percent: float, disks: list[dict], load: tuple[float, float, flo
     return int(max(5, min(100, round(score))))
 
 
+def _zram_used() -> int:
+    total = 0
+    block = Path("/sys/block")
+    if not block.is_dir():
+        return 0
+    for zram in block.glob("zram*"):
+        for name in ("mm_stat", "mem_used_total"):
+            path = zram / name
+            try:
+                text = path.read_text().split()
+            except OSError:
+                continue
+            if name == "mem_used_total" and text:
+                try:
+                    total += int(text[0])
+                    break
+                except ValueError:
+                    continue
+            if name == "mm_stat" and len(text) >= 3:
+                try:
+                    # orig_data_size compr_data_size mem_used_total
+                    total += int(text[2])
+                    break
+                except ValueError:
+                    continue
+    return total
+
+
 def collect() -> dict:
     release = _os_release()
     mem = _meminfo()
@@ -242,6 +270,11 @@ def collect() -> dict:
     uptime = _uptime_seconds()
     cpu_p = cpu_percent()
     distro = release.get("PRETTY_NAME") or release.get("NAME") or platform.platform()
+    swap_total = mem.get("SwapTotal", 0)
+    swap_free = mem.get("SwapFree", 0)
+    cached = mem.get("Cached", 0)
+    buffers = mem.get("Buffers", 0)
+    zram_used = _zram_used()
     return {
         "distro": distro,
         "distro_id": release.get("ID", ""),
@@ -255,8 +288,13 @@ def collect() -> dict:
         "ram_available": available,
         "ram_used": used,
         "ram_percent": ram_percent,
-        "swap_total": mem.get("SwapTotal", 0),
-        "swap_free": mem.get("SwapFree", 0),
+        "ram_free": mem.get("MemFree", 0),
+        "ram_cached": cached,
+        "ram_buffers": buffers,
+        "swap_total": swap_total,
+        "swap_free": swap_free,
+        "swap_used": max(0, swap_total - swap_free),
+        "zram_used": zram_used,
         "disks": disks,
         "uptime": fmt_duration(uptime),
         "uptime_seconds": uptime,
@@ -266,6 +304,9 @@ def collect() -> dict:
         "ram_total_h": fmt_bytes(total),
         "ram_used_h": fmt_bytes(used),
         "ram_available_h": fmt_bytes(available),
+        "ram_cached_h": fmt_bytes(cached),
+        "swap_used_h": fmt_bytes(max(0, swap_total - swap_free)),
+        "zram_used_h": fmt_bytes(zram_used),
     }
 
 

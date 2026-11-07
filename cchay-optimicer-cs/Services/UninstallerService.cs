@@ -132,7 +132,7 @@ namespace cchay_optimicer_cs.Services
                     }
 
                     psi.UseShellExecute = true;
-                    var proc = Process.Start(psi);
+                    using var proc = Process.Start(psi);
                     return proc != null;
                 }
                 catch (Exception ex)

@@ -1,0 +1,260 @@
+<UserControl x:Class="cchay_optimicer_cs.Views.GameModePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:cchay_optimicer_cs.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="850">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Modo Game" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4" />
+                <TextBlock Text="Ajustes reversibles para jugar. Los FPS dependen del hardware, la temperatura y la configuración del juego." FontSize="14" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <ui:Card Padding="18" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Fortnite: objetivo 144 FPS" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <TextBlock Text="Punto de partida para i7-11800H / RTX 3050 Ti Laptop: conecta el cargador, selecciona la GPU NVIDIA y comprueba que la pantalla esté a 144 Hz." TextWrapping="Wrap" Margin="0,0,0,6" />
+                    <TextBlock Text="Prueba 1920 × 1080, límite de 144 FPS, modo Rendimiento, sombras y efectos bajos. Si no alcanza el objetivo, reduce la resolución 3D y compara la misma zona de una partida." TextWrapping="Wrap" Margin="0,0,0,6" />
+                    <TextBlock Text="Mide durante una partida real: promedio, caídas y temperatura. 144 FPS requieren fotogramas de aproximadamente 6,94 ms; la aplicación no garantiza ese resultado. Evita limpiar RAM o cachés durante la partida." TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:Button x:Name="BtnFortniteProfile" Content="Seleccionar perfil conservador para Fortnite" Margin="0,12,0,0" Click="BtnFortniteProfile_Click" />
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Main Status Card -->
+            <ui:Card x:Name="CardGameModeStatus" Padding="20" Margin="0,0,0,20" BorderBrush="{DynamicResource AccentBorderThemeBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status Icon -->
+                    <Border x:Name="BorderIcon" Width="56" Height="56" CornerRadius="12" Background="#147ED4F5" Margin="0,0,20,0" VerticalAlignment="Center">
+                        <ui:SymbolIcon x:Name="IconGameMode" Symbol="Games24" FontSize="32" Foreground="{DynamicResource RethAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <!-- Text Status Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock x:Name="TxtStatusTitle" Text="Modo Game: Inactivo" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,10,0" />
+                            <Border x:Name="BadgeStatus" Background="#267ED4F5" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtBadge" Text="LISTO" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource RethAccentBrush}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="TxtStatusDesc" Text="El sistema opera con la configuración estándar de Windows. Activa el modo para optimizar la respuesta." FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock x:Name="TxtActiveDuration" Visibility="Collapsed" Text="Tiempo activo: 00:00:00" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource RethAccentBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <!-- Action Button -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                        <ui:Button x:Name="BtnToggleGameMode" 
+                                   Appearance="Primary" 
+                                   Padding="22,14,22,14" 
+                                   Click="BtnToggleGameMode_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon x:Name="IconBtnToggle" Symbol="Play24" Margin="0,0,8,0" />
+                                <TextBlock x:Name="TxtBtnToggle" Text="Activar Modo Game" FontWeight="Bold" FontSize="14" />
+                            </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <!-- Live Status & Game Monitor -->
+            <UniformGrid Columns="2" Margin="0,0,0,20">
+                <!-- Power Scheme Info -->
+                <ui:Card Margin="0,0,8,0" Padding="14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Symbol="Flash24" FontSize="26" Foreground="{DynamicResource RethAccentBrush}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Plan de Energía Actual" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                            <TextBlock x:Name="TxtCurrentPowerPlan" Text="Detectando..." FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+
+                <!-- Active Game Detected -->
+                <ui:Card Margin="8,0,0,0" Padding="14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon x:Name="IconGameDetected" Symbol="Desktop24" FontSize="26" Foreground="#40C057" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Supervisión de Juegos" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                            <TextBlock x:Name="TxtGameDetected" Text="Esperando ejecución de juego..." FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </ui:Card>
+            </UniformGrid>
+
+            <!-- Operation Progress / Result Banner -->
+            <TextBlock x:Name="TxtOperationResult" Visibility="Collapsed" Text="" Padding="12" FontSize="13" FontWeight="Medium" Background="#147ED4F5" Foreground="{DynamicResource RethAccentBrush}" Margin="0,0,0,20" HorizontalAlignment="Stretch" TextAlignment="Center" />
+
+            <!-- Configuration Card: What changes and why -->
+            <ui:Card Padding="18" Margin="0,0,0,20">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Ajustes incluidos en el Modo Game" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="Personaliza qué intervenciones aplica RETH Optimicer. Todas son reversibles." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <ui:Button x:Name="BtnCleanStandbyNow" Appearance="Secondary" Padding="12,6" Margin="0,0,8,0" Click="BtnCleanStandbyNow_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="DeveloperBoard24" Margin="0,0,6,0" FontSize="14" />
+                                    <TextBlock Text="Limpiar Standby RAM ahora" FontSize="12" />
+                                </StackPanel>
+                            </ui:Button>
+                            <ui:Button x:Name="BtnRestoreDefaults" Appearance="Secondary" Padding="12,6" Click="BtnRestoreDefaults_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="ArrowCounterclockwise24" Margin="0,0,6,0" FontSize="14" />
+                                    <TextBlock Text="Restaurar todo" FontSize="12" />
+                                </StackPanel>
+                            </ui:Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <Separator Margin="0,0,0,12" Background="{DynamicResource ControlStrokeColorDefaultBrush}" />
+
+                    <!-- Optimization Toggles List -->
+                    <StackPanel>
+                        <!-- Power Plan -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Plan de Alto Rendimiento" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Cambia temporalmente el plan de energía. En laptops puede aumentar consumo y temperatura; utiliza el cargador." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckPowerPlan" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- CPU Quantum -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Prioridad de CPU para Juego en Primer Plano (0x26)" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Opción avanzada de planificación de CPU; desactivada por defecto. No garantiza mejoras de FPS." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckCpuQuantum" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- Multimedia & Network -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Programador Multimedia &amp; Latencia de Red" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Opción avanzada: reserva multimedia del 10%. No garantiza menor ping; desactivada por defecto." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckMultimedia" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- Search Indexing -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Pausar Indexación de Búsqueda (WSearch)" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Detiene temporalmente el servicio Windows Search para evitar lecturas sorpresivas del disco durante el juego o carga de escenarios." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckWSearch" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- SysMain -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Pausar SysMain (Superfetch)" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Opción avanzada: pausa temporalmente SysMain. Desactivada por defecto; compara el rendimiento antes de utilizarla." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckSysMain" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- GameDVR -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Desactivar Grabación de Fondo GameDVR" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Detiene el búfer de grabación en segundo plano de Windows si estuviera activo, liberando ciclos del codificador de tu GPU." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckGameDvr" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- Standby RAM Clean -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Liberar Standby RAM al Iniciar" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Elimina páginas en caché. Puede provocar nuevas lecturas de disco; desactivada por defecto." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckStandbyRam" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                        <Separator Background="{DynamicResource ControlStrokeColorDefaultBrush}" Opacity="0.5" />
+
+                        <!-- Elevate Process Priority -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="Supervisión y prioridad de juegos" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="Detecta el juego y utiliza prioridad sobre lo normal. Conserva la prioridad previa durante esta sesión y la restaura al desactivar. Algunos juegos protegidos pueden rechazar el cambio." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <CheckBox x:Name="CheckElevatePriority" Grid.Column="1" VerticalAlignment="Center" Checked="Option_Changed" Unchecked="Option_Changed" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Reversibility & Security Guarantee Footer -->
+            <ui:Card Padding="14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:SymbolIcon Symbol="ShieldCheckmark24" FontSize="24" Foreground="#40C057" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center"
+                               Text="Las nuevas sesiones guardan los valores originales antes de cada cambio. Si falla la restauración, se conserva la copia para reintentar. Las sesiones antiguas pueden carecer de copias completas." />
+                </Grid>
+            </ui:Card>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -75,9 +75,10 @@ public partial class App : Application
             File.AppendAllText(crashPath, log + "\n---\n");
 
             string title = fatal ? "Error crítico" : "Error";
+            string errorMessage = ex.GetBaseException().Message;
             string body = fatal
-                ? $"RETH Optimicer detectó un error y debe cerrarse:\n\n{ex.Message}\n\nDetalles en crash.txt"
-                : $"Se produjo un error, pero la aplicación sigue en ejecución:\n\n{ex.Message}";
+                ? $"RETH Optimicer detectó un error y debe cerrarse:\n\n{errorMessage}\n\nDetalles en {crashPath}"
+                : $"Se produjo un error, pero la aplicación sigue en ejecución:\n\n{errorMessage}\n\nDetalles en {crashPath}";
             MessageBox.Show(body, title, MessageBoxButton.OK, fatal ? MessageBoxImage.Error : MessageBoxImage.Warning);
         }
         catch (Exception writeEx)
@@ -86,10 +87,16 @@ public partial class App : Application
         }
     }
 
-    protected override void OnExit(ExitEventArgs e)
+    public static void ReleaseSingleInstanceMutex()
     {
         try { _singleInstanceMutex?.ReleaseMutex(); } catch { }
-        _singleInstanceMutex?.Dispose();
+        try { _singleInstanceMutex?.Dispose(); } catch { }
+        _singleInstanceMutex = null;
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        ReleaseSingleInstanceMutex();
         base.OnExit(e);
     }
 }

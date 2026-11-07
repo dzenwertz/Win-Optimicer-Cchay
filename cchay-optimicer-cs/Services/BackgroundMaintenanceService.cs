@@ -57,6 +57,7 @@ namespace cchay_optimicer_cs.Services
 
         private static async Task CheckAndCleanRamAsync()
         {
+            if (GameModeService.IsActive || GameModeService.GetActiveGameStatus().IsRunning) return;
             if (_isRamRunning) return;
 
             var settings = SettingsService.Settings;
@@ -68,8 +69,10 @@ namespace cchay_optimicer_cs.Services
                 var mem = RamService.GetMemoryUsage();
                 if (mem.PercentUsed >= settings.AutoRamCleanThreshold)
                 {
-                    Debug.WriteLine($"[AutoRAM] Memory usage is {mem.PercentUsed}%, which exceeds threshold {settings.AutoRamCleanThreshold}%. Cleaning RAM...");
-                    long freed = await RamService.CleanAll();
+                    // Safe standby list cleaning to prevent paging out working sets of active games and apps
+                    long freed = 0;
+                    freed += await RamService.CleanStandbyListLowPriority();
+                    freed += await RamService.CleanStandbyList();
                     
                     // Increment RAM freed stats
                     settings.TotalBytesRamFreed += (ulong)freed;
@@ -91,6 +94,7 @@ namespace cchay_optimicer_cs.Services
 
         private static async Task CheckDailyMaintenanceAsync()
         {
+            if (GameModeService.IsActive || GameModeService.GetActiveGameStatus().IsRunning) return;
             if (_isDailyRunning) return;
 
             var settings = SettingsService.Settings;
@@ -136,6 +140,7 @@ namespace cchay_optimicer_cs.Services
 
         private static void CheckGamerProcessesPriority()
         {
+            if (GameModeService.IsActive) return;
             try
             {
                 var settings = SettingsService.Settings;

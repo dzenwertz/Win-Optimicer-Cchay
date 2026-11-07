@@ -191,6 +191,10 @@ namespace cchay_optimicer_cs.Services
                     {
                         // Ignore individual failures
                     }
+                    finally
+                    {
+                        p.Dispose();
+                    }
                 }
 
                 return threats;
@@ -215,38 +219,23 @@ namespace cchay_optimicer_cs.Services
 
                 try
                 {
-                    var psi = new ProcessStartInfo
+                    var runResult = ProcessRunner.Run(defenderPath, $"-Scan -ScanType 3 -File \"{targetPath}\" -DisableRemediation", 60000);
+                    if (runResult.Success || runResult.ExitCode == 2)
                     {
-                        FileName = defenderPath,
-                        Arguments = $"-Scan -ScanType 3 -File \"{targetPath}\" -DisableRemediation",
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
+                        bool threatFound = runResult.ExitCode == 2 || 
+                                           runResult.StdOut.Contains("threat", StringComparison.OrdinalIgnoreCase) ||
+                                           runResult.StdOut.Contains("infection", StringComparison.OrdinalIgnoreCase);
 
-                    using (var proc = Process.Start(psi))
-                    {
-                        if (proc != null)
+                        if (threatFound)
                         {
-                            string output = proc.StandardOutput.ReadToEnd();
-                            proc.WaitForExit(60000); // 1 minute timeout
-
-                            bool threatFound = proc.ExitCode == 2 || 
-                                               output.Contains("threat", StringComparison.OrdinalIgnoreCase) ||
-                                               output.Contains("infection", StringComparison.OrdinalIgnoreCase);
-
-                            if (threatFound)
+                            threats.Add(new ThreatItem
                             {
-                                threats.Add(new ThreatItem
-                                {
-                                    Name = Path.GetFileName(targetPath),
-                                    Path = targetPath,
-                                    Reason = "Virus/Amenaza detectada por Microsoft Defender.",
-                                    RiskLevel = "Crítico",
-                                    ProcessId = 0
-                                });
-                            }
+                                Name = Path.GetFileName(targetPath),
+                                Path = targetPath,
+                                Reason = "Virus/Amenaza detectada por Microsoft Defender.",
+                                RiskLevel = "Crítico",
+                                ProcessId = 0
+                            });
                         }
                     }
                 }

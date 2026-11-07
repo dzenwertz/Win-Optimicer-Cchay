@@ -25,7 +25,7 @@
                     
                     <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
                         <TextBlock Text="Optimización del Sistema" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <TextBlock Text="Selecciona una opción para liberar recursos rápidamente o realizar una optimización técnica profunda en un solo clic." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="Selecciona una opción para liberar recursos rápidamente o realizar una limpieza de temporales en un solo clic." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -40,14 +40,56 @@
                             </StackPanel>
                         </ui:Button>
 
-                        <ui:Button x:Name="BtnTechOptimize" 
+                        <ui:Button x:Name="BtnTechOptimize" Visibility="Collapsed"
                                    Appearance="Primary" 
                                    Padding="18,12,18,12" 
                                    Click="BtnTechOptimize_Click">
                             <StackPanel Orientation="Horizontal">
                                 <ui:SymbolIcon Symbol="Wrench24" Margin="0,0,8,0" />
-                                <TextBlock x:Name="TxtTechOptimizeBtn" Text="Optimización profunda" FontWeight="SemiBold" />
+                                <TextBlock x:Name="TxtTechOptimizeBtn" Text="Mantenimiento seguro" FontWeight="SemiBold" />
                             </StackPanel>
+                        </ui:Button>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <!-- Modo Game Quick Card -->
+            <ui:Card x:Name="CardGameModeQuick" Padding="16" Margin="0,0,0,20" BorderBrush="{DynamicResource AccentBorderThemeBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="Games24" FontSize="18" Foreground="{DynamicResource RethAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Modo Game" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Border x:Name="BadgeDashboardGameMode" Background="#147ED4F5" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtDashboardGameModeBadge" Text="INACTIVO" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource RethAccentBrush}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="TxtDashboardGameModeDesc" Text="Reduce la latencia de entrada y los tirones en juegos aplicando prioridad al juego y suspendiendo servicios secundarios." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:Button x:Name="BtnDashboardToggleGameMode" 
+                                   Appearance="Secondary" 
+                                   Padding="16,10,16,10" 
+                                   Margin="0,0,8,0"
+                                   Click="BtnDashboardToggleGameMode_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon x:Name="IconDashboardGameModeBtn" Symbol="Play24" Margin="0,0,6,0" />
+                                <TextBlock x:Name="TxtDashboardGameModeBtn" Text="Activar" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </ui:Button>
+
+                        <ui:Button x:Name="BtnDashboardOpenGameMode" 
+                                   Appearance="Transparent" 
+                                   Padding="10,10,10,10" 
+                                   ToolTip="Configurar Modo Game"
+                                   Click="BtnDashboardOpenGameMode_Click">
+                            <ui:SymbolIcon Symbol="ChevronRight24" />
                         </ui:Button>
                     </StackPanel>
                 </Grid>

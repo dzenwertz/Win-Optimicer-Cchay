@@ -51,28 +51,30 @@ def run_safe(progress: Progress | None = None, settings: dict | None = None) -> 
         plan.append(("journal_user", "Compactando diario de usuario", True))
     if cfg.get("optimize_empty_trash", False):
         plan.append(("trash", "Vaciando papelera", True))
-    if cfg.get("optimize_drop_caches", True):
-        plan.append(("drop_caches", "Liberando cachés de página", False))
-    if cfg.get("optimize_fstrim", True):
+    if cfg.get("optimize_drop_caches", False):
+        plan.append(("drop_caches", "Liberando RAM (caché y compactación)", False))
+    if cfg.get("optimize_fstrim", False):
         plan.append(("fstrim", "Ejecutando TRIM", False))
 
     count = max(1, len(plan))
     for step_id, title, local in plan:
         emit(title + "…", n / count)
-        if step_id == "drop_caches":
-            add(step_id, title, memory.drop_caches())
-        elif step_id == "fstrim":
-            add(step_id, title, tweaks.run_fstrim())
-        else:
-            add(step_id, title, disk.clean_target(step_id))
+        try:
+            if step_id == "drop_caches":
+                result = memory.reclaim_ram()
+            elif step_id == "fstrim":
+                result = tweaks.run_fstrim()
+            else:
+                result = disk.clean_target(step_id)
+        except Exception as exc:
+            result = {"ok": False, "error": str(exc)}
+        add(step_id, title, result)
         n += 1
         emit(title, n / count)
 
     emit("Optimización finalizada", 1.0)
     ok = True
     for step in steps:
-        if step["id"] in {"drop_caches", "fstrim"}:
-            continue
         ok = ok and step["ok"]
     return {
         "ok": ok,

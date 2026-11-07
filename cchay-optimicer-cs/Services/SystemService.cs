@@ -368,33 +368,7 @@ namespace cchay_optimicer_cs.Services
 
         public static bool EnableUltimatePerformancePlan()
         {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powercfg",
-                    Arguments = "-duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                };
-                var proc = Process.Start(psi);
-                proc?.WaitForExit(3000);
-
-                var psi2 = new ProcessStartInfo
-                {
-                    FileName = "powercfg",
-                    Arguments = "-setactive e9a42b02-d5df-448d-aa00-03f14749eb61",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                };
-                var proc2 = Process.Start(psi2);
-                proc2?.WaitForExit(3000);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return PowerSchemeHelper.EnableUltimateOrHighPerformance();
         }
 
         public static int CalculateHealthScore(SystemInfoData info)
@@ -429,7 +403,7 @@ namespace cchay_optimicer_cs.Services
         {
             var sb = new StringBuilder();
             sb.AppendLine("==================================================");
-            sb.AppendLine("         CCHAY OPTIMICER - REPORTE DE PC          ");
+            sb.AppendLine("          RETH OPTIMICER - REPORTE DE PC          ");
             sb.AppendLine("==================================================");
             sb.AppendLine($"Fecha/Hora:       {DateTime.Now}");
             sb.AppendLine($"Usuario:          {info.Username}");

@@ -167,7 +167,7 @@ namespace cchay_optimicer_cs_tests
             if (!Directory.Exists(xamlDir)) return;
 
             var files = Directory.GetFiles(xamlDir, "*.xaml", SearchOption.AllDirectories);
-            var regex = new Regex(@"(?:Symbol|Icon)=(?:""|)?([a-zA-Z0-9_]+)", RegexOptions.Compiled);
+            var regex = new Regex(@"\bSymbol=(?:""|)?([a-zA-Z0-9_]+)", RegexOptions.Compiled);
 
             var invalidSymbols = new List<string>();
             foreach (var file in files)

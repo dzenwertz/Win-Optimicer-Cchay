@@ -257,6 +257,7 @@ namespace cchay_optimicer_cs.Views
         {
             var selectedItems = _allTargets.Where(t => t.IsChecked).ToList();
             if (selectedItems.Count == 0) return;
+            if (MessageBox.Show("Se eliminarán los archivos de las categorías seleccionadas. Esta limpieza no se puede deshacer con un punto de restauración. ¿Continuar?", "Confirmar limpieza", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
             SetButtonsState(false);
             TxtBtnClean.Text = "Limpiando...";
@@ -282,16 +283,15 @@ namespace cchay_optimicer_cs.Views
                     ProgDiskClean.Value = (double)(i + 1) / selectedItems.Count * 100;
 
                     var processed = await DiskService.ProcessTargetAsync(vm.Target, delete: true);
-                    vm.SizeMB = -1;
-                    vm.Cleaned = true;
-
                     if (processed.SizeMB > 0)
                     {
                         totalFreedMB += processed.SizeMB;
                         TxtDiskFreedLive.Text = totalFreedMB < 1 ? $"{(totalFreedMB * 1024):F0} KB liberados" : $"{totalFreedMB:F1} MB liberados";
                     }
-
-                    await Task.Delay(120);
+                    vm.Cleaned = processed.Cleaned;
+                    vm.SizeMB = -1;
+                    if (!vm.Cleaned)
+                        throw new InvalidOperationException($"No se completó {vm.Name}. Revisa los permisos e inténtalo de nuevo.");
                 }
 
                 // Save stats
@@ -314,6 +314,7 @@ namespace cchay_optimicer_cs.Views
             {
                 PanelDiskCleanProgress.Visibility = Visibility.Collapsed;
                 System.Diagnostics.Debug.WriteLine($"Disk cleanup error: {ex.Message}");
+                MessageBox.Show(ex.Message, "Limpieza incompleta", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             finally
             {

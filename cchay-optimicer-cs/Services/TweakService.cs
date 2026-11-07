@@ -49,37 +49,8 @@ namespace cchay_optimicer_cs.Services
 
         private static bool RunCmd(string filename, string arguments, int timeoutMs = 15000)
         {
-            try
-            {
-                using var process = new Process();
-                process.StartInfo = new ProcessStartInfo
-                {
-                    FileName = filename,
-                    Arguments = arguments,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    RedirectStandardError = true
-                };
-                process.Start();
-                string stderr = process.StandardError.ReadToEnd();
-                if (!process.WaitForExit(timeoutMs))
-                {
-                    try { process.Kill(true); } catch { }
-                    Debug.WriteLine($"[TweakService] Command timed out after {timeoutMs}ms: {filename} {arguments}");
-                    return false;
-                }
-                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(stderr))
-                {
-                    Debug.WriteLine($"[TweakService] Command failed (exit {process.ExitCode}): {filename} {arguments} | stderr: {stderr.Trim()}");
-                }
-                return process.ExitCode == 0;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[TweakService] Error executing: {filename} {arguments} | {ex.Message}");
-                return false;
-            }
+            var result = ProcessRunner.Run(filename, arguments, timeoutMs);
+            return result.Success;
         }
 
         public static Task<List<Tweak>> GetTweaksAsync()
@@ -393,8 +364,7 @@ namespace cchay_optimicer_cs.Services
                             break;
 
                         case "ultimate-performance":
-                            RunCmd("powercfg", "-duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61");
-                            RunCmd("powercfg", "-setactive e9a42b02-d5df-448d-aa00-03f14749eb61");
+                            PowerSchemeHelper.EnableUltimateOrHighPerformance();
                             break;
 
                         case "cool-quiet-laptop":
@@ -670,7 +640,12 @@ namespace cchay_optimicer_cs.Services
 
                         case "ultimate-performance":
                             // Set active back to Balanced (381b4222-f694-41f0-9685-ff5bb260df2e)
-                            RunCmd("powercfg", "-setactive 381b4222-f694-41f0-9685-ff5bb260df2e");
+                            PowerSchemeHelper.SetActiveScheme(PowerSchemeHelper.BalancedGuid);
+                            break;
+
+                        case "cool-quiet-laptop":
+                            PowerSchemeHelper.SetActiveScheme(PowerSchemeHelper.BalancedGuid);
+                            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\54533251-825c-42af-9646-d08a0d4c9873\be337238-0d82-4146-a960-4f3749d470c7", "Attributes", 1, RegistryValueKind.DWord);
                             break;
 
                         case "optimize-multimedia":

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import stat
 import subprocess
 import time
 from pathlib import Path
@@ -28,7 +29,7 @@ def _home() -> Path:
 
 
 def dir_size(path: Path, limit: int = 25000, deadline: float = 2.5) -> int:
-    if not path.exists():
+    if any(p.is_symlink() for p in (path, *path.parents)) or not path.exists():
         return 0
     total = 0
     files = 0
@@ -51,7 +52,7 @@ def dir_size(path: Path, limit: int = 25000, deadline: float = 2.5) -> int:
                     st = os.lstat(os.path.join(root, name))
                 except OSError:
                     continue
-                if os.path.stat.S_ISREG(st.st_mode):
+                if stat.S_ISREG(st.st_mode):
                     total += st.st_size
     except OSError:
         return total
@@ -179,7 +180,7 @@ def scan_targets() -> list[dict]:
 
 def _clear_dir(path: Path, deny: set[str] | None = None) -> int:
     freed = 0
-    if not path.exists():
+    if any(p.is_symlink() for p in (path, *path.parents)) or not path.exists():
         return 0
     deny = deny or set()
     try:
@@ -188,12 +189,12 @@ def _clear_dir(path: Path, deny: set[str] | None = None) -> int:
                 continue
             try:
                 if child.is_symlink() or child.is_file():
-                    size = child.stat().st_size if child.is_file() else 0
+                    size = child.lstat().st_size if not child.is_symlink() else 0
                     child.unlink()
                     freed += size
                 elif child.is_dir():
                     size = dir_size(child, limit=80000, deadline=8.0)
-                    shutil.rmtree(child, ignore_errors=True)
+                    shutil.rmtree(child)
                     freed += size
             except OSError:
                 continue
@@ -238,9 +239,7 @@ def clean_target(target_id: str) -> dict:
     if t["kind"] == "trash":
         files = path / "files"
         info = path / "info"
-        freed = dir_size(files) + dir_size(info)
-        _clear_dir(files)
-        _clear_dir(info)
+        freed = _clear_dir(files) + _clear_dir(info)
         return {"ok": True, "freed": freed, "freed_h": fmt_bytes(freed)}
 
     if t["id"] == "user_cache":

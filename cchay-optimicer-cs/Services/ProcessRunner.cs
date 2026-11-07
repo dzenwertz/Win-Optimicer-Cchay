@@ -19,7 +19,7 @@ namespace cchay_optimicer_cs.Services
         public class ProcessResult
         {
             public bool Success { get; set; }
-            public int ExitCode { get; set; }
+            public int ExitCode { get; set; } = -1;
             public string StdOut { get; set; } = string.Empty;
             public string StdErr { get; set; } = string.Empty;
             public bool TimedOut { get; set; }
@@ -80,6 +80,7 @@ namespace cchay_optimicer_cs.Services
             {
                 Debug.WriteLine($"[ProcessRunner] Error executing: {fileName} {arguments} | {ex.Message}");
                 result.Success = false;
+                result.StdErr = ex.Message;
             }
             return result;
         }
