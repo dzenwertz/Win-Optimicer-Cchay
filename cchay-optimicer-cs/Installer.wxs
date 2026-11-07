@@ -2,7 +2,7 @@
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="RETH Optimicer" 
            Manufacturer="RETH" 
-           Version="3.0.0" 
+           Version="3.1.0" 
            UpgradeCode="d21f8a84-0a34-4b5f-9db1-d4ab6f19634e" 
            Scope="perMachine">
 
@@ -11,7 +11,7 @@
     <!-- Icon for Add/Remove Programs -->
     <Icon Id="AppIcon" SourceFile="Assets\reth.ico"/>
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz/RETH-Optimicer" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/dzenwertz/Win-Optimicer-Cchay" />
 
     <!-- Professional Wizard UI with Launch Checkbox -->
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Ejecutar RETH Optimicer al finalizar" />

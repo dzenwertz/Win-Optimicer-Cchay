@@ -1,13 +1,13 @@
 ; Script de Inno Setup para RETH Optimicer
 [Setup]
 AppName=RETH Optimicer
-AppVersion=3.0.0
+AppVersion=3.1.0
 AppPublisher=RETH
-AppPublisherURL=https://github.com/dzenwertz/RETH-Optimicer
+AppPublisherURL=https://github.com/dzenwertz/Win-Optimicer-Cchay
 DefaultDirName={autopf}\RETH Optimicer
 DefaultGroupName=RETH Optimicer
 OutputDir=..\installer_output
-OutputBaseFilename=RETH_Optimicer_Setup_v3.0.0
+OutputBaseFilename=RETH_Optimicer_Setup_v3.1.0
 SetupIconFile=..\cchay-optimicer-cs\Assets\reth.ico
 Compression=lzma2/ultra64
 SolidCompression=yes

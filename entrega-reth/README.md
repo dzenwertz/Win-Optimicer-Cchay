@@ -17,9 +17,9 @@ Windows: C# · .NET 8 · WPF (WPF-UI) — Linux: Python 3 · GTK 4 · libadwaita
 
 ## Versión, licencia y descarga
 
-- **Versión publicada:** v3.0.0 — https://github.com/dzenwertz/Win-Optimicer-Cchay/releases/tag/v3.0.0
+- **Versión:** 3.1.0 (en GitHub; la release se publica al crear el tag `v3.1.0`). Releases: https://github.com/dzenwertz/Win-Optimicer-Cchay/releases
 - **Licencia:** GPL-3.0
-- Las mejoras de la rama `pulido-reth` (interfaz nueva, Restaurar, permisos) **aún no están en ninguna release**.
+
 
 ## Capturas (`capturas/`)
 
@@ -37,4 +37,3 @@ Capturas reales de la app de Linux con **datos de demostración** (procesos, ser
 
 - Capturas de Windows: no hay VM disponible; la interfaz de Windows no se revisó visualmente.
 - El código Windows de `pulido-reth` no se compiló (falta de RAM en el equipo de desarrollo); revisado a mano.
-- Versión inconsistente: Windows y README dicen 3.0.0; Linux (`__init__.py`) dice 3.0.1. Definir el número de la próxima versión.

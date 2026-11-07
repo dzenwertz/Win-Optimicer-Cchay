@@ -179,7 +179,7 @@ namespace cchay_optimicer_cs.Views
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "https://github.com/dzenwertz/RETH-Optimicer",
+                    FileName = "https://github.com/dzenwertz/Win-Optimicer-Cchay",
                     UseShellExecute = true
                 });
             }

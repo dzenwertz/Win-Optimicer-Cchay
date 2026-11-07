@@ -10,7 +10,7 @@ dotnet publish ..\cchay-optimicer-cs\cchay-optimicer-cs.csproj -c Release -r win
 
 2. Compilar `installer.iss` con Inno Setup 6. Salida:
 
-`../installer_output/RETH_Optimicer_Setup_v3.0.0.exe`
+`../installer_output/RETH_Optimicer_Setup_v3.1.0.exe`
 
 El instalador pide administrador, copia archivos, crea accesos directos y puede lanzar la app al terminar.
 

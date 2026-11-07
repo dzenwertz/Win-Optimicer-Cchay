@@ -365,7 +365,7 @@ namespace CchaySetup
                 if (key != null)
                 {
                     key.SetValue("DisplayName", "RETH Optimicer");
-                    key.SetValue("DisplayVersion", "3.0.0");
+                    key.SetValue("DisplayVersion", "3.1.0");
                     key.SetValue("Publisher", "RETH");
                     key.SetValue("DisplayIcon", targetExe);
                     string uninstallCmd = $"powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Stop-Process -Name 'RethOptimicer' -Force -ErrorAction SilentlyContinue; Remove-Item -Path '{workingDir}' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RethOptimicer' -Recurse -Force -ErrorAction SilentlyContinue\"";

@@ -205,7 +205,7 @@ namespace cchay_optimicer_cs
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "https://github.com/dzenwertz/RETH-Optimicer",
+                    FileName = "https://github.com/dzenwertz/Win-Optimicer-Cchay",
                     UseShellExecute = true
                 };
                 Process.Start(psi);

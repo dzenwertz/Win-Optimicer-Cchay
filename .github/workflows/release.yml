@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Tests
-        run: python3 -m unittest tests.test_modules
+        run: python3 -m unittest tests.test_modules tests.test_safety tests.test_reverts
         working-directory: linux
       - name: Tarball
         run: |
