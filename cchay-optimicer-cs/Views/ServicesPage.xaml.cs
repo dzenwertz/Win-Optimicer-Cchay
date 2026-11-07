@@ -156,9 +156,12 @@ namespace cchay_optimicer_cs.Views
             if (result != MessageBoxResult.Yes) return;
 
             // Punto de restauración antes del perfil; si falla, el usuario decide.
-            TxtResult.Text = "Creando punto de restauración antes de aplicar el perfil...";
-            TxtResult.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x86, 0x8E, 0x96));
-            TxtResult.Visibility = Visibility.Visible;
+            if (SettingsService.Settings.AutoRestorePointEnabled)
+            {
+                TxtResult.Text = "Creando punto de restauración antes de aplicar el perfil...";
+                TxtResult.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x86, 0x8E, 0x96));
+                TxtResult.Visibility = Visibility.Visible;
+            }
             if (!await BackupService.EnsureRestorePointAsync($"RETH Services Profile: {profile.Name}"))
             {
                 TxtResult.Text = "Perfil cancelado. No se modificó ningún servicio.";
