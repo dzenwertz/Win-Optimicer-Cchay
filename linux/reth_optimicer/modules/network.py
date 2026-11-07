@@ -82,23 +82,44 @@ def ping(host: str, timeout: int = 1) -> float | None:
     return None
 
 
+def parse_resolvectl_dns(text: str) -> list[str]:
+    """«Link 2 (wlan0): 1.1.1.1 1.0.0.1» → «wlan0: 1.1.1.1, 1.0.0.1». Omite entradas vacías."""
+    servers = []
+    for line in text.splitlines():
+        if ":" not in line:
+            continue
+        name, _, addrs = line.partition("):") if "):" in line else line.partition(":")
+        addrs = addrs.split()
+        if not addrs:
+            continue
+        name = name.split("(")[-1].strip() or "Global"
+        servers.append(f"{name}: {', '.join(addrs)}")
+    return servers
+
+
+def parse_resolv_conf(text: str) -> list[str]:
+    """Solo las direcciones de «nameserver», sin comentarios."""
+    servers = []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[0] == "nameserver":
+            servers.append(parts[1])
+    return servers
+
+
 def current_dns() -> list[str]:
-    for cmd in (
-        ["resolvectl", "dns"],
-        ["resolvectl", "status"],
-    ):
-        if shutil.which(cmd[0]) is None:
-            continue
+    if shutil.which("resolvectl"):
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=8, check=False)
+            proc = subprocess.run(["resolvectl", "dns"], capture_output=True, text=True, timeout=8, check=False)
+            if proc.returncode == 0:
+                servers = parse_resolvectl_dns(proc.stdout)
+                if servers:
+                    return servers[:12]
         except (OSError, subprocess.TimeoutExpired):
-            continue
-        if proc.returncode == 0 and proc.stdout.strip():
-            return [ln.strip() for ln in proc.stdout.splitlines() if ln.strip()][:24]
-    resolv = "/etc/resolv.conf"
+            pass
     try:
-        lines = open(resolv, encoding="utf-8", errors="replace").read().splitlines()
-        return [ln for ln in lines if ln.startswith("nameserver") or ln.startswith("#")][:24]
+        with open("/etc/resolv.conf", encoding="utf-8", errors="replace") as fh:
+            return parse_resolv_conf(fh.read())[:12]
     except OSError:
         return []
 

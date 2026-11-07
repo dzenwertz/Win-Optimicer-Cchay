@@ -70,10 +70,27 @@ def available_governors() -> list[str]:
         return []
 
 
+ZRAM_SWAPPINESS = 180
+
+
+def zram_swap_active() -> bool:
+    """True si hay un dispositivo zram usado como swap (swap comprimido en RAM)."""
+    try:
+        return any("/dev/zram" in ln for ln in Path("/proc/swaps").read_text().splitlines()[1:])
+    except OSError:
+        return False
+
+
 def list_tweaks() -> list[dict]:
     items: list[dict] = []
+    zram = zram_swap_active()
     for spec in SYSCTL_KEYS:
         current = read_sysctl(spec["key"])
+        recommended, maximum, note = spec["recommended"], spec["max"], ""
+        if spec["key"] == "vm.swappiness" and zram:
+            # Con zram la swap es RAM comprimida: un valor alto es lo correcto.
+            recommended, maximum = ZRAM_SWAPPINESS, 200
+            note = "Con zram activo conviene un valor alto."
         items.append(
             {
                 "id": spec["key"],
@@ -81,8 +98,9 @@ def list_tweaks() -> list[dict]:
                 "title": spec["title"],
                 "subtitle": spec["subtitle"],
                 "min": spec["min"],
-                "max": spec["max"],
-                "recommended": spec["recommended"],
+                "max": maximum,
+                "recommended": recommended,
+                "note": note,
                 "current": current,
                 "available": True,
             }
