@@ -100,7 +100,7 @@ docs/                      Documentación de soporte
 
 ## Estado
 
-Versión **3.1.0**. Las funciones de Linux están probadas de forma automática y recorriendo la interfaz. La versión de Windows se compila en el CI; falta validarla en un Windows 11 limpio antes de declararla estable. Detalle en el [CHANGELOG](CHANGELOG.md).
+Versión **3.1.0**. Linux: pruebas automáticas y recorrido completo de la interfaz. Windows: compilado en el CI y probado el portable de la release en un Windows 11 Pro 25H2 recién instalado (arranque sin privilegios, explicación de permisos, reinicio como administrador y aviso cuando no se puede crear el punto de restauración). Detalle en el [CHANGELOG](CHANGELOG.md).
 
 ## Licencia y contacto
 

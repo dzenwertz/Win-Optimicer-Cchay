@@ -21,8 +21,8 @@ Pulido de producto: cambios reversibles, permisos explicados e interfaz Linux nu
 - Las pantallas cargan en segundo plano: Red ya no bloquea el arranque; Memoria no parpadea.
 - Requiere libadwaita 1.4 o superior.
 
-### Pendiente
-- El código Windows de esta versión se valida en el CI de GitHub; falta probarlo en un Windows 11 limpio.
+### Verificado
+- Portable de la release probado en Windows 11 Pro 25H2 limpio: arranque, explicación de permisos, reinicio como administrador y aviso «Sin punto de restauración» al aplicar un ajuste.
 
 ## 3.0.0 — 2026-08-31
 

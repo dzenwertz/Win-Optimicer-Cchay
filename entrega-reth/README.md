@@ -35,5 +35,4 @@ Capturas reales de la app de Linux con **datos de demostración** (procesos, ser
 
 ## Pendiente (no verificado)
 
-- Capturas de Windows: no hay VM disponible; la interfaz de Windows no se revisó visualmente.
-- El código Windows de `pulido-reth` no se compiló (falta de RAM en el equipo de desarrollo); revisado a mano.
+- Windows: compilado en el CI y probado en Windows 11 limpio; las capturas de Windows no se incluyen porque muestran datos del equipo de pruebas.
